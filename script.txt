@@ -1,0 +1,347 @@
+-- ============================================================================
+-- SCRIPT MYSQL WORKBENCH - SISTEMA DE VENTAS
+-- Fecha: 2025-04-01
+-- Descripción: Estructura completa de base de datos para sistema de ventas  
+--              Compatible con MySQL Workbench y conector JDBC para Java
+-- ============================================================================
+
+-- Crear y usar el esquema
+DROP SCHEMA IF EXISTS sistema_ventas;
+CREATE SCHEMA sistema_ventas DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE sistema_ventas;
+
+-- ============================================================================
+-- TABLAS REFERENCIALES (Se crean primero por dependencias FK)
+-- ============================================================================
+
+-- Tabla: Clasificación de Cliente
+CREATE TABLE CLASCLIENTE (
+    CatCliCod CHAR(1) NOT NULL COMMENT 'Código Clasificación de Cliente',
+    CatCliNom VARCHAR(20) NOT NULL COMMENT 'Categoría del Cliente',
+    CatCliDesc VARCHAR(40) NOT NULL COMMENT 'Descripción de la Categoría',
+    CatCliLimCred DECIMAL(10,2) NOT NULL COMMENT 'Límite de Crédito',
+    CatCliEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro (A=Activo, I=Inactivo)',
+    
+    PRIMARY KEY (CatCliCod),
+    CONSTRAINT chk_catcli_cod CHECK (CatCliCod IN ('E', 'B', 'R', 'M')),
+    CONSTRAINT chk_catcli_est CHECK (CatCliEstReg IN ('A', 'I', '*'))
+) ENGINE=InnoDB COMMENT='Clasificación de clientes según comportamiento de pago';
+
+-- Tabla: Clasificación de Producto  
+CREATE TABLE CLASIFICACION_PRODUCTO (
+    ClasProCod CHAR(1) NOT NULL COMMENT 'Código Clasificación de Producto',
+    ClasProDesc VARCHAR(40) NOT NULL COMMENT 'Descripción Clasificación',
+    ClasProEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
+    
+    PRIMARY KEY (ClasProCod),
+    CONSTRAINT chk_claspro_cod CHECK (ClasProCod IN ('A', 'B', 'C')),
+    CONSTRAINT chk_claspro_est CHECK (ClasProEstReg IN ('A', 'I', '*'))
+) ENGINE=InnoDB COMMENT='Clasificación de productos: A=Insumo, B=Abarrote, C=Accesorio';
+
+-- Tabla: Rol de Usuario
+CREATE TABLE USUARIO_ROL (
+    RolUsuCod CHAR(1) NOT NULL COMMENT 'Código Rol de Usuario',
+    RolUsuDesc VARCHAR(40) NOT NULL COMMENT 'Descripción del Rol',
+    RolUsuProEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
+    
+    PRIMARY KEY (RolUsuCod),
+    CONSTRAINT chk_rolusu_cod CHECK (RolUsuCod IN ('R', 'D')),
+    CONSTRAINT chk_rolusu_est CHECK (RolUsuProEstReg IN ('A', 'I', '*'))
+) ENGINE=InnoDB COMMENT='Roles de usuario: R=Representante, D=Director';
+
+-- Tabla: Unidad de Medida de Producto
+CREATE TABLE PROD_UNIDAD_MEDIDA (
+    UniMedProCod VARCHAR(3) NOT NULL COMMENT 'Código Unidad de Medida',
+    UniMedProDesc VARCHAR(20) NOT NULL COMMENT 'Descripción Unidad',
+    UniMedEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
+    
+    PRIMARY KEY (UniMedProCod),
+    CONSTRAINT chk_unimed_cod CHECK (UniMedProCod IN ('UND', 'KG', 'ML')),
+    CONSTRAINT chk_unimed_est CHECK (UniMedEstReg IN ('A', 'I', '*'))
+) ENGINE=InnoDB COMMENT='Unidades de medida para productos';
+
+-- Tabla: Estado de Usuario del Sistema
+CREATE TABLE ESTADO_SISTEMA (
+    UsuEstSistCod CHAR(1) NOT NULL COMMENT 'Código Estado Usuario',
+    UsuEstSistDesc VARCHAR(40) NOT NULL COMMENT 'Descripción Estado',
+    UsuEstSistEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
+    
+    PRIMARY KEY (UsuEstSistCod),
+    CONSTRAINT chk_usuest_cod CHECK (UsuEstSistCod IN ('A', 'S', 'B')),
+    CONSTRAINT chk_usuest_est CHECK (UsuEstSistEstReg IN ('A', 'S', 'B', '*'))
+) ENGINE=InnoDB COMMENT='Estados de usuario: A=Activo, S=Suspendido, B=Bloqueado';
+
+-- Tabla: Disponibilidad de Producto
+CREATE TABLE PROD_DISPO (
+    DispoProdCod TINYINT NOT NULL COMMENT 'Código Disponibilidad',
+    DispoProdDesc VARCHAR(40) NOT NULL COMMENT 'Descripción Disponibilidad',
+    DispoProdEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
+    
+    PRIMARY KEY (DispoProdCod),
+    CONSTRAINT chk_dispo_cod CHECK (DispoProdCod IN (0, 1)),
+    CONSTRAINT chk_dispo_est CHECK (DispoProdEstReg IN ('A', 'I', '*'))
+) ENGINE=InnoDB COMMENT='Disponibilidad de productos: 0=No Disponible, 1=Disponible';
+
+-- Tabla: Módulos de Auditoría
+CREATE TABLE AUD_MODULO (
+    ModAudiCod INT NOT NULL COMMENT 'Código Módulo',
+    ModAudiDesc VARCHAR(40) NOT NULL COMMENT 'Descripción Módulo',
+    ModAudiEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
+    
+    PRIMARY KEY (ModAudiCod),
+    CONSTRAINT chk_modaudi_cod CHECK (ModAudiCod >= 1),
+    CONSTRAINT chk_modaudi_est CHECK (ModAudiEstReg IN ('A', 'I', '*'))
+) ENGINE=InnoDB COMMENT='Módulos del sistema para auditoría';
+
+-- Tabla: Cargo
+CREATE TABLE CARGO (
+    CarCod INT NOT NULL COMMENT 'Código Cargo',
+    CarNom VARCHAR(50) NOT NULL COMMENT 'Nombre del Cargo',
+    CarSue DECIMAL(7,2) NOT NULL COMMENT 'Sueldo',
+    CarEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
+    
+    PRIMARY KEY (CarCod),
+    CONSTRAINT chk_car_cod CHECK (CarCod >= 1),
+    CONSTRAINT chk_car_sueldo CHECK (CarSue >= 0),
+    CONSTRAINT chk_car_est CHECK (CarEstReg IN ('A', 'I', '*'))
+) ENGINE=InnoDB COMMENT='Cargos de la empresa';
+
+-- Tabla: Fabricante de Producto
+CREATE TABLE FABRICANTE_PRODUCTO (
+    FabCod VARCHAR(20) NOT NULL COMMENT 'Código Fabricante',
+    FabNom VARCHAR(100) NOT NULL COMMENT 'Nombre Fabricante',
+    
+    PRIMARY KEY (FabCod)
+) ENGINE=InnoDB COMMENT='Fabricantes de productos';
+
+-- Tabla: Departamento
+CREATE TABLE DEPARTAMENTO (
+    DepCod INT NOT NULL COMMENT 'Código Departamento',
+    DepNom VARCHAR(50) NOT NULL COMMENT 'Nombre Departamento',
+    DepEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
+    
+    PRIMARY KEY (DepCod),
+    CONSTRAINT chk_dep_cod CHECK (DepCod >= 1),
+    CONSTRAINT chk_dep_est CHECK (DepEstReg IN ('A', 'I', '*'))
+) ENGINE=InnoDB COMMENT='Departamentos del país';
+
+-- Tabla: Región
+CREATE TABLE REGION (
+    RegCod INT NOT NULL COMMENT 'Código Región',
+    DepCod INT NOT NULL COMMENT 'Código Departamento',
+    RegNom VARCHAR(50) NOT NULL COMMENT 'Nombre Región',
+    RegEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
+    
+    PRIMARY KEY (RegCod),
+    CONSTRAINT chk_reg_cod CHECK (RegCod >= 1),
+    CONSTRAINT chk_reg_est CHECK (RegEstReg IN ('A', 'I', '*')),
+    CONSTRAINT fk_reg_departamento FOREIGN KEY (DepCod) REFERENCES DEPARTAMENTO(DepCod)
+) ENGINE=InnoDB COMMENT='Regiones por departamento';
+
+-- Tabla: Ciudades
+CREATE TABLE CIUDADES (
+    CiuCod INT NOT NULL COMMENT 'Código Ciudad',
+    RegCod INT NOT NULL COMMENT 'Código Región',
+    CiuNom VARCHAR(50) NOT NULL COMMENT 'Nombre Ciudad',
+    CiuEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
+    
+    PRIMARY KEY (CiuCod),
+    CONSTRAINT chk_ciu_cod CHECK (CiuCod >= 1),
+    CONSTRAINT chk_ciu_est CHECK (CiuEstReg IN ('A', 'I', '*')),
+    CONSTRAINT fk_ciu_region FOREIGN KEY (RegCod) REFERENCES REGION(RegCod)
+) ENGINE=InnoDB COMMENT='Ciudades por región';
+
+-- ============================================================================
+-- TABLAS PRINCIPALES
+-- ============================================================================
+
+-- Tabla: Oficina
+CREATE TABLE OFICINA (
+    OfiCod INT NOT NULL COMMENT 'Código Oficina',
+    OfiCiu VARCHAR(100) NOT NULL COMMENT 'Ciudad',
+    OfiReg VARCHAR(50) NOT NULL COMMENT 'Región',
+    OfiDir VARCHAR(100) COMMENT 'Dirección',
+    OfiEmp VARCHAR(100) COMMENT 'Empresa',
+    OfiObj DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Objetivo de Ventas',
+    RepCod INT COMMENT 'Código Representante Responsable',
+    
+    PRIMARY KEY (OfiCod),
+    CONSTRAINT chk_ofi_cod CHECK (OfiCod >= 1),
+    CONSTRAINT chk_ofi_obj CHECK (OfiObj >= 0.00)
+) ENGINE=InnoDB COMMENT='Oficinas de la empresa';
+
+-- Tabla: Representante de Venta
+CREATE TABLE REPVENTA (
+    RepCod INT NOT NULL COMMENT 'Código Representante',
+    RepNom VARCHAR(50) NOT NULL COMMENT 'Nombre Representante',
+    RepEdad INT NOT NULL COMMENT 'Edad',
+    OfiCod INT NOT NULL COMMENT 'Código Oficina',
+    CarCod INT NOT NULL COMMENT 'Código Cargo',
+    RepCon DATE NOT NULL COMMENT 'Fecha Contrato',
+    UsuCod INT NOT NULL COMMENT 'Código Usuario',
+    
+    PRIMARY KEY (RepCod),
+    CONSTRAINT chk_rep_cod CHECK (RepCod >= 1),
+    CONSTRAINT chk_rep_edad CHECK (RepEdad BETWEEN 18 AND 65),
+    CONSTRAINT chk_rep_contrato CHECK (RepCon >= '2024-01-01'),
+    CONSTRAINT fk_rep_oficina FOREIGN KEY (OfiCod) REFERENCES OFICINA(OfiCod),
+    CONSTRAINT fk_rep_cargo FOREIGN KEY (CarCod) REFERENCES CARGO(CarCod)
+) ENGINE=InnoDB COMMENT='Representantes de venta';
+
+-- Tabla: Usuario del Sistema
+CREATE TABLE USUARIOSISTEMA (
+    UsuCod INT NOT NULL COMMENT 'Código Usuario',
+    RepCod INT NOT NULL COMMENT 'Código Representante',
+    UsuNom VARCHAR(50) NOT NULL COMMENT 'Nombre Usuario',
+    UsuContr VARCHAR(50) NOT NULL COMMENT 'Contraseña',
+    RolUsuCod CHAR(1) NOT NULL COMMENT 'Rol Usuario',
+    
+    PRIMARY KEY (UsuCod, RepCod),
+    CONSTRAINT chk_usu_cod CHECK (UsuCod >= 1),
+    CONSTRAINT fk_usu_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod),
+    CONSTRAINT fk_usu_rol FOREIGN KEY (RolUsuCod) REFERENCES USUARIO_ROL(RolUsuCod)
+) ENGINE=InnoDB COMMENT='Usuarios del sistema';
+
+-- Agregar FK de oficina a representante (después de crear ambas tablas)
+ALTER TABLE OFICINA 
+ADD CONSTRAINT fk_ofi_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod);
+
+-- Agregar FK de representante a usuario (después de crear usuario)
+ALTER TABLE REPVENTA 
+ADD CONSTRAINT fk_rep_usuario FOREIGN KEY (UsuCod) REFERENCES USUARIOSISTEMA(UsuCod);
+
+-- Tabla: Cliente
+CREATE TABLE CLIENTE (
+    CliCod INT NOT NULL COMMENT 'Código Cliente',
+    CliEmp VARCHAR(100) COMMENT 'Empresa',
+    RepCod INT COMMENT 'Código Representante',
+    CliLim VARCHAR(10) COMMENT 'Límite de Crédito',
+    CliNom VARCHAR(50) NOT NULL COMMENT 'Nombre',
+    CliApePat VARCHAR(50) NOT NULL COMMENT 'Apellido Paterno',
+    CliApeMat VARCHAR(50) NOT NULL COMMENT 'Apellido Materno',
+    CliDirCiu VARCHAR(30) COMMENT 'Ciudad',
+    CliDirReg VARCHAR(30) COMMENT 'Región',
+    CliDirDis VARCHAR(30) COMMENT 'Distrito',
+    CliDirCalle VARCHAR(30) COMMENT 'Calle',
+    ClirDirNro INT COMMENT 'Número',
+    CliTel BIGINT COMMENT 'Teléfono',
+    CliCor VARCHAR(50) COMMENT 'Correo',
+    CatCliCod CHAR(1) NOT NULL COMMENT 'Categoría Cliente',
+    
+    PRIMARY KEY (CliCod),
+    CONSTRAINT chk_cli_cod CHECK (CliCod >= 1),
+    CONSTRAINT chk_cli_tel CHECK (CliTel IS NULL OR CliTel >= 100000000),
+    CONSTRAINT fk_cli_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod),
+    CONSTRAINT fk_cli_categoria FOREIGN KEY (CatCliCod) REFERENCES CLASCLIENTE(CatCliCod)
+) ENGINE=InnoDB COMMENT='Información personal del cliente';
+
+-- Tabla: Reporte de Producto
+CREATE TABLE REPORPROD (
+    ReporProdCod INT NOT NULL COMMENT 'Código Reporte',
+    ProdCod INT NOT NULL COMMENT 'Código Producto',
+    ReporProdMin INT DEFAULT 0 COMMENT 'Stock Mínimo',
+    ReporProdMax INT DEFAULT 1000 COMMENT 'Stock Máximo',
+    
+    PRIMARY KEY (ReporProdCod, ProdCod),
+    CONSTRAINT chk_repor_cod CHECK (ReporProdCod >= 1),
+    CONSTRAINT chk_repor_min CHECK (ReporProdMin >= 0),
+    CONSTRAINT chk_repor_max CHECK (ReporProdMax >= 0)
+) ENGINE=InnoDB COMMENT='Reporte de cada tipo de producto';
+
+-- Tabla: Producto
+CREATE TABLE PRODUCTO (
+    ProdCod INT NOT NULL COMMENT 'Código Producto',
+    FabCod VARCHAR(20) NOT NULL COMMENT 'Código Fabricante',
+    ProdDes VARCHAR(100) NOT NULL COMMENT 'Descripción',
+    ProdPre DECIMAL(10,2) NOT NULL COMMENT 'Precio',
+    ProdStock INT DEFAULT 0 COMMENT 'Stock',
+    ClasProCod CHAR(1) NOT NULL COMMENT 'Clasificación',
+    UniMedProCod VARCHAR(3) NOT NULL COMMENT 'Unidad Medida',
+    ReporProdCod INT COMMENT 'Código Reporte',
+    DispoProdCod TINYINT DEFAULT 1 COMMENT 'Disponibilidad',
+    
+    PRIMARY KEY (ProdCod),
+    CONSTRAINT chk_prod_cod CHECK (ProdCod >= 1),
+    CONSTRAINT chk_prod_precio CHECK (ProdPre >= 0.00),
+    CONSTRAINT chk_prod_stock CHECK (ProdStock >= 0),
+    CONSTRAINT fk_prod_fabricante FOREIGN KEY (FabCod) REFERENCES FABRICANTE_PRODUCTO(FabCod),
+    CONSTRAINT fk_prod_clasificacion FOREIGN KEY (ClasProCod) REFERENCES CLASIFICACION_PRODUCTO(ClasProCod),
+    CONSTRAINT fk_prod_unidad FOREIGN KEY (UniMedProCod) REFERENCES PROD_UNIDAD_MEDIDA(UniMedProCod),
+    CONSTRAINT fk_prod_disponibilidad FOREIGN KEY (DispoProdCod) REFERENCES PROD_DISPO(DispoProdCod)
+) ENGINE=InnoDB COMMENT='Información sobre producto, fabricante existencia y unidad medida';
+
+-- Agregar FK de producto a reporte (después de crear producto)
+ALTER TABLE REPORPROD 
+ADD CONSTRAINT fk_repor_producto FOREIGN KEY (ProdCod) REFERENCES PRODUCTO(ProdCod);
+
+-- Tabla: Reporte de Representante de Venta
+CREATE TABLE REPORREPVENTA (
+    RepoRepVentCod INT NOT NULL COMMENT 'Código Reporte',
+    RepCod INT NOT NULL COMMENT 'Código Representante',
+    RepoRepVentObj DECIMAL(12,2) COMMENT 'Meta Objetivo',
+    RepoRepVentNum INT DEFAULT 0 COMMENT 'Ventas Concretas',
+    RepoRepVentCuo INT DEFAULT 0 COMMENT 'Cuota',
+    CarCod INT COMMENT 'Código Cargo',
+    
+    PRIMARY KEY (RepoRepVentCod, RepCod),
+    CONSTRAINT chk_repoventa_cod CHECK (RepoRepVentCod >= 1),
+    CONSTRAINT chk_repoventa_num CHECK (RepoRepVentNum >= 0),
+    CONSTRAINT chk_repoventa_cuo CHECK (RepoRepVentCuo >= 0),
+    CONSTRAINT fk_repoventa_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod),
+    CONSTRAINT fk_repoventa_cargo FOREIGN KEY (CarCod) REFERENCES CARGO(CarCod)
+) ENGINE=InnoDB COMMENT='Reporte de representante de venta';
+
+-- Tabla: Factura
+CREATE TABLE FACTURA (
+    FacCod INT NOT NULL COMMENT 'Código Factura',
+    CliCod INT NOT NULL COMMENT 'Código Cliente',
+    RepCod INT NOT NULL COMMENT 'Código Representante',
+    FacFab VARCHAR(50) COMMENT 'Fabricante',
+    Faclmp DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Importe Total',
+    FacAño INT NOT NULL COMMENT 'Año',
+    FacMes INT NOT NULL COMMENT 'Mes',
+    FacDia INT NOT NULL COMMENT 'Día',
+    FactPlazoPago DATE COMMENT 'Plazo de Pago',
+    FactFechPago DATE COMMENT 'Fecha de Pago',
+    
+    PRIMARY KEY (FacCod),
+    CONSTRAINT chk_fac_cod CHECK (FacCod >= 1),
+    CONSTRAINT chk_fac_importe CHECK (Faclmp >= 0.00),
+    CONSTRAINT chk_fac_año CHECK (FacAño >= 2000),
+    CONSTRAINT chk_fac_mes CHECK (FacMes BETWEEN 1 AND 12),
+    CONSTRAINT chk_fac_dia CHECK (FacDia BETWEEN 1 AND 31),
+    CONSTRAINT fk_fac_cliente FOREIGN KEY (CliCod) REFERENCES CLIENTE(CliCod),
+    CONSTRAINT fk_fac_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod)
+) ENGINE=InnoDB COMMENT='Datos generales del pedido y productos asociados';
+
+-- Tabla: Detalle de Factura
+CREATE TABLE DETALLES (
+    FacCod INT NOT NULL COMMENT 'Código Factura',
+    ProCod INT NOT NULL COMMENT 'Código Producto',
+    DetCan INT NOT NULL COMMENT 'Cantidad',
+    DetPre DECIMAL(6,2) NOT NULL COMMENT 'Precio Unitario',
+    DetSub DECIMAL(8,2) NOT NULL COMMENT 'Subtotal',
+    
+    PRIMARY KEY (FacCod, ProCod),
+    CONSTRAINT chk_det_can CHECK (DetCan >= 1),
+    CONSTRAINT chk_det_pre CHECK (DetPre >= 0.01),
+    CONSTRAINT chk_det_sub CHECK (DetSub >= 0.00),
+    CONSTRAINT fk_det_factura FOREIGN KEY (FacCod) REFERENCES FACTURA(FacCod),
+    CONSTRAINT fk_det_producto FOREIGN KEY (ProCod) REFERENCES PRODUCTO(ProdCod)
+) ENGINE=InnoDB COMMENT='Lista de productos en cada factura';
+
+-- Tabla: Auditoría
+CREATE TABLE AUDITORIA (
+    AudiCod INT NOT NULL COMMENT 'Código Auditoría',
+    UsuCod INT NOT NULL COMMENT 'Código Usuario',
+    AudiFecha DATE NOT NULL COMMENT 'Fecha',
+    AudiHora TIME NOT NULL COMMENT 'Hora',
+    AudiDescri VARCHAR(100) NOT NULL COMMENT 'Descripción Acción',
+    AudiDet VARCHAR(100) COMMENT 'Detalle',
+    ModAudiCod INT NOT NULL COMMENT 'Módulo Afectado',
+    
+    PRIMARY KEY (AudiCod),
+    CONSTRAINT chk_audi_cod CHECK (AudiCod >= 1),
+    CONSTRAINT fk_audi_usuario FOREIGN KEY (UsuCod) REFERENCES USUARIOSISTEMA(UsuCod),
+    CONSTRAINT fk_audi_modulo FOREIGN KEY (ModAudiCod) REFERENCES AUD_MODULO(ModAudiCod)
+) ENGINE=InnoDB COMMENT='Registro de eventos del sistema';
