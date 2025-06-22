@@ -1,6 +1,7 @@
 # BD_MySQL – Sistema de Gestión de Categorías de Clientes
 
 Este proyecto implementa una interfaz gráfica en Java para gestionar categorías de clientes, utilizando una base de datos MySQL.
+El script para la creación de BD en Workbench esta en script.txt
 
 ## 📁 Estructura del Proyecto
 
