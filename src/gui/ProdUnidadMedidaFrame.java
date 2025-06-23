@@ -150,6 +150,7 @@ public class ProdUnidadMedidaFrame extends JFrame {
 
         String codigo = txtCodigo.getText().trim();
         String descripcion = txtDescripcion.getText().trim();
+        String estadoRegistroStr = txtEstadoRegistro.getText().trim();
         char estadoRegistro = estadoRegistroStr.charAt(0);
 
         if (codigo.isEmpty() || descripcion.isEmpty() || estadoRegistro.isEmpty()) {
