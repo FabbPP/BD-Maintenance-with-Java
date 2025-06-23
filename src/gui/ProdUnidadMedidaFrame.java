@@ -150,7 +150,8 @@ public class ProdUnidadMedidaFrame extends JFrame {
 
         String codigo = txtCodigo.getText().trim();
         String descripcion = txtDescripcion.getText().trim();
-        char estadoRegistro = estadoRegistroStr.charAt(0);;
+        String estadoRegistroStr = txtEstadoRegistro.getText().trim();
+        char estadoRegistro = estadoRegistroStr.charAt(0);
 
         if (codigo.isEmpty() || descripcion.isEmpty() || estadoRegistro.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Todos los campos (Código, Descripción, Estado Registro) son obligatorios.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
