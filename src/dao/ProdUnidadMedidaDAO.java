@@ -57,7 +57,7 @@ public class ProdUnidadMedidaDAO {
 
             pstmt.setString(1, unidad.getUniMedProCod());
             pstmt.setString(2, unidad.getUniMedProDesc());
-            pstmt.setString(3, unidad.getUniMedProEstReg());
+            pstmt.setString(3, String.valueOf(unidad.getUniMedProEstReg()));
 
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
@@ -77,7 +77,7 @@ public class ProdUnidadMedidaDAO {
 
             pstmt.setString(1, unidad.getUniMedProDesc());
             pstmt.setString(2, unidad.getUniMedProEstReg());
-            pstmt.setString(3, unidad.getUniMedProCod());
+            pstmt.setString(3, String.valueOf(unidad.getUniMedProEstReg()));
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
