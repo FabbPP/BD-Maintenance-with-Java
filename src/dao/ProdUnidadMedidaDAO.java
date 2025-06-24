@@ -73,11 +73,12 @@ public class ProdUnidadMedidaDAO {
     public boolean actualizarUnidad(ProdUnidadMedida unidad) {
         String sql = "UPDATE PROD_UNIDAD_MEDIDA SET UniMedProDesc = ?, UniMedProEstReg = ? WHERE UniMedProCod = ?";
         try (Connection conn = ConexionBD.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql)) { 
 
             pstmt.setString(1, unidad.getUniMedProDesc());
-            pstmt.setString(2, unidad.getUniMedProEstReg());
-            pstmt.setString(3, String.valueOf(unidad.getUniMedProEstReg()));
+            pstmt.setString(2, String.valueOf(unidad.getUniMedProEstReg())); // convertir char a String
+            pstmt.setString(3, unidad.getUniMedProCod()); // corregido: este es el código
+
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
@@ -85,6 +86,7 @@ public class ProdUnidadMedidaDAO {
             return false;
         }
     }
+
 
     public boolean eliminarLogicamenteUnidad(String codigo) {
         String sql = "UPDATE PROD_UNIDAD_MEDIDA SET UniMedProEstReg = '*' WHERE UniMedProCod = ?";

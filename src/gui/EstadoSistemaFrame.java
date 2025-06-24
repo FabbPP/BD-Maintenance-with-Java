@@ -144,68 +144,73 @@ public class EstadoSistemaFrame extends JFrame {
     }
 
     private void comandoActualizar() {
-        if (flagCarFlaAct == 0) {
-            JOptionPane.showMessageDialog(this, "No hay ninguna operación pendiente de actualizar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+    if (flagCarFlaAct == 0) {
+        JOptionPane.showMessageDialog(this, "No hay ninguna operación pendiente de actualizar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    String codigoStr = txtCodigo.getText().trim();
+    String descripcion = txtDescripcion.getText().trim();
+    String estadoRegistroStr = txtEstadoRegistro.getText().trim();
+
+    // Validación de campos vacíos
+    if (codigoStr.isEmpty() || descripcion.isEmpty() || estadoRegistroStr.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Todos los campos (Código, Descripción, Estado Registro) son obligatorios.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // Validación de formato de código
+    if (operacionActual.equals("ADICIONAR") || operacionActual.equals("MODIFICAR")) {
+        if (!codigoStr.matches("A|S|B")) {
+            JOptionPane.showMessageDialog(this, "El Código solo puede ser 'A', 'S' o 'B'.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
             return;
-        }
-
-        String codigoStr = txtCodigo.getText().trim();
-        char codigo = codigoStr.charAt(0);
-        String descripcion = txtDescripcion.getText().trim();
-        String estadoRegistroStr = txtEstadoRegistro.getText().trim();
-        char estadoRegistro = estadoRegistroStr.charAt(0);
-
-        if (codigo.isEmpty() || descripcion.isEmpty() || estadoRegistro.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Todos los campos (Código, Descripción, Estado Registro) son obligatorios.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        if (operacionActual.equals("ADICIONAR") || operacionActual.equals("MODIFICAR")) {
-            if (!codigo.matches("A|S|B")) {
-                JOptionPane.showMessageDialog(this, "El Código solo puede ser 'A', 'S' o 'B'.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        }
-
-        if (!estadoRegistro.matches("A|S|B|\\*")) {
-             JOptionPane.showMessageDialog(this, "El Estado de Registro solo puede ser 'A', 'S', 'B' o '*'.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
-             return;
-        }
-
-
-        EstadoSistema estado = new EstadoSistema(codigo, descripcion, estadoRegistro);
-        boolean exito = false;
-        String mensaje = "";
-
-        switch (operacionActual) {
-            case "ADICIONAR":
-                exito = estadoSistemaDAO.insertarEstado(estado);
-                mensaje = exito ? "Estado del sistema adicionado con éxito." : "Error al adicionar estado del sistema. Revise el código o restricciones.";
-                break;
-            case "MODIFICAR":
-            case "ELIMINAR":
-            case "INACTIVAR":
-            case "REACTIVAR":
-                exito = estadoSistemaDAO.actualizarEstado(estado);
-                mensaje = exito ? "Estado del sistema actualizado con éxito." : "Error al actualizar estado del sistema.";
-                break;
-            default:
-                JOptionPane.showMessageDialog(this, "Operación no reconocida.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-        }
-
-        if (exito) {
-            JOptionPane.showMessageDialog(this, mensaje, "Éxito", JOptionPane.INFORMATION_MESSAGE);
-            limpiarCampos();
-            habilitarControles(false);
-            cargarTablaEstados();
-            flagCarFlaAct = 0;
-            operacionActual = "";
-            habilitarBotonesIniciales();
-        } else {
-            JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
+    // Validación de estado de registro
+    if (!estadoRegistroStr.matches("A|S|B|\\*")) {
+        JOptionPane.showMessageDialog(this, "El Estado de Registro solo puede ser 'A', 'S', 'B' o '*'.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // Convertir a char después de validar
+    char codigo = codigoStr.charAt(0);
+    char estadoRegistro = estadoRegistroStr.charAt(0);
+
+    EstadoSistema estado = new EstadoSistema(codigo, descripcion, estadoRegistro);
+    boolean exito = false;
+    String mensaje = "";
+
+    switch (operacionActual) {
+        case "ADICIONAR":
+            exito = estadoSistemaDAO.insertarEstado(estado);
+            mensaje = exito ? "Estado del sistema adicionado con éxito." : "Error al adicionar estado del sistema. Revise el código o restricciones.";
+            break;
+        case "MODIFICAR":
+        case "ELIMINAR":
+        case "INACTIVAR":
+        case "REACTIVAR":
+            exito = estadoSistemaDAO.actualizarEstado(estado);
+            mensaje = exito ? "Estado del sistema actualizado con éxito." : "Error al actualizar estado del sistema.";
+            break;
+        default:
+            JOptionPane.showMessageDialog(this, "Operación no reconocida.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+    }
+
+    if (exito) {
+        JOptionPane.showMessageDialog(this, mensaje, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+        limpiarCampos();
+        habilitarControles(false);
+        cargarTablaEstados();
+        flagCarFlaAct = 0;
+        operacionActual = "";
+        habilitarBotonesIniciales();
+    } else {
+        JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
+
 
     private void comandoCancelar() {
         limpiarCampos();

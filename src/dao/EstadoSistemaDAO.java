@@ -73,11 +73,12 @@ public class EstadoSistemaDAO {
     public boolean actualizarEstado(EstadoSistema estado) {
         String sql = "UPDATE ESTADO_SISTEMA SET UsuEstSistDesc = ?, UsuEstSistEstReg = ? WHERE UsuEstSistCod = ?";
         try (Connection conn = ConexionBD.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, String.valueOf(estado.getUsuEstSistCod()));
-            pstmt.setString(2, estado.getUsuEstSistEstReg());
-            pstmt.setString(3, String.valueOf(estado.getUsuEstSistEstReg()));
+            pstmt.setString(1, estado.getUsuEstSistDesc()); // descripción
+            pstmt.setString(2, String.valueOf(estado.getUsuEstSistEstReg())); // estado char → String
+            pstmt.setInt(3, estado.getUsuEstSistCod()); // suponiendo que el código es int
+
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
         } catch (SQLException e) {
@@ -88,7 +89,7 @@ public class EstadoSistemaDAO {
 
     public boolean eliminarLogicamenteEstado(String codigo) {
         String sql = "UPDATE ESTADO_SISTEMA SET UsuEstSistEstReg = '*' WHERE UsuEstSistCod = ?";
-        try (Connection conn = ConexionBD.BD;
+        try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, codigo);

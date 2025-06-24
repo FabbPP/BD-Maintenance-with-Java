@@ -151,13 +151,14 @@ public class ProdUnidadMedidaFrame extends JFrame {
         String codigo = txtCodigo.getText().trim();
         String descripcion = txtDescripcion.getText().trim();
         String estadoRegistroStr = txtEstadoRegistro.getText().trim();
-        char estadoRegistro = estadoRegistroStr.charAt(0);
 
-        if (codigo.isEmpty() || descripcion.isEmpty() || estadoRegistro.isEmpty()) {
+        // Validar campos vacíos
+        if (codigo.isEmpty() || descripcion.isEmpty() || estadoRegistroStr.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Todos los campos (Código, Descripción, Estado Registro) son obligatorios.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
+        // Validar formato del código
         if (operacionActual.equals("ADICIONAR") || operacionActual.equals("MODIFICAR")) {
             if (!codigo.matches("UND|KG|ML")) {
                 JOptionPane.showMessageDialog(this, "El Código solo puede ser 'UND', 'KG' o 'ML'.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
@@ -165,11 +166,13 @@ public class ProdUnidadMedidaFrame extends JFrame {
             }
         }
 
-        if (!estadoRegistro.matches("A|I|\\*")) {
-             JOptionPane.showMessageDialog(this, "El Estado de Registro solo puede ser 'A' (Activo), 'I' (Inactivo) o '*' (Eliminado Lógicamente).", "Error de Validación", JOptionPane.ERROR_MESSAGE);
-             return;
+        // Validar estado
+        if (!estadoRegistroStr.matches("A|I|\\*")) {
+            JOptionPane.showMessageDialog(this, "El Estado de Registro solo puede ser 'A' (Activo), 'I' (Inactivo) o '*' (Eliminado Lógicamente).", "Error de Validación", JOptionPane.ERROR_MESSAGE);
+            return;
         }
 
+        char estadoRegistro = estadoRegistroStr.charAt(0); // solo cuando ya esté validado
 
         ProdUnidadMedida unidad = new ProdUnidadMedida(codigo, descripcion, estadoRegistro);
         boolean exito = false;
@@ -191,7 +194,7 @@ public class ProdUnidadMedidaFrame extends JFrame {
                     mensaje = exito ? "Unidad de medida eliminada lógicamente con éxito." : "Error al eliminar lógicamente unidad de medida.";
                 } else {
                     mensaje = "Operación de eliminación cancelada.";
-                    exito = true; // Para que se restablezca el estado de los botones
+                    exito = true;
                 }
                 break;
             case "INACTIVAR":
@@ -219,6 +222,7 @@ public class ProdUnidadMedidaFrame extends JFrame {
             JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     private void comandoCancelar() {
         limpiarCampos();
