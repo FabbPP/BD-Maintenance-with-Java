@@ -11,7 +11,7 @@ public class CargoDAO {
 
     public List<Cargo> obtenerTodosCargos() {
         List<Cargo> cargos = new ArrayList<>();
-        String sql = "SELECT CarCod, CarDesc, CarSue, CarEstReg FROM cargo";
+        String sql = "SELECT CarCod, CarNom, CarSue, CarEstReg FROM cargo";
         try (Connection conn = ConexionBD.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -19,7 +19,7 @@ public class CargoDAO {
             while (rs.next()) {
                 Cargo cargo = new Cargo();
                 cargo.setCarCod(rs.getInt("CarCod"));
-                cargo.setCarDesc(rs.getString("CarDesc"));
+                cargo.setCarDesc(rs.getString("CarNom"));
                 cargo.setCarSue(rs.getDouble("CarSue"));
                 cargo.setCarEstReg(rs.getString("CarEstReg").charAt(0));
                 cargos.add(cargo);
@@ -31,7 +31,7 @@ public class CargoDAO {
     }
 
     public Cargo obtenerCargoPorCodigo(int codigo) {
-        String sql = "SELECT CarCod, CarDesc, CarSue, CarEstReg FROM cargo WHERE CarCod = ?";
+        String sql = "SELECT CarCod, CarNom, CarSue, CarEstReg FROM cargo WHERE CarCod = ?";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, codigo);
@@ -39,7 +39,7 @@ public class CargoDAO {
                 if (rs.next()) {
                     Cargo cargo = new Cargo();
                     cargo.setCarCod(rs.getInt("CarCod"));
-                    cargo.setCarDesc(rs.getString("CarDesc"));
+                    cargo.setCarDesc(rs.getString("CarNom"));
                     cargo.setCarSue(rs.getDouble("CarSue"));
                     cargo.setCarEstReg(rs.getString("CarEstReg").charAt(0));
                     return cargo;
@@ -52,7 +52,7 @@ public class CargoDAO {
     }
 
     public boolean insertarCargo(Cargo cargo) {
-        String sql = "INSERT INTO cargo (CarCod, CarDesc, CarSue, CarEstReg) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO cargo (CarCod, CarNom, CarSue, CarEstReg) VALUES (?, ?, ?, ?)";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -71,7 +71,7 @@ public class CargoDAO {
     }
 
     public boolean actualizarCargo(Cargo cargo) {
-        String sql = "UPDATE cargo SET CarDesc = ?, CarSue = ?, CarEstReg = ? WHERE CarCod = ?";
+        String sql = "UPDATE cargo SET CarNom = ?, CarSue = ?, CarEstReg = ? WHERE CarCod = ?";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
