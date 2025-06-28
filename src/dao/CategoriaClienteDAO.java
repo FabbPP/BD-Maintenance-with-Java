@@ -12,13 +12,14 @@ public class CategoriaClienteDAO {
     public List<CategoriaCliente> obtenerTodasCategorias() {
         List<CategoriaCliente> categorias = new ArrayList<>();
         String sql = "SELECT CatCliCod, CatCliDesc, CatCliLimCred, CatCliEstReg FROM clascliente";
+
         try (Connection conn = ConexionBD.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 CategoriaCliente categoria = new CategoriaCliente();
-                categoria.setCatCliCod(rs.getString("CatCliCod").charAt(0));
+                categoria.setCatCliCod(rs.getInt("CatCliCod"));
                 categoria.setCatCliDesc(rs.getString("CatCliDesc"));
                 categoria.setCatCliLimCred(rs.getDouble("CatCliLimCred"));
                 categoria.setCatCliEstReg(rs.getString("CatCliEstReg").charAt(0));
@@ -27,18 +28,22 @@ public class CategoriaClienteDAO {
         } catch (SQLException e) {
             System.err.println("Error al obtener todas las categorías de cliente: " + e.getMessage());
         }
+
         return categorias;
     }
 
-    public CategoriaCliente obtenerCategoriaPorCodigo(char codigo) {
+    public CategoriaCliente obtenerCategoriaPorCodigo(int codigo) {
         String sql = "SELECT CatCliCod, CatCliDesc, CatCliLimCred, CatCliEstReg FROM clascliente WHERE CatCliCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, String.valueOf(codigo));
+
+            pstmt.setInt(1, codigo);
+
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     CategoriaCliente categoria = new CategoriaCliente();
-                    categoria.setCatCliCod(rs.getString("CatCliCod").charAt(0));
+                    categoria.setCatCliCod(rs.getInt("CatCliCod"));
                     categoria.setCatCliDesc(rs.getString("CatCliDesc"));
                     categoria.setCatCliLimCred(rs.getDouble("CatCliLimCred"));
                     categoria.setCatCliEstReg(rs.getString("CatCliEstReg").charAt(0));
@@ -48,37 +53,49 @@ public class CategoriaClienteDAO {
         } catch (SQLException e) {
             System.err.println("Error al obtener categoría por código: " + e.getMessage());
         }
+
         return null;
     }
 
     public boolean insertarCategoria(CategoriaCliente categoria) {
-        String sql = "INSERT INTO clascliente (CatCliNom, CatCliDesc, CatCliLimCred, CatCliEstReg) VALUES (?, ?, ?, ?)";
-        try (Connection conn = ConexionBD.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        String sql = "INSERT INTO clascliente (CatCliDesc, CatCliLimCred, CatCliEstReg) VALUES (?, ?, ?)";
 
-            pstmt.setString(1, categoria.getCatCliNom());
-            pstmt.setString(2, categoria.getCatCliDesc());
-            pstmt.setDouble(3, categoria.getCatCliLimCred());
-            pstmt.setString(4, String.valueOf(categoria.getCatCliEstReg()));
+        try (Connection conn = ConexionBD.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            pstmt.setString(1, categoria.getCatCliDesc());
+            pstmt.setDouble(2, categoria.getCatCliLimCred());
+            pstmt.setString(3, String.valueOf(categoria.getCatCliEstReg()));
 
             int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
+            if (rowsAffected > 0) {
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        categoria.setCatCliCod(generatedKeys.getInt(1)); // Asignar la PK generada al objeto
+                    }
+                }
+                return true;
+            }
+            return false;
 
         } catch (SQLException e) {
             System.err.println("Error al insertar categoría de cliente: " + e.getMessage());
+            e.printStackTrace(); // Para ver más detalles del error
             return false;
         }
     }
 
     public boolean actualizarCategoria(CategoriaCliente categoria) {
         String sql = "UPDATE clascliente SET CatCliDesc = ?, CatCliLimCred = ?, CatCliEstReg = ? WHERE CatCliCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, categoria.getCatCliDesc());
             pstmt.setDouble(2, categoria.getCatCliLimCred());
             pstmt.setString(3, String.valueOf(categoria.getCatCliEstReg()));
-            pstmt.setString(4, String.valueOf(categoria.getCatCliCod()));
+            pstmt.setInt(4, categoria.getCatCliCod());
+
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
 
@@ -88,12 +105,13 @@ public class CategoriaClienteDAO {
         }
     }
 
-    public boolean eliminarLogicamenteCategoria(char codigo) {
+    public boolean eliminarLogicamenteCategoria(int codigo) {
         String sql = "UPDATE clascliente SET CatCliEstReg = '*' WHERE CatCliCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, String.valueOf(codigo));
+            pstmt.setInt(1, codigo);
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
 
@@ -103,12 +121,13 @@ public class CategoriaClienteDAO {
         }
     }
 
-    public boolean inactivarCategoria(char codigo) {
+    public boolean inactivarCategoria(int codigo) {
         String sql = "UPDATE clascliente SET CatCliEstReg = 'I' WHERE CatCliCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, String.valueOf(codigo));
+            pstmt.setInt(1, codigo);
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
 
@@ -118,12 +137,13 @@ public class CategoriaClienteDAO {
         }
     }
 
-    public boolean reactivarCategoria(char codigo) {
+    public boolean reactivarCategoria(int codigo) {
         String sql = "UPDATE clascliente SET CatCliEstReg = 'A' WHERE CatCliCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, String.valueOf(codigo));
+            pstmt.setInt(1, codigo);
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
 

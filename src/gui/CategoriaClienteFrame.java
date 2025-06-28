@@ -1,4 +1,4 @@
-// Archivo actualizado CategoriaClienteFrame.java
+// Archivo corregido CategoriaClienteFrame.java
 package gui;
 
 import dao.CategoriaClienteDAO;
@@ -13,8 +13,7 @@ import java.util.List;
 
 public class CategoriaClienteFrame extends JFrame {
 
-    private JComboBox<String> cbxCod;
-    private JTextField txtNombre;
+    private JTextField txtCodigo;
     private JTextField txtDescripcion;
     private JTextField txtLimiteCredito;
     private JTextField txtEstadoRegistro;
@@ -26,6 +25,7 @@ public class CategoriaClienteFrame extends JFrame {
     private CategoriaClienteDAO categoriaClienteDAO;
     private int flagCarFlaAct = 0;
     private String operacionActual = "";
+    private int codigoSeleccionado = 0;
 
     public CategoriaClienteFrame() {
         setTitle("Mantenimiento de Categoría de Cliente");
@@ -39,6 +39,7 @@ public class CategoriaClienteFrame extends JFrame {
         habilitarControles(false);
         habilitarBotonesIniciales();
     }
+    
     public static void main(String[] args){
         SwingUtilities.invokeLater(() -> new CategoriaClienteFrame().setVisible(true));
     }
@@ -54,18 +55,13 @@ public class CategoriaClienteFrame extends JFrame {
         gbc.gridx = 0; gbc.gridy = 0;
         panelRegistro.add(new JLabel("Código:"), gbc);
         gbc.gridx = 1;
-        cbxCod = new JComboBox<>(new String[]{"E", "B", "R", "M"});
-        panelRegistro.add(cbxCod, gbc);
+        txtCodigo = new JTextField(10);
+        txtCodigo.setEditable(false); // El código es AUTO_INCREMENT
+        panelRegistro.add(txtCodigo, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
-        panelRegistro.add(new JLabel("Nombre:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
-        txtNombre = new JTextField(30);
-        panelRegistro.add(txtNombre, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 1;
         panelRegistro.add(new JLabel("Descripción:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
         txtDescripcion = new JTextField(40);
         panelRegistro.add(txtDescripcion, gbc);
 
@@ -86,7 +82,7 @@ public class CategoriaClienteFrame extends JFrame {
 
         JPanel panelTabla = new JPanel(new BorderLayout());
         panelTabla.setBorder(BorderFactory.createTitledBorder("Categorías de Cliente"));
-        tableModel = new DefaultTableModel(new Object[]{"Código", "Nombre", "Descripción", "Límite Crédito", "Estado"}, 0) {
+        tableModel = new DefaultTableModel(new Object[]{"Código", "Descripción", "Límite Crédito", "Estado"}, 0) {
             public boolean isCellEditable(int row, int col) { return false; }
         };
         tablaCategorias = new JTable(tableModel);
@@ -96,11 +92,11 @@ public class CategoriaClienteFrame extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 if (operacionActual.isEmpty() && e.getClickCount() == 1) {
                     int i = tablaCategorias.getSelectedRow();
-                    cbxCod.setSelectedItem(tableModel.getValueAt(i, 0).toString());
-                    txtNombre.setText(tableModel.getValueAt(i, 1).toString());
+                    txtCodigo.setText(tableModel.getValueAt(i, 0).toString());
                     txtDescripcion.setText(tableModel.getValueAt(i, 1).toString());
                     txtLimiteCredito.setText(tableModel.getValueAt(i, 2).toString());
                     txtEstadoRegistro.setText(tableModel.getValueAt(i, 3).toString());
+                    codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(i, 0).toString());
                     habilitarBotonesParaSeleccion();
                 }
             }
@@ -147,7 +143,6 @@ public class CategoriaClienteFrame extends JFrame {
             return;
         }
 
-        String nombre = txtNombre.getText().trim();
         String desc = txtDescripcion.getText().trim();
         String limStr = txtLimiteCredito.getText().trim();
         String estadoStr = txtEstadoRegistro.getText().trim();
@@ -166,7 +161,6 @@ public class CategoriaClienteFrame extends JFrame {
         }
 
         CategoriaCliente cat = new CategoriaCliente();
-        cat.setCatCliNom(nombre);
         cat.setCatCliDesc(desc);
         cat.setCatCliLimCred(lim);
         cat.setCatCliEstReg(estadoStr.charAt(0));
@@ -180,19 +174,20 @@ public class CategoriaClienteFrame extends JFrame {
                 mensaje = exito ? "Categoría registrada con éxito." : "Error al registrar categoría.";
                 break;
             case "MODIFICAR":
+                cat.setCatCliCod(codigoSeleccionado);
                 exito = categoriaClienteDAO.actualizarCategoria(cat);
                 mensaje = exito ? "Categoría modificada con éxito." : "Error al modificar categoría.";
                 break;
             case "ELIMINAR":
-                exito = categoriaClienteDAO.eliminarLogicamenteCategoria(codigo);
+                exito = categoriaClienteDAO.eliminarLogicamenteCategoria(codigoSeleccionado);
                 mensaje = exito ? "Categoría eliminada con éxito." : "Error al eliminar categoría.";
                 break;
             case "INACTIVAR":
-                exito = categoriaClienteDAO.inactivarCategoria(codigo);
+                exito = categoriaClienteDAO.inactivarCategoria(codigoSeleccionado);
                 mensaje = exito ? "Categoría inactivada con éxito." : "Error al inactivar categoría.";
                 break;
             case "REACTIVAR":
-                exito = categoriaClienteDAO.reactivarCategoria(codigo);
+                exito = categoriaClienteDAO.reactivarCategoria(codigoSeleccionado);
                 mensaje = exito ? "Categoría reactivada con éxito." : "Error al reactivar categoría.";
                 break;
             default:
@@ -214,6 +209,7 @@ public class CategoriaClienteFrame extends JFrame {
         habilitarControles(false);
         operacionActual = "";
         flagCarFlaAct = 0;
+        codigoSeleccionado = 0;
         habilitarBotonesIniciales();
     }
 
@@ -225,20 +221,18 @@ public class CategoriaClienteFrame extends JFrame {
         tableModel.setRowCount(0);
         List<CategoriaCliente> lista = categoriaClienteDAO.obtenerTodasCategorias();
         for (CategoriaCliente c : lista) {
-            tableModel.addRow(new Object[]{c.getCatCliCod(), c.getCatCliNom(), c.getCatCliDesc(), c.getCatCliLimCred(), c.getCatCliEstReg()});
+            tableModel.addRow(new Object[]{c.getCatCliCod(), c.getCatCliDesc(), c.getCatCliLimCred(), c.getCatCliEstReg()});
         }
     }
 
     private void habilitarControles(boolean b) {
-        cbxCod.setEnabled(b);
-        txtNombre.setEditable(b);
         txtDescripcion.setEditable(b);
         txtLimiteCredito.setEditable(b);
+        // txtCodigo y txtEstadoRegistro siempre permanecen no editables
     }
 
     private void limpiarCampos() {
-        cbxCod.setSelectedIndex(0);
-        txtNombre.setText("");
+        txtCodigo.setText("");
         txtDescripcion.setText("");
         txtLimiteCredito.setText("");
         txtEstadoRegistro.setText("");
@@ -282,8 +276,6 @@ public class CategoriaClienteFrame extends JFrame {
             return;
         }
         habilitarControles(true);
-        cbxCod.setEnabled(false);
-        txtEstadoRegistro.setEditable(false);
         operacionActual = "MODIFICAR";
         flagCarFlaAct = 1;
         habilitarBotonesParaOperacion();
@@ -295,11 +287,11 @@ public class CategoriaClienteFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Seleccione un registro para eliminar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        cbxCod.setSelectedItem(tableModel.getValueAt(selectedRow, 0).toString());
-        txtNombre.setText(tableModel.getValueAt(selectedRow, 1).toString());
-        txtDescripcion.setText(tableModel.getValueAt(selectedRow, 2).toString());
-        txtLimiteCredito.setText(tableModel.getValueAt(selectedRow, 3).toString());
+        txtCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
+        txtDescripcion.setText(tableModel.getValueAt(selectedRow, 1).toString());
+        txtLimiteCredito.setText(tableModel.getValueAt(selectedRow, 2).toString());
         txtEstadoRegistro.setText("*");
+        codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
         habilitarControles(false);
         operacionActual = "ELIMINAR";
         flagCarFlaAct = 1;
@@ -313,11 +305,11 @@ public class CategoriaClienteFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Seleccione un registro para inactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        cbxCod.setSelectedItem(tableModel.getValueAt(selectedRow, 0).toString());
-        txtNombre.setText(tableModel.getValueAt(selectedRow, 1).toString());
-        txtDescripcion.setText(tableModel.getValueAt(selectedRow, 2).toString());
-        txtLimiteCredito.setText(tableModel.getValueAt(selectedRow, 3).toString());
+        txtCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
+        txtDescripcion.setText(tableModel.getValueAt(selectedRow, 1).toString());
+        txtLimiteCredito.setText(tableModel.getValueAt(selectedRow, 2).toString());
         txtEstadoRegistro.setText("I");
+        codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
         habilitarControles(false);
         operacionActual = "INACTIVAR";
         flagCarFlaAct = 1;
@@ -331,15 +323,15 @@ public class CategoriaClienteFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Seleccione un registro para reactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        cbxCod.setSelectedItem(tableModel.getValueAt(selectedRow, 0).toString());
-        txtNombre.setText(tableModel.getValueAt(selectedRow, 1).toString());
-        txtDescripcion.setText(tableModel.getValueAt(selectedRow, 2).toString());
-        txtLimiteCredito.setText(tableModel.getValueAt(selectedRow, 3).toString());
+        txtCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
+        txtDescripcion.setText(tableModel.getValueAt(selectedRow, 1).toString());
+        txtLimiteCredito.setText(tableModel.getValueAt(selectedRow, 2).toString());
         txtEstadoRegistro.setText("A");
+        codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
         habilitarControles(false);
         operacionActual = "REACTIVAR";
         flagCarFlaAct = 1;
         habilitarBotonesParaOperacion();
         JOptionPane.showMessageDialog(this, "El registro se marcará como activo ('A').\nPresione 'Actualizar' para confirmar.", "Reactivar Registro", JOptionPane.INFORMATION_MESSAGE);
     }
-} 
+}

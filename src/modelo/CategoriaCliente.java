@@ -2,7 +2,6 @@ package modelo;
 
 public class CategoriaCliente {
 	private int catCliCod;
-	private String catCliNom;
 	private String catCliDesc;
 	private double catCliLimCred;
 	private char catCliEstReg;
@@ -10,9 +9,8 @@ public class CategoriaCliente {
 	public CategoriaCliente() {
 	}
 
-	public CategoriaCliente(int cod, String nom, String desc, double limCred, char estReg){
+	public CategoriaCliente(int cod, String desc, double limCred, char estReg){
 		catCliCod = cod;
-		catCliNom = nom;
 		catCliDesc = desc;
 		catCliLimCred = limCred;
 		catCliEstReg = estReg;
@@ -24,14 +22,6 @@ public class CategoriaCliente {
 
 	public void setCatCliCod(int catCliCod){
 		this.catCliCod = catCliCod;
-	}
-
-	public String getCatCliNom(){
-		return catCliNom;
-	}
-
-	public void setCatCliNom(String catCliNom){
-		this.catCliNom = catCliNom;
 	}
 
 	public String getCatCliDesc(){
@@ -57,15 +47,14 @@ public class CategoriaCliente {
 	public void setCatCliEstReg(char catCliEstReg) {
 		this.catCliEstReg = catCliEstReg;
 	}
-	
+
 	@Override
 	public String toString() {
-        return "CategoriaCliente{" +
-                "catCliCod=" + catCliCod +
-                ", catCliNom='" + catCliNom + '\'' +
-                ", catCliDesc='" + catCliDesc + '\'' +
-                ", catCliLimCred=" + catCliLimCred +
-                ", catCliEstReg=" + catCliEstReg +
-                '}';
-    }
+		return "CategoriaCliente{" +
+				"catCliCod=" + catCliCod +
+				", catCliDesc='" + catCliDesc + '\'' +
+				", catCliLimCred=" + catCliLimCred +
+				", catCliEstReg=" + catCliEstReg +
+				'}';
+	}
 }
