@@ -16,14 +16,13 @@ USE sistema_ventas;
 
 -- Tabla: Clasificación de Cliente
 CREATE TABLE CLASCLIENTE (
-    CatCliCod CHAR(1) NOT NULL COMMENT 'Código Clasificación de Cliente',
+    CatCliCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Clasificación de Cliente',
     CatCliNom VARCHAR(20) NOT NULL COMMENT 'Categoría del Cliente',
     CatCliDesc VARCHAR(40) NOT NULL COMMENT 'Descripción de la Categoría',
     CatCliLimCred DECIMAL(10,2) NOT NULL COMMENT 'Límite de Crédito',
     CatCliEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro (A=Activo, I=Inactivo)',
     
     PRIMARY KEY (CatCliCod),
-    CONSTRAINT chk_catcli_cod CHECK (CatCliCod IN ('E', 'B', 'R', 'M')),
     CONSTRAINT chk_catcli_est CHECK (CatCliEstReg IN ('A', 'I', '*'))
 ) ENGINE=InnoDB COMMENT='Clasificación de clientes según comportamiento de pago';
 
