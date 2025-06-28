@@ -1,4 +1,3 @@
-// Archivo ClasificacionProductoFrame.java
 package gui;
 
 import dao.ClasificacionProductoDAO;

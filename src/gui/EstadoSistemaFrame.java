@@ -1,4 +1,3 @@
-// Archivo EstadoSistemaFrame.java
 package gui;
 
 import dao.EstadoSistemaDAO;

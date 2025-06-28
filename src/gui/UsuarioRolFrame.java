@@ -1,4 +1,3 @@
-// Archivo UsuarioRolFrame.java
 package gui;
 
 import dao.UsuarioRolDAO;

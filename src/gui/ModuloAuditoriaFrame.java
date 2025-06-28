@@ -1,4 +1,3 @@
-// Archivo ModuloAuditoriaFrame.java
 package gui;
 
 import dao.ModuloAuditoriaDAO;

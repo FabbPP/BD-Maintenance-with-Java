@@ -1,4 +1,3 @@
-// Archivo DisponibilidadProductoFrame.java
 package gui;
 
 import dao.DisponibilidadProductoDAO;

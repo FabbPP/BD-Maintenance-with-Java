@@ -1,4 +1,3 @@
-// Archivo corregido CategoriaClienteFrame.java
 package gui;
 
 import dao.CategoriaClienteDAO;

@@ -1,4 +1,3 @@
-// Archivo CargoFrame.java
 package gui;
 
 import dao.CargoDAO;

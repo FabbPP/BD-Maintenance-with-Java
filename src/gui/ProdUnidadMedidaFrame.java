@@ -1,4 +1,3 @@
-// Archivo ProdUnidadMedidaFrame.java
 package gui;
 
 import dao.ProdUnidadMedidaDAO;
