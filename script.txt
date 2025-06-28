@@ -27,86 +27,79 @@ CREATE TABLE CLASCLIENTE (
 
 -- Tabla: Clasificación de Producto  
 CREATE TABLE CLASIFICACION_PRODUCTO (
-    ClasProCod CHAR(1) NOT NULL COMMENT 'Código Clasificación de Producto',
+    ClasProCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Clasificación de Producto',
     ClasProDesc VARCHAR(40) NOT NULL COMMENT 'Descripción Clasificación',
     ClasProEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
     
     PRIMARY KEY (ClasProCod),
-    CONSTRAINT chk_claspro_cod CHECK (ClasProCod IN ('A', 'B', 'C')),
     CONSTRAINT chk_claspro_est CHECK (ClasProEstReg IN ('A', 'I', '*'))
 ) ENGINE=InnoDB COMMENT='Clasificación de productos: A=Insumo, B=Abarrote, C=Accesorio';
 
 -- Tabla: Rol de Usuario
 CREATE TABLE USUARIO_ROL (
-    RolUsuCod CHAR(1) NOT NULL COMMENT 'Código Rol de Usuario',
+    RolUsuCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Rol de Usuario',
     RolUsuDesc VARCHAR(40) NOT NULL COMMENT 'Descripción del Rol',
     RolUsuProEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
     
     PRIMARY KEY (RolUsuCod),
-    CONSTRAINT chk_rolusu_cod CHECK (RolUsuCod IN ('R', 'D')),
     CONSTRAINT chk_rolusu_est CHECK (RolUsuProEstReg IN ('A', 'I', '*'))
 ) ENGINE=InnoDB COMMENT='Roles de usuario: R=Representante, D=Director';
 
 -- Tabla: Unidad de Medida de Producto
 CREATE TABLE PROD_UNIDAD_MEDIDA (
-    UniMedProCod VARCHAR(3) NOT NULL COMMENT 'Código Unidad de Medida',
+    UniMedProCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Unidad de Medida',
     UniMedProDesc VARCHAR(20) NOT NULL COMMENT 'Descripción Unidad',
     UniMedEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
     
     PRIMARY KEY (UniMedProCod),
-    CONSTRAINT chk_unimed_cod CHECK (UniMedProCod IN ('UND', 'KG', 'ML')),
     CONSTRAINT chk_unimed_est CHECK (UniMedEstReg IN ('A', 'I', '*'))
 ) ENGINE=InnoDB COMMENT='Unidades de medida para productos';
 
 -- Tabla: Estado de Usuario del Sistema
 CREATE TABLE ESTADO_SISTEMA (
-    UsuEstSistCod CHAR(1) NOT NULL COMMENT 'Código Estado Usuario',
+    UsuEstSistCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Estado Usuario',
     UsuEstSistDesc VARCHAR(40) NOT NULL COMMENT 'Descripción Estado',
     UsuEstSistEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
     
     PRIMARY KEY (UsuEstSistCod),
-    CONSTRAINT chk_usuest_cod CHECK (UsuEstSistCod IN ('A', 'S', 'B')),
     CONSTRAINT chk_usuest_est CHECK (UsuEstSistEstReg IN ('A', 'S', 'B', '*'))
 ) ENGINE=InnoDB COMMENT='Estados de usuario: A=Activo, S=Suspendido, B=Bloqueado';
 
 -- Tabla: Disponibilidad de Producto
 CREATE TABLE PROD_DISPO (
-    DispoProdCod TINYINT NOT NULL COMMENT 'Código Disponibilidad',
+    DispoProdCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Disponibilidad',
     DispoProdDesc VARCHAR(40) NOT NULL COMMENT 'Descripción Disponibilidad',
     DispoProdEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
     
     PRIMARY KEY (DispoProdCod),
-    CONSTRAINT chk_dispo_cod CHECK (DispoProdCod IN (0, 1)),
     CONSTRAINT chk_dispo_est CHECK (DispoProdEstReg IN ('A', 'I', '*'))
 ) ENGINE=InnoDB COMMENT='Disponibilidad de productos: 0=No Disponible, 1=Disponible';
 
 -- Tabla: Módulos de Auditoría
 CREATE TABLE AUD_MODULO (
-    ModAudiCod INT NOT NULL COMMENT 'Código Módulo',
+    ModAudiCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Módulo',
     ModAudiDesc VARCHAR(40) NOT NULL COMMENT 'Descripción Módulo',
     ModAudiEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
     
     PRIMARY KEY (ModAudiCod),
-    CONSTRAINT chk_modaudi_cod CHECK (ModAudiCod >= 1),
     CONSTRAINT chk_modaudi_est CHECK (ModAudiEstReg IN ('A', 'I', '*'))
 ) ENGINE=InnoDB COMMENT='Módulos del sistema para auditoría';
 
 -- Tabla: Cargo
 CREATE TABLE CARGO (
-    CarCod INT NOT NULL COMMENT 'Código Cargo',
+    CarCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Cargo',
     CarNom VARCHAR(50) NOT NULL COMMENT 'Nombre del Cargo',
     CarSue DECIMAL(7,2) NOT NULL COMMENT 'Sueldo',
     CarEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
     
     PRIMARY KEY (CarCod),
-    CONSTRAINT chk_car_cod CHECK (CarCod >= 1),
     CONSTRAINT chk_car_sueldo CHECK (CarSue >= 0),
     CONSTRAINT chk_car_est CHECK (CarEstReg IN ('A', 'I', '*'))
 ) ENGINE=InnoDB COMMENT='Cargos de la empresa';
 
 -- Tabla: Fabricante de Producto
 CREATE TABLE FABRICANTE_PRODUCTO (
-    FabCod VARCHAR(20) NOT NULL COMMENT 'Código Fabricante',
+    FabCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Fabricante',
     FabNom VARCHAR(100) NOT NULL COMMENT 'Nombre Fabricante',
     
     PRIMARY KEY (FabCod)
@@ -114,37 +107,34 @@ CREATE TABLE FABRICANTE_PRODUCTO (
 
 -- Tabla: Departamento
 CREATE TABLE DEPARTAMENTO (
-    DepCod INT NOT NULL COMMENT 'Código Departamento',
+    DepCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Departamento',
     DepNom VARCHAR(50) NOT NULL COMMENT 'Nombre Departamento',
     DepEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
     
     PRIMARY KEY (DepCod),
-    CONSTRAINT chk_dep_cod CHECK (DepCod >= 1),
     CONSTRAINT chk_dep_est CHECK (DepEstReg IN ('A', 'I', '*'))
 ) ENGINE=InnoDB COMMENT='Departamentos del país';
 
 -- Tabla: Región
 CREATE TABLE REGION (
-    RegCod INT NOT NULL COMMENT 'Código Región',
+    RegCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Región',
     DepCod INT NOT NULL COMMENT 'Código Departamento',
     RegNom VARCHAR(50) NOT NULL COMMENT 'Nombre Región',
     RegEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
     
     PRIMARY KEY (RegCod),
-    CONSTRAINT chk_reg_cod CHECK (RegCod >= 1),
     CONSTRAINT chk_reg_est CHECK (RegEstReg IN ('A', 'I', '*')),
     CONSTRAINT fk_reg_departamento FOREIGN KEY (DepCod) REFERENCES DEPARTAMENTO(DepCod)
 ) ENGINE=InnoDB COMMENT='Regiones por departamento';
 
 -- Tabla: Ciudades
 CREATE TABLE CIUDADES (
-    CiuCod INT NOT NULL COMMENT 'Código Ciudad',
+    CiuCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Ciudad',
     RegCod INT NOT NULL COMMENT 'Código Región',
     CiuNom VARCHAR(50) NOT NULL COMMENT 'Nombre Ciudad',
     CiuEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
     
     PRIMARY KEY (CiuCod),
-    CONSTRAINT chk_ciu_cod CHECK (CiuCod >= 1),
     CONSTRAINT chk_ciu_est CHECK (CiuEstReg IN ('A', 'I', '*')),
     CONSTRAINT fk_ciu_region FOREIGN KEY (RegCod) REFERENCES REGION(RegCod)
 ) ENGINE=InnoDB COMMENT='Ciudades por región';
@@ -155,7 +145,7 @@ CREATE TABLE CIUDADES (
 
 -- Tabla: Oficina
 CREATE TABLE OFICINA (
-    OfiCod INT NOT NULL COMMENT 'Código Oficina',
+    OfiCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Oficina',
     OfiCiu VARCHAR(100) NOT NULL COMMENT 'Ciudad',
     OfiReg VARCHAR(50) NOT NULL COMMENT 'Región',
     OfiDir VARCHAR(100) COMMENT 'Dirección',
@@ -164,13 +154,12 @@ CREATE TABLE OFICINA (
     RepCod INT COMMENT 'Código Representante Responsable',
     
     PRIMARY KEY (OfiCod),
-    CONSTRAINT chk_ofi_cod CHECK (OfiCod >= 1),
     CONSTRAINT chk_ofi_obj CHECK (OfiObj >= 0.00)
 ) ENGINE=InnoDB COMMENT='Oficinas de la empresa';
 
 -- Tabla: Representante de Venta
 CREATE TABLE REPVENTA (
-    RepCod INT NOT NULL COMMENT 'Código Representante',
+    RepCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Representante',
     RepNom VARCHAR(50) NOT NULL COMMENT 'Nombre Representante',
     RepEdad INT NOT NULL COMMENT 'Edad',
     OfiCod INT NOT NULL COMMENT 'Código Oficina',
@@ -179,7 +168,6 @@ CREATE TABLE REPVENTA (
     UsuCod INT NOT NULL COMMENT 'Código Usuario',
     
     PRIMARY KEY (RepCod),
-    CONSTRAINT chk_rep_cod CHECK (RepCod >= 1),
     CONSTRAINT chk_rep_edad CHECK (RepEdad BETWEEN 18 AND 65),
     CONSTRAINT chk_rep_contrato CHECK (RepCon >= '2024-01-01'),
     CONSTRAINT fk_rep_oficina FOREIGN KEY (OfiCod) REFERENCES OFICINA(OfiCod),
@@ -188,14 +176,13 @@ CREATE TABLE REPVENTA (
 
 -- Tabla: Usuario del Sistema
 CREATE TABLE USUARIOSISTEMA (
-    UsuCod INT NOT NULL COMMENT 'Código Usuario',
+    UsuCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Usuario',
     RepCod INT NOT NULL COMMENT 'Código Representante',
     UsuNom VARCHAR(50) NOT NULL COMMENT 'Nombre Usuario',
     UsuContr VARCHAR(50) NOT NULL COMMENT 'Contraseña',
-    RolUsuCod CHAR(1) NOT NULL COMMENT 'Rol Usuario',
+    RolUsuCod INT NOT NULL COMMENT 'Rol Usuario',
     
     PRIMARY KEY (UsuCod, RepCod),
-    CONSTRAINT chk_usu_cod CHECK (UsuCod >= 1),
     CONSTRAINT fk_usu_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod),
     CONSTRAINT fk_usu_rol FOREIGN KEY (RolUsuCod) REFERENCES USUARIO_ROL(RolUsuCod)
 ) ENGINE=InnoDB COMMENT='Usuarios del sistema';
@@ -210,7 +197,7 @@ ADD CONSTRAINT fk_rep_usuario FOREIGN KEY (UsuCod) REFERENCES USUARIOSISTEMA(Usu
 
 -- Tabla: Cliente
 CREATE TABLE CLIENTE (
-    CliCod INT NOT NULL COMMENT 'Código Cliente',
+    CliCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Cliente',
     CliEmp VARCHAR(100) COMMENT 'Empresa',
     RepCod INT COMMENT 'Código Representante',
     CliLim VARCHAR(10) COMMENT 'Límite de Crédito',
@@ -224,10 +211,9 @@ CREATE TABLE CLIENTE (
     ClirDirNro INT COMMENT 'Número',
     CliTel BIGINT COMMENT 'Teléfono',
     CliCor VARCHAR(50) COMMENT 'Correo',
-    CatCliCod CHAR(1) NOT NULL COMMENT 'Categoría Cliente',
+    CatCliCod INT NOT NULL COMMENT 'Categoría Cliente',
     
     PRIMARY KEY (CliCod),
-    CONSTRAINT chk_cli_cod CHECK (CliCod >= 1),
     CONSTRAINT chk_cli_tel CHECK (CliTel IS NULL OR CliTel >= 100000000),
     CONSTRAINT fk_cli_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod),
     CONSTRAINT fk_cli_categoria FOREIGN KEY (CatCliCod) REFERENCES CLASCLIENTE(CatCliCod)
@@ -235,31 +221,29 @@ CREATE TABLE CLIENTE (
 
 -- Tabla: Reporte de Producto
 CREATE TABLE REPORPROD (
-    ReporProdCod INT NOT NULL COMMENT 'Código Reporte',
+    ReporProdCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Reporte',
     ProdCod INT NOT NULL COMMENT 'Código Producto',
     ReporProdMin INT DEFAULT 0 COMMENT 'Stock Mínimo',
     ReporProdMax INT DEFAULT 1000 COMMENT 'Stock Máximo',
     
     PRIMARY KEY (ReporProdCod, ProdCod),
-    CONSTRAINT chk_repor_cod CHECK (ReporProdCod >= 1),
     CONSTRAINT chk_repor_min CHECK (ReporProdMin >= 0),
     CONSTRAINT chk_repor_max CHECK (ReporProdMax >= 0)
 ) ENGINE=InnoDB COMMENT='Reporte de cada tipo de producto';
 
 -- Tabla: Producto
 CREATE TABLE PRODUCTO (
-    ProdCod INT NOT NULL COMMENT 'Código Producto',
-    FabCod VARCHAR(20) NOT NULL COMMENT 'Código Fabricante',
+    ProdCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Producto',
+    FabCod INT NOT NULL COMMENT 'Código Fabricante',
     ProdDes VARCHAR(100) NOT NULL COMMENT 'Descripción',
     ProdPre DECIMAL(10,2) NOT NULL COMMENT 'Precio',
     ProdStock INT DEFAULT 0 COMMENT 'Stock',
-    ClasProCod CHAR(1) NOT NULL COMMENT 'Clasificación',
-    UniMedProCod VARCHAR(3) NOT NULL COMMENT 'Unidad Medida',
+    ClasProCod INT NOT NULL COMMENT 'Clasificación',
+    UniMedProCod INT NOT NULL COMMENT 'Unidad Medida',
     ReporProdCod INT COMMENT 'Código Reporte',
-    DispoProdCod TINYINT DEFAULT 1 COMMENT 'Disponibilidad',
+    DispoProdCod INT DEFAULT 1 COMMENT 'Disponibilidad',
     
     PRIMARY KEY (ProdCod),
-    CONSTRAINT chk_prod_cod CHECK (ProdCod >= 1),
     CONSTRAINT chk_prod_precio CHECK (ProdPre >= 0.00),
     CONSTRAINT chk_prod_stock CHECK (ProdStock >= 0),
     CONSTRAINT fk_prod_fabricante FOREIGN KEY (FabCod) REFERENCES FABRICANTE_PRODUCTO(FabCod),
@@ -274,7 +258,7 @@ ADD CONSTRAINT fk_repor_producto FOREIGN KEY (ProdCod) REFERENCES PRODUCTO(ProdC
 
 -- Tabla: Reporte de Representante de Venta
 CREATE TABLE REPORREPVENTA (
-    RepoRepVentCod INT NOT NULL COMMENT 'Código Reporte',
+    RepoRepVentCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Reporte',
     RepCod INT NOT NULL COMMENT 'Código Representante',
     RepoRepVentObj DECIMAL(12,2) COMMENT 'Meta Objetivo',
     RepoRepVentNum INT DEFAULT 0 COMMENT 'Ventas Concretas',
@@ -282,7 +266,6 @@ CREATE TABLE REPORREPVENTA (
     CarCod INT COMMENT 'Código Cargo',
     
     PRIMARY KEY (RepoRepVentCod, RepCod),
-    CONSTRAINT chk_repoventa_cod CHECK (RepoRepVentCod >= 1),
     CONSTRAINT chk_repoventa_num CHECK (RepoRepVentNum >= 0),
     CONSTRAINT chk_repoventa_cuo CHECK (RepoRepVentCuo >= 0),
     CONSTRAINT fk_repoventa_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod),
@@ -291,7 +274,7 @@ CREATE TABLE REPORREPVENTA (
 
 -- Tabla: Factura
 CREATE TABLE FACTURA (
-    FacCod INT NOT NULL COMMENT 'Código Factura',
+    FacCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Factura',
     CliCod INT NOT NULL COMMENT 'Código Cliente',
     RepCod INT NOT NULL COMMENT 'Código Representante',
     FacFab VARCHAR(50) COMMENT 'Fabricante',
@@ -303,13 +286,12 @@ CREATE TABLE FACTURA (
     FactFechPago DATE COMMENT 'Fecha de Pago',
     
     PRIMARY KEY (FacCod),
-    CONSTRAINT chk_fac_cod CHECK (FacCod >= 1),
     CONSTRAINT chk_fac_importe CHECK (Faclmp >= 0.00),
     CONSTRAINT chk_fac_año CHECK (FacAño >= 2000),
     CONSTRAINT chk_fac_mes CHECK (FacMes BETWEEN 1 AND 12),
     CONSTRAINT chk_fac_dia CHECK (FacDia BETWEEN 1 AND 31),
     CONSTRAINT fk_fac_cliente FOREIGN KEY (CliCod) REFERENCES CLIENTE(CliCod),
-    CONSTRAINT fk_fac_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod)
+    CONSTRAINT fk_fac_representante FOREIGN KEY (RepCod) REFERENCES FACTURA(FacCod)
 ) ENGINE=InnoDB COMMENT='Datos generales del pedido y productos asociados';
 
 -- Tabla: Detalle de Factura
@@ -330,7 +312,7 @@ CREATE TABLE DETALLES (
 
 -- Tabla: Auditoría
 CREATE TABLE AUDITORIA (
-    AudiCod INT NOT NULL COMMENT 'Código Auditoría',
+    AudiCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Auditoría',
     UsuCod INT NOT NULL COMMENT 'Código Usuario',
     AudiFecha DATE NOT NULL COMMENT 'Fecha',
     AudiHora TIME NOT NULL COMMENT 'Hora',
@@ -339,7 +321,6 @@ CREATE TABLE AUDITORIA (
     ModAudiCod INT NOT NULL COMMENT 'Módulo Afectado',
     
     PRIMARY KEY (AudiCod),
-    CONSTRAINT chk_audi_cod CHECK (AudiCod >= 1),
     CONSTRAINT fk_audi_usuario FOREIGN KEY (UsuCod) REFERENCES USUARIOSISTEMA(UsuCod),
     CONSTRAINT fk_audi_modulo FOREIGN KEY (ModAudiCod) REFERENCES AUD_MODULO(ModAudiCod)
 ) ENGINE=InnoDB COMMENT='Registro de eventos del sistema';
