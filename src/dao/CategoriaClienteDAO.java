@@ -52,11 +52,11 @@ public class CategoriaClienteDAO {
     }
 
     public boolean insertarCategoria(CategoriaCliente categoria) {
-        String sql = "INSERT INTO clascliente (CatCliCod, CatCliDesc, CatCliLimCred, CatCliEstReg) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO clascliente (CatCliNom, CatCliDesc, CatCliLimCred, CatCliEstReg) VALUES (?, ?, ?, ?)";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, String.valueOf(categoria.getCatCliCod()));
+            pstmt.setString(1, categoria.getCatCliNom());
             pstmt.setString(2, categoria.getCatCliDesc());
             pstmt.setDouble(3, categoria.getCatCliLimCred());
             pstmt.setString(4, String.valueOf(categoria.getCatCliEstReg()));
