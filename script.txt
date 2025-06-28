@@ -88,7 +88,7 @@ CREATE TABLE AUD_MODULO (
 -- Tabla: Cargo
 CREATE TABLE CARGO (
     CarCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Cargo',
-    CarNom VARCHAR(50) NOT NULL COMMENT 'Nombre del Cargo',
+    CarDesc VARCHAR(50) NOT NULL COMMENT 'Descripcion del Cargo',
     CarSue DECIMAL(7,2) NOT NULL COMMENT 'Sueldo',
     CarEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
     

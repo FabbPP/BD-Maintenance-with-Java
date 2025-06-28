@@ -12,6 +12,7 @@ public class ModuloAuditoriaDAO {
     public List<ModuloAuditoria> obtenerTodosModulos() {
         List<ModuloAuditoria> modulos = new ArrayList<>();
         String sql = "SELECT ModAudiCod, ModAudiDesc, ModAudiEstReg FROM AUD_MODULO";
+
         try (Connection conn = ConexionBD.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -26,14 +27,18 @@ public class ModuloAuditoriaDAO {
         } catch (SQLException e) {
             System.err.println("Error al obtener todos los módulos de auditoría: " + e.getMessage());
         }
+
         return modulos;
     }
 
     public ModuloAuditoria obtenerModuloPorCodigo(int codigo) {
         String sql = "SELECT ModAudiCod, ModAudiDesc, ModAudiEstReg FROM AUD_MODULO WHERE ModAudiCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setInt(1, codigo);
+
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     ModuloAuditoria modulo = new ModuloAuditoria();
@@ -46,35 +51,47 @@ public class ModuloAuditoriaDAO {
         } catch (SQLException e) {
             System.err.println("Error al obtener módulo por código: " + e.getMessage());
         }
+
         return null;
     }
 
     public boolean insertarModulo(ModuloAuditoria modulo) {
-        String sql = "INSERT INTO AUD_MODULO (ModAudiCod, ModAudiDesc, ModAudiEstReg) VALUES (?, ?, ?)";
-        try (Connection conn = ConexionBD.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        String sql = "INSERT INTO AUD_MODULO (ModAudiDesc, ModAudiEstReg) VALUES (?, ?)";
 
-            pstmt.setInt(1, modulo.getModAudiCod());
-            pstmt.setString(2, modulo.getModAudiDesc());
-            pstmt.setString(3, String.valueOf(modulo.getModAudiEstReg()));
+        try (Connection conn = ConexionBD.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            pstmt.setString(1, modulo.getModAudiDesc());
+            pstmt.setString(2, String.valueOf(modulo.getModAudiEstReg()));
 
             int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
+            if (rowsAffected > 0) {
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        modulo.setModAudiCod(generatedKeys.getInt(1));
+                    }
+                }
+                return true;
+            }
+            return false;
 
         } catch (SQLException e) {
             System.err.println("Error al insertar módulo de auditoría: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
 
     public boolean actualizarModulo(ModuloAuditoria modulo) {
         String sql = "UPDATE AUD_MODULO SET ModAudiDesc = ?, ModAudiEstReg = ? WHERE ModAudiCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, modulo.getModAudiDesc());
             pstmt.setString(2, String.valueOf(modulo.getModAudiEstReg()));
             pstmt.setInt(3, modulo.getModAudiCod());
+
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
 
@@ -86,6 +103,7 @@ public class ModuloAuditoriaDAO {
 
     public boolean eliminarLogicamenteModulo(int codigo) {
         String sql = "UPDATE AUD_MODULO SET ModAudiEstReg = '*' WHERE ModAudiCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -101,6 +119,7 @@ public class ModuloAuditoriaDAO {
 
     public boolean inactivarModulo(int codigo) {
         String sql = "UPDATE AUD_MODULO SET ModAudiEstReg = 'I' WHERE ModAudiCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -116,6 +135,7 @@ public class ModuloAuditoriaDAO {
 
     public boolean reactivarModulo(int codigo) {
         String sql = "UPDATE AUD_MODULO SET ModAudiEstReg = 'A' WHERE ModAudiCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 

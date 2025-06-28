@@ -1,24 +1,24 @@
 package modelo;
 
 public class EstadoSistema {
-    private char usuEstSistCod;
+    private int usuEstSistCod;      
     private String usuEstSistDesc;
     private char usuEstSistEstReg;
 
     public EstadoSistema() {
     }
 
-    public EstadoSistema(char cod, String desc, char estReg) {
-        usuEstSistCod = cod;
-        usuEstSistDesc = desc;
-        usuEstSistEstReg = estReg;
+    public EstadoSistema(int cod, String desc, char estReg) {
+        this.usuEstSistCod = cod;
+        this.usuEstSistDesc = desc;
+        this.usuEstSistEstReg = estReg;
     }
 
-    public char getUsuEstSistCod() {
+    public int getUsuEstSistCod() {
         return usuEstSistCod;
     }
 
-    public void setUsuEstSistCod(char usuEstSistCod) {
+    public void setUsuEstSistCod(int usuEstSistCod) {
         this.usuEstSistCod = usuEstSistCod;
     }
 
@@ -38,7 +38,12 @@ public class EstadoSistema {
         this.usuEstSistEstReg = usuEstSistEstReg;
     }
 
+    @Override
     public String toString() {
-        return "EstadoSistema {" + "usuEstSistCod = " + usuEstSistCod + ", usuEstSistDesc = " + usuEstSistDesc + ", usuEstSistEstReg = " + usuEstSistEstReg + "}";
+        return "EstadoSistema{" +
+                "usuEstSistCod=" + usuEstSistCod +
+                ", usuEstSistDesc='" + usuEstSistDesc + '\'' +
+                ", usuEstSistEstReg=" + usuEstSistEstReg +
+                '}';
     }
 }

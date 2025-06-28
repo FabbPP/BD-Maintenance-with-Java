@@ -1,3 +1,4 @@
+// Archivo CargoFrame.java
 package gui;
 
 import dao.CargoDAO;
@@ -24,9 +25,10 @@ public class CargoFrame extends JFrame {
     private CargoDAO cargoDAO;
     private int flagCarFlaAct = 0;
     private String operacionActual = "";
+    private int codigoSeleccionado = 0;
 
     public CargoFrame() {
-        setTitle("Mantenimiento de Cargo");
+        setTitle("Mantenimiento de Cargos");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -37,8 +39,8 @@ public class CargoFrame extends JFrame {
         habilitarControles(false);
         habilitarBotonesIniciales();
     }
-
-    public static void main(String[] args) {
+    
+    public static void main(String[] args){
         SwingUtilities.invokeLater(() -> new CargoFrame().setVisible(true));
     }
 
@@ -54,18 +56,19 @@ public class CargoFrame extends JFrame {
         panelRegistro.add(new JLabel("Código:"), gbc);
         gbc.gridx = 1;
         txtCodigo = new JTextField(10);
+        txtCodigo.setEditable(false); // El código es AUTO_INCREMENT
         panelRegistro.add(txtCodigo, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Descripción:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
         txtDescripcion = new JTextField(40);
         panelRegistro.add(txtDescripcion, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Sueldo:"), gbc);
-        gbc.gridx = 1;
-        txtSueldo = new JTextField(15);
+        gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 1.0;
+        txtSueldo = new JTextField(20);
         panelRegistro.add(txtSueldo, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3;
@@ -93,6 +96,7 @@ public class CargoFrame extends JFrame {
                     txtDescripcion.setText(tableModel.getValueAt(i, 1).toString());
                     txtSueldo.setText(tableModel.getValueAt(i, 2).toString());
                     txtEstadoRegistro.setText(tableModel.getValueAt(i, 3).toString());
+                    codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(i, 0).toString());
                     habilitarBotonesParaSeleccion();
                 }
             }
@@ -139,28 +143,28 @@ public class CargoFrame extends JFrame {
             return;
         }
 
-        String codigoStr = txtCodigo.getText().trim();
         String desc = txtDescripcion.getText().trim();
         String sueldoStr = txtSueldo.getText().trim();
         String estadoStr = txtEstadoRegistro.getText().trim();
 
-        if (codigoStr.isEmpty() || desc.isEmpty() || sueldoStr.isEmpty() || estadoStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios.", "Error", JOptionPane.ERROR_MESSAGE);
+        if (desc.isEmpty() || sueldoStr.isEmpty() || estadoStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Descripción, sueldo y estado son obligatorios.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        int codigo;
         double sueldo;
         try {
-            codigo = Integer.parseInt(codigoStr);
             sueldo = Double.parseDouble(sueldoStr);
+            if (sueldo < 0) {
+                JOptionPane.showMessageDialog(this, "El sueldo debe ser mayor o igual a 0.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "Código o sueldo inválido", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "El sueldo debe ser un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         Cargo cargo = new Cargo();
-        cargo.setCarCod(codigo);
         cargo.setCarDesc(desc);
         cargo.setCarSue(sueldo);
         cargo.setCarEstReg(estadoStr.charAt(0));
@@ -174,19 +178,20 @@ public class CargoFrame extends JFrame {
                 mensaje = exito ? "Cargo registrado con éxito." : "Error al registrar cargo.";
                 break;
             case "MODIFICAR":
+                cargo.setCarCod(codigoSeleccionado);
                 exito = cargoDAO.actualizarCargo(cargo);
                 mensaje = exito ? "Cargo modificado con éxito." : "Error al modificar cargo.";
                 break;
             case "ELIMINAR":
-                exito = cargoDAO.eliminarLogicamenteCargo(codigo);
+                exito = cargoDAO.eliminarLogicamenteCargo(codigoSeleccionado);
                 mensaje = exito ? "Cargo eliminado con éxito." : "Error al eliminar cargo.";
                 break;
             case "INACTIVAR":
-                exito = cargoDAO.inactivarCargo(codigo);
+                exito = cargoDAO.inactivarCargo(codigoSeleccionado);
                 mensaje = exito ? "Cargo inactivado con éxito." : "Error al inactivar cargo.";
                 break;
             case "REACTIVAR":
-                exito = cargoDAO.reactivarCargo(codigo);
+                exito = cargoDAO.reactivarCargo(codigoSeleccionado);
                 mensaje = exito ? "Cargo reactivado con éxito." : "Error al reactivar cargo.";
                 break;
             default:
@@ -208,6 +213,7 @@ public class CargoFrame extends JFrame {
         habilitarControles(false);
         operacionActual = "";
         flagCarFlaAct = 0;
+        codigoSeleccionado = 0;
         habilitarBotonesIniciales();
     }
 
@@ -224,9 +230,9 @@ public class CargoFrame extends JFrame {
     }
 
     private void habilitarControles(boolean b) {
-        txtCodigo.setEditable(b);
         txtDescripcion.setEditable(b);
         txtSueldo.setEditable(b);
+        // txtCodigo y txtEstadoRegistro siempre permanecen no editables
     }
 
     private void limpiarCampos() {
@@ -257,10 +263,14 @@ public class CargoFrame extends JFrame {
     }
 
     private void habilitarBotonesParaSeleccion() {
+        btnAdicionar.setEnabled(false);
         btnModificar.setEnabled(true);
         btnEliminar.setEnabled(true);
         btnInactivar.setEnabled(true);
         btnReactivar.setEnabled(true);
+        btnActualizar.setEnabled(false);
+        btnCancelar.setEnabled(false);
+        btnSalir.setEnabled(true);
     }
 
     private void comandoModificar() {
@@ -270,8 +280,6 @@ public class CargoFrame extends JFrame {
             return;
         }
         habilitarControles(true);
-        txtCodigo.setEditable(false);
-        txtEstadoRegistro.setEditable(false);
         operacionActual = "MODIFICAR";
         flagCarFlaAct = 1;
         habilitarBotonesParaOperacion();
@@ -287,6 +295,7 @@ public class CargoFrame extends JFrame {
         txtDescripcion.setText(tableModel.getValueAt(selectedRow, 1).toString());
         txtSueldo.setText(tableModel.getValueAt(selectedRow, 2).toString());
         txtEstadoRegistro.setText("*");
+        codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
         habilitarControles(false);
         operacionActual = "ELIMINAR";
         flagCarFlaAct = 1;
@@ -304,6 +313,7 @@ public class CargoFrame extends JFrame {
         txtDescripcion.setText(tableModel.getValueAt(selectedRow, 1).toString());
         txtSueldo.setText(tableModel.getValueAt(selectedRow, 2).toString());
         txtEstadoRegistro.setText("I");
+        codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
         habilitarControles(false);
         operacionActual = "INACTIVAR";
         flagCarFlaAct = 1;
@@ -321,6 +331,7 @@ public class CargoFrame extends JFrame {
         txtDescripcion.setText(tableModel.getValueAt(selectedRow, 1).toString());
         txtSueldo.setText(tableModel.getValueAt(selectedRow, 2).toString());
         txtEstadoRegistro.setText("A");
+        codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
         habilitarControles(false);
         operacionActual = "REACTIVAR";
         flagCarFlaAct = 1;

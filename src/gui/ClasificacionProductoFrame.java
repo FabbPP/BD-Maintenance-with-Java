@@ -1,3 +1,4 @@
+// Archivo ClasificacionProductoFrame.java
 package gui;
 
 import dao.ClasificacionProductoDAO;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public class ClasificacionProductoFrame extends JFrame {
 
-    private JComboBox<String> cbxCod;
+    private JTextField txtCodigo;
     private JTextField txtDescripcion;
     private JTextField txtEstadoRegistro;
     private JTable tablaClasificaciones;
@@ -23,10 +24,11 @@ public class ClasificacionProductoFrame extends JFrame {
     private ClasificacionProductoDAO clasificacionProductoDAO;
     private int flagCarFlaAct = 0;
     private String operacionActual = "";
+    private int codigoSeleccionado = 0;
 
     public ClasificacionProductoFrame() {
         setTitle("Mantenimiento de Clasificación de Producto");
-        setSize(800, 600);
+        setSize(700, 550);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -36,8 +38,8 @@ public class ClasificacionProductoFrame extends JFrame {
         habilitarControles(false);
         habilitarBotonesIniciales();
     }
-
-    public static void main(String[] args) {
+    
+    public static void main(String[] args){
         SwingUtilities.invokeLater(() -> new ClasificacionProductoFrame().setVisible(true));
     }
 
@@ -52,12 +54,13 @@ public class ClasificacionProductoFrame extends JFrame {
         gbc.gridx = 0; gbc.gridy = 0;
         panelRegistro.add(new JLabel("Código:"), gbc);
         gbc.gridx = 1;
-        cbxCod = new JComboBox<>(new String[]{"A", "B", "C"});
-        panelRegistro.add(cbxCod, gbc);
+        txtCodigo = new JTextField(10);
+        txtCodigo.setEditable(false); // El código es AUTO_INCREMENT
+        panelRegistro.add(txtCodigo, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Descripción:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
         txtDescripcion = new JTextField(40);
         panelRegistro.add(txtDescripcion, gbc);
 
@@ -82,9 +85,10 @@ public class ClasificacionProductoFrame extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 if (operacionActual.isEmpty() && e.getClickCount() == 1) {
                     int i = tablaClasificaciones.getSelectedRow();
-                    cbxCod.setSelectedItem(tableModel.getValueAt(i, 0).toString());
+                    txtCodigo.setText(tableModel.getValueAt(i, 0).toString());
                     txtDescripcion.setText(tableModel.getValueAt(i, 1).toString());
                     txtEstadoRegistro.setText(tableModel.getValueAt(i, 2).toString());
+                    codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(i, 0).toString());
                     habilitarBotonesParaSeleccion();
                 }
             }
@@ -109,7 +113,7 @@ public class ClasificacionProductoFrame extends JFrame {
         btnAdicionar.addActionListener(e -> comandoAdicionar());
         btnActualizar.addActionListener(e -> comandoActualizar());
         btnCancelar.addActionListener(e -> comandoCancelar());
-        btnSalir.addActionListener(e -> dispose());
+        btnSalir.addActionListener(e -> comandoSalir());
         btnModificar.addActionListener(e -> comandoModificar());
         btnEliminar.addActionListener(e -> comandoEliminar());
         btnInactivar.addActionListener(e -> comandoInactivar());
@@ -131,7 +135,6 @@ public class ClasificacionProductoFrame extends JFrame {
             return;
         }
 
-        char codigo = cbxCod.getSelectedItem().toString().charAt(0);
         String desc = txtDescripcion.getText().trim();
         String estadoStr = txtEstadoRegistro.getText().trim();
 
@@ -140,33 +143,33 @@ public class ClasificacionProductoFrame extends JFrame {
             return;
         }
 
-        ClasificacionProducto clas = new ClasificacionProducto();
-        clas.setClasProCod(codigo);
-        clas.setClasProDesc(desc);
-        clas.setClasProEstReg(estadoStr.charAt(0));
+        ClasificacionProducto clasificacion = new ClasificacionProducto();
+        clasificacion.setClasProDesc(desc);
+        clasificacion.setClasProEstReg(estadoStr.charAt(0));
 
         boolean exito = false;
         String mensaje = "";
 
         switch (operacionActual) {
             case "ADICIONAR":
-                exito = clasificacionProductoDAO.insertar(clas);
+                exito = clasificacionProductoDAO.insertarClasificacion(clasificacion);
                 mensaje = exito ? "Clasificación registrada con éxito." : "Error al registrar clasificación.";
                 break;
             case "MODIFICAR":
-                exito = clasificacionProductoDAO.actualizar(clas);
+                clasificacion.setClasProCod(codigoSeleccionado);
+                exito = clasificacionProductoDAO.actualizarClasificacion(clasificacion);
                 mensaje = exito ? "Clasificación modificada con éxito." : "Error al modificar clasificación.";
                 break;
             case "ELIMINAR":
-                exito = clasificacionProductoDAO.eliminarLogico(codigo);
+                exito = clasificacionProductoDAO.eliminarLogicamenteClasificacion(codigoSeleccionado);
                 mensaje = exito ? "Clasificación eliminada con éxito." : "Error al eliminar clasificación.";
                 break;
             case "INACTIVAR":
-                exito = clasificacionProductoDAO.inactivar(codigo);
+                exito = clasificacionProductoDAO.inactivarClasificacion(codigoSeleccionado);
                 mensaje = exito ? "Clasificación inactivada con éxito." : "Error al inactivar clasificación.";
                 break;
             case "REACTIVAR":
-                exito = clasificacionProductoDAO.reactivar(codigo);
+                exito = clasificacionProductoDAO.reactivarClasificacion(codigoSeleccionado);
                 mensaje = exito ? "Clasificación reactivada con éxito." : "Error al reactivar clasificación.";
                 break;
             default:
@@ -188,69 +191,12 @@ public class ClasificacionProductoFrame extends JFrame {
         habilitarControles(false);
         operacionActual = "";
         flagCarFlaAct = 0;
+        codigoSeleccionado = 0;
         habilitarBotonesIniciales();
     }
 
-    private void comandoModificar() {
-        int selectedRow = tablaClasificaciones.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un registro para modificar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        habilitarControles(true);
-        cbxCod.setEnabled(false);
-        txtEstadoRegistro.setEditable(false);
-        operacionActual = "MODIFICAR";
-        flagCarFlaAct = 1;
-        habilitarBotonesParaOperacion();
-    }
-
-    private void comandoEliminar() {
-        int selectedRow = tablaClasificaciones.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un registro para eliminar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        cbxCod.setSelectedItem(tableModel.getValueAt(selectedRow, 0).toString());
-        txtDescripcion.setText(tableModel.getValueAt(selectedRow, 1).toString());
-        txtEstadoRegistro.setText("*");
-        habilitarControles(false);
-        operacionActual = "ELIMINAR";
-        flagCarFlaAct = 1;
-        habilitarBotonesParaOperacion();
-        JOptionPane.showMessageDialog(this, "El registro se marcará como eliminado ('*').\nPresione 'Actualizar' para confirmar.", "Eliminación Lógica", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void comandoInactivar() {
-        int selectedRow = tablaClasificaciones.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un registro para inactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        cbxCod.setSelectedItem(tableModel.getValueAt(selectedRow, 0).toString());
-        txtDescripcion.setText(tableModel.getValueAt(selectedRow, 1).toString());
-        txtEstadoRegistro.setText("I");
-        habilitarControles(false);
-        operacionActual = "INACTIVAR";
-        flagCarFlaAct = 1;
-        habilitarBotonesParaOperacion();
-        JOptionPane.showMessageDialog(this, "El registro se marcará como inactivo ('I').\nPresione 'Actualizar' para confirmar.", "Inactivar Registro", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void comandoReactivar() {
-        int selectedRow = tablaClasificaciones.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un registro para reactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        cbxCod.setSelectedItem(tableModel.getValueAt(selectedRow, 0).toString());
-        txtDescripcion.setText(tableModel.getValueAt(selectedRow, 1).toString());
-        txtEstadoRegistro.setText("A");
-        habilitarControles(false);
-        operacionActual = "REACTIVAR";
-        flagCarFlaAct = 1;
-        habilitarBotonesParaOperacion();
-        JOptionPane.showMessageDialog(this, "El registro se marcará como activo ('A').\nPresione 'Actualizar' para confirmar.", "Reactivar Registro", JOptionPane.INFORMATION_MESSAGE);
+    private void comandoSalir() {
+        dispose();
     }
 
     private void cargarTablaClasificaciones() {
@@ -262,12 +208,12 @@ public class ClasificacionProductoFrame extends JFrame {
     }
 
     private void habilitarControles(boolean b) {
-        cbxCod.setEnabled(b);
         txtDescripcion.setEditable(b);
+        // txtCodigo y txtEstadoRegistro siempre permanecen no editables
     }
 
     private void limpiarCampos() {
-        cbxCod.setSelectedIndex(0);
+        txtCodigo.setText("");
         txtDescripcion.setText("");
         txtEstadoRegistro.setText("");
     }
@@ -293,12 +239,76 @@ public class ClasificacionProductoFrame extends JFrame {
     }
 
     private void habilitarBotonesParaSeleccion() {
+        btnAdicionar.setEnabled(false);
         btnModificar.setEnabled(true);
         btnEliminar.setEnabled(true);
         btnInactivar.setEnabled(true);
         btnReactivar.setEnabled(true);
+        btnActualizar.setEnabled(false);
+        btnCancelar.setEnabled(false);
+        btnSalir.setEnabled(true);
     }
-    private void comandoSalir(){
-        dispose();
+
+    private void comandoModificar() {
+        int selectedRow = tablaClasificaciones.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un registro para modificar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        habilitarControles(true);
+        operacionActual = "MODIFICAR";
+        flagCarFlaAct = 1;
+        habilitarBotonesParaOperacion();
+    }
+
+    private void comandoEliminar() {
+        int selectedRow = tablaClasificaciones.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un registro para eliminar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        txtCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
+        txtDescripcion.setText(tableModel.getValueAt(selectedRow, 1).toString());
+        txtEstadoRegistro.setText("*");
+        codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
+        habilitarControles(false);
+        operacionActual = "ELIMINAR";
+        flagCarFlaAct = 1;
+        habilitarBotonesParaOperacion();
+        JOptionPane.showMessageDialog(this, "El registro se marcará como eliminado ('*').\nPresione 'Actualizar' para confirmar.", "Eliminación Lógica", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void comandoInactivar() {
+        int selectedRow = tablaClasificaciones.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un registro para inactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        txtCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
+        txtDescripcion.setText(tableModel.getValueAt(selectedRow, 1).toString());
+        txtEstadoRegistro.setText("I");
+        codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
+        habilitarControles(false);
+        operacionActual = "INACTIVAR";
+        flagCarFlaAct = 1;
+        habilitarBotonesParaOperacion();
+        JOptionPane.showMessageDialog(this, "El registro se marcará como inactivo ('I').\nPresione 'Actualizar' para confirmar.", "Inactivar Registro", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void comandoReactivar() {
+        int selectedRow = tablaClasificaciones.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un registro para reactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        txtCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
+        txtDescripcion.setText(tableModel.getValueAt(selectedRow, 1).toString());
+        txtEstadoRegistro.setText("A");
+        codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
+        habilitarControles(false);
+        operacionActual = "REACTIVAR";
+        flagCarFlaAct = 1;
+        habilitarBotonesParaOperacion();
+        JOptionPane.showMessageDialog(this, "El registro se marcará como activo ('A').\nPresione 'Actualizar' para confirmar.", "Reactivar Registro", JOptionPane.INFORMATION_MESSAGE);
     }
 }

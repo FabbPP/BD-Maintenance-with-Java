@@ -1,24 +1,23 @@
 package modelo;
 
 public class ClasificacionProducto {
-    private char clasProCod;
+    private int clasProCod; 
     private String clasProDesc;
     private char clasProEstReg;
 
     public ClasificacionProducto() {
     }
 
-    public ClasificacionProducto(char clasProCod, String clasProDesc, char clasProEstReg) {
-        this.clasProCod = clasProCod;
+    public ClasificacionProducto(String clasProDesc, char clasProEstReg) {
         this.clasProDesc = clasProDesc;
         this.clasProEstReg = clasProEstReg;
     }
 
-    public char getClasProCod() {
+    public int getClasProCod() {
         return clasProCod;
     }
 
-    public void setClasProCod(char clasProCod) {
+    public void setClasProCod(int clasProCod) {
         this.clasProCod = clasProCod;
     }
 

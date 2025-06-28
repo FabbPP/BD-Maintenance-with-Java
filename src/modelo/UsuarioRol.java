@@ -1,23 +1,22 @@
 package modelo;
 
 public class UsuarioRol {
-    private char rolUsuCod;
+    private int rolUsuCod;
     private String rolUsuDesc;
     private char rolUsuProEstReg;
 
     public UsuarioRol() {}
 
-    public UsuarioRol(char rolUsuCod, String rolUsuDesc, char rolUsuProEstReg) {
-        this.rolUsuCod = rolUsuCod;
+    public UsuarioRol(String rolUsuDesc, char rolUsuProEstReg) {
         this.rolUsuDesc = rolUsuDesc;
         this.rolUsuProEstReg = rolUsuProEstReg;
     }
 
-    public char getRolUsuCod() {
+    public int getRolUsuCod() {
         return rolUsuCod;
     }
 
-    public void setRolUsuCod(char rolUsuCod) {
+    public void setRolUsuCod(int rolUsuCod) {
         this.rolUsuCod = rolUsuCod;
     }
 

@@ -12,13 +12,14 @@ public class DisponibilidadProductoDAO {
     public List<DisponibilidadProducto> obtenerTodasDisponibilidades() {
         List<DisponibilidadProducto> disponibilidades = new ArrayList<>();
         String sql = "SELECT DispoProdCod, DispoProdDesc, DispoProdEstReg FROM PROD_DISPO";
+
         try (Connection conn = ConexionBD.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 DisponibilidadProducto disponibilidad = new DisponibilidadProducto();
-                disponibilidad.setDispoProdCod(rs.getByte("DispoProdCod"));
+                disponibilidad.setDispoProdCod(rs.getInt("DispoProdCod"));
                 disponibilidad.setDispoProdDesc(rs.getString("DispoProdDesc"));
                 disponibilidad.setDispoProdEstReg(rs.getString("DispoProdEstReg").charAt(0));
                 disponibilidades.add(disponibilidad);
@@ -26,18 +27,22 @@ public class DisponibilidadProductoDAO {
         } catch (SQLException e) {
             System.err.println("Error al obtener todas las disponibilidades de producto: " + e.getMessage());
         }
+
         return disponibilidades;
     }
 
-    public DisponibilidadProducto obtenerDisponibilidadPorCodigo(byte codigo) {
+    public DisponibilidadProducto obtenerDisponibilidadPorCodigo(int codigo) {
         String sql = "SELECT DispoProdCod, DispoProdDesc, DispoProdEstReg FROM PROD_DISPO WHERE DispoProdCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setByte(1, codigo);
+
+            pstmt.setInt(1, codigo);
+
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     DisponibilidadProducto disponibilidad = new DisponibilidadProducto();
-                    disponibilidad.setDispoProdCod(rs.getByte("DispoProdCod"));
+                    disponibilidad.setDispoProdCod(rs.getInt("DispoProdCod"));
                     disponibilidad.setDispoProdDesc(rs.getString("DispoProdDesc"));
                     disponibilidad.setDispoProdEstReg(rs.getString("DispoProdEstReg").charAt(0));
                     return disponibilidad;
@@ -46,20 +51,29 @@ public class DisponibilidadProductoDAO {
         } catch (SQLException e) {
             System.err.println("Error al obtener disponibilidad por código: " + e.getMessage());
         }
+
         return null;
     }
 
     public boolean insertarDisponibilidad(DisponibilidadProducto disponibilidad) {
-        String sql = "INSERT INTO PROD_DISPO (DispoProdCod, DispoProdDesc, DispoProdEstReg) VALUES (?, ?, ?)";
-        try (Connection conn = ConexionBD.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        String sql = "INSERT INTO PROD_DISPO (DispoProdDesc, DispoProdEstReg) VALUES (?, ?)";
 
-            pstmt.setByte(1, disponibilidad.getDispoProdCod());
-            pstmt.setString(2, disponibilidad.getDispoProdDesc());
-            pstmt.setString(3, String.valueOf(disponibilidad.getDispoProdEstReg()));
+        try (Connection conn = ConexionBD.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            pstmt.setString(1, disponibilidad.getDispoProdDesc());
+            pstmt.setString(2, String.valueOf(disponibilidad.getDispoProdEstReg()));
 
             int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
+            if (rowsAffected > 0) {
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        disponibilidad.setDispoProdCod(generatedKeys.getInt(1));
+                    }
+                }
+                return true;
+            }
+            return false;
 
         } catch (SQLException e) {
             System.err.println("Error al insertar disponibilidad de producto: " + e.getMessage());
@@ -69,12 +83,14 @@ public class DisponibilidadProductoDAO {
 
     public boolean actualizarDisponibilidad(DisponibilidadProducto disponibilidad) {
         String sql = "UPDATE PROD_DISPO SET DispoProdDesc = ?, DispoProdEstReg = ? WHERE DispoProdCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, disponibilidad.getDispoProdDesc());
             pstmt.setString(2, String.valueOf(disponibilidad.getDispoProdEstReg()));
-            pstmt.setByte(3, disponibilidad.getDispoProdCod());
+            pstmt.setInt(3, disponibilidad.getDispoProdCod());
+
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
 
@@ -84,12 +100,13 @@ public class DisponibilidadProductoDAO {
         }
     }
 
-    public boolean eliminarLogicamenteDisponibilidad(byte codigo) {
+    public boolean eliminarLogicamenteDisponibilidad(int codigo) {
         String sql = "UPDATE PROD_DISPO SET DispoProdEstReg = '*' WHERE DispoProdCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setByte(1, codigo);
+            pstmt.setInt(1, codigo);
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
 
@@ -99,12 +116,13 @@ public class DisponibilidadProductoDAO {
         }
     }
 
-    public boolean inactivarDisponibilidad(byte codigo) {
+    public boolean inactivarDisponibilidad(int codigo) {
         String sql = "UPDATE PROD_DISPO SET DispoProdEstReg = 'I' WHERE DispoProdCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setByte(1, codigo);
+            pstmt.setInt(1, codigo);
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
 
@@ -114,12 +132,13 @@ public class DisponibilidadProductoDAO {
         }
     }
 
-    public boolean reactivarDisponibilidad(byte codigo) {
+    public boolean reactivarDisponibilidad(int codigo) {
         String sql = "UPDATE PROD_DISPO SET DispoProdEstReg = 'A' WHERE DispoProdCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setByte(1, codigo);
+            pstmt.setInt(1, codigo);
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
 

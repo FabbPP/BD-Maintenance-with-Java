@@ -1,7 +1,7 @@
 package modelo;
 
 public class DisponibilidadProducto {
-    private byte dispoProdCod;
+    private int dispoProdCod; 
     private String dispoProdDesc;
     private char dispoProdEstReg;
 
@@ -10,18 +10,18 @@ public class DisponibilidadProducto {
     }
 
     // Constructor con parámetros
-    public DisponibilidadProducto(byte dispoProdCod, String dispoProdDesc, char dispoProdEstReg) {
+    public DisponibilidadProducto(int dispoProdCod, String dispoProdDesc, char dispoProdEstReg) {
         this.dispoProdCod = dispoProdCod;
         this.dispoProdDesc = dispoProdDesc;
         this.dispoProdEstReg = dispoProdEstReg;
     }
 
     // Getters y Setters
-    public byte getDispoProdCod() {
+    public int getDispoProdCod() {
         return dispoProdCod;
     }
 
-    public void setDispoProdCod(byte dispoProdCod) {
+    public void setDispoProdCod(int dispoProdCod) {
         this.dispoProdCod = dispoProdCod;
     }
 

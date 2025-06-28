@@ -9,102 +9,149 @@ import java.util.List;
 
 public class UsuarioRolDAO {
 
+    // Obtener todos los roles de usuario
     public List<UsuarioRol> obtenerTodosRoles() {
-        List<UsuarioRol> lista = new ArrayList<>();
-        String sql = "SELECT RolUsuCod, RolUsuDesc, RolUsuProEstReg FROM USUARIO_ROL";
+        List<UsuarioRol> roles = new ArrayList<>();
+        String sql = "SELECT RolUsuCod, RolUsuDesc, RolUsuProEstReg FROM usuario_rol";
+
         try (Connection conn = ConexionBD.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 UsuarioRol rol = new UsuarioRol();
-                rol.setRolUsuCod(rs.getString("RolUsuCod").charAt(0));
+                rol.setRolUsuCod(rs.getInt("RolUsuCod"));
                 rol.setRolUsuDesc(rs.getString("RolUsuDesc"));
                 rol.setRolUsuProEstReg(rs.getString("RolUsuProEstReg").charAt(0));
-                lista.add(rol);
+                roles.add(rol);
             }
         } catch (SQLException e) {
-            System.err.println("Error al obtener roles de usuario: " + e.getMessage());
+            System.err.println("Error al obtener todos los roles de usuario: " + e.getMessage());
         }
-        return lista;
+
+        return roles;
     }
 
-    public UsuarioRol obtenerRolPorCodigo(char codigo) {
-        String sql = "SELECT RolUsuCod, RolUsuDesc, RolUsuProEstReg FROM USUARIO_ROL WHERE RolUsuCod = ?";
+    // Obtener un rol de usuario por código
+    public UsuarioRol obtenerRolPorCodigo(int codigo) {
+        String sql = "SELECT RolUsuCod, RolUsuDesc, RolUsuProEstReg FROM usuario_rol WHERE RolUsuCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, String.valueOf(codigo));
-            ResultSet rs = pstmt.executeQuery();
+            pstmt.setInt(1, codigo);
 
-            if (rs.next()) {
-                return new UsuarioRol(
-                        rs.getString("RolUsuCod").charAt(0),
-                        rs.getString("RolUsuDesc"),
-                        rs.getString("RolUsuProEstReg").charAt(0)
-                );
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    UsuarioRol rol = new UsuarioRol();
+                    rol.setRolUsuCod(rs.getInt("RolUsuCod"));
+                    rol.setRolUsuDesc(rs.getString("RolUsuDesc"));
+                    rol.setRolUsuProEstReg(rs.getString("RolUsuProEstReg").charAt(0));
+                    return rol;
+                }
             }
         } catch (SQLException e) {
-            System.err.println("Error al buscar rol por código: " + e.getMessage());
+            System.err.println("Error al obtener rol por código: " + e.getMessage());
         }
+
         return null;
     }
 
+    // Insertar un nuevo rol de usuario
     public boolean insertarRol(UsuarioRol rol) {
-        String sql = "INSERT INTO USUARIO_ROL (RolUsuCod, RolUsuDesc, RolUsuProEstReg) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO usuario_rol (RolUsuDesc, RolUsuProEstReg) VALUES (?, ?)";
+
         try (Connection conn = ConexionBD.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            pstmt.setString(1, String.valueOf(rol.getRolUsuCod()));
-            pstmt.setString(2, rol.getRolUsuDesc());
-            pstmt.setString(3, String.valueOf(rol.getRolUsuProEstReg()));
+            pstmt.setString(1, rol.getRolUsuDesc());
+            pstmt.setString(2, String.valueOf(rol.getRolUsuProEstReg()));
 
-            return pstmt.executeUpdate() > 0;
+            int rowsAffected = pstmt.executeUpdate();
+            if (rowsAffected > 0) {
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        rol.setRolUsuCod(generatedKeys.getInt(1)); // Asignar la PK generada al objeto
+                    }
+                }
+                return true;
+            }
+            return false;
+
         } catch (SQLException e) {
-            System.err.println("Error al insertar rol: " + e.getMessage());
+            System.err.println("Error al insertar rol de usuario: " + e.getMessage());
+            e.printStackTrace(); // Para ver más detalles del error
             return false;
         }
     }
 
+    // Actualizar un rol de usuario
     public boolean actualizarRol(UsuarioRol rol) {
-        String sql = "UPDATE USUARIO_ROL SET RolUsuDesc = ?, RolUsuProEstReg = ? WHERE RolUsuCod = ?";
+        String sql = "UPDATE usuario_rol SET RolUsuDesc = ?, RolUsuProEstReg = ? WHERE RolUsuCod = ?";
+
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, rol.getRolUsuDesc());
             pstmt.setString(2, String.valueOf(rol.getRolUsuProEstReg()));
-            pstmt.setString(3, String.valueOf(rol.getRolUsuCod()));
+            pstmt.setInt(3, rol.getRolUsuCod());
 
-            return pstmt.executeUpdate() > 0;
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+
         } catch (SQLException e) {
-            System.err.println("Error al actualizar rol: " + e.getMessage());
+            System.err.println("Error al actualizar rol de usuario: " + e.getMessage());
             return false;
         }
     }
 
-    public boolean eliminarLogico(char codigo) {
-        String sql = "UPDATE USUARIO_ROL SET RolUsuProEstReg = '*' WHERE RolUsuCod = ?";
-        return ejecutarCambioEstado(sql, codigo);
-    }
+    // Eliminar un rol lógicamente (cambiar estado)
+    public boolean eliminarLogicamenteRol(int codigo) {
+        String sql = "UPDATE usuario_rol SET RolUsuProEstReg = '*' WHERE RolUsuCod = ?";
 
-    public boolean inactivar(char codigo) {
-        String sql = "UPDATE USUARIO_ROL SET RolUsuProEstReg = 'I' WHERE RolUsuCod = ?";
-        return ejecutarCambioEstado(sql, codigo);
-    }
-
-    public boolean reactivar(char codigo) {
-        String sql = "UPDATE USUARIO_ROL SET RolUsuProEstReg = 'A' WHERE RolUsuCod = ?";
-        return ejecutarCambioEstado(sql, codigo);
-    }
-
-    private boolean ejecutarCambioEstado(String sql, char codigo) {
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, String.valueOf(codigo));
-            return pstmt.executeUpdate() > 0;
+            pstmt.setInt(1, codigo);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+
         } catch (SQLException e) {
-            System.err.println("Error al cambiar estado del rol: " + e.getMessage());
+            System.err.println("Error al eliminar lógicamente rol: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Inactivar un rol de usuario (poner estado como 'I')
+    public boolean inactivarRol(int codigo) {
+        String sql = "UPDATE usuario_rol SET RolUsuProEstReg = 'I' WHERE RolUsuCod = ?";
+
+        try (Connection conn = ConexionBD.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, codigo);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error al inactivar rol: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Reactivar un rol de usuario (poner estado como 'A')
+    public boolean reactivarRol(int codigo) {
+        String sql = "UPDATE usuario_rol SET RolUsuProEstReg = 'A' WHERE RolUsuCod = ?";
+
+        try (Connection conn = ConexionBD.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, codigo);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error al reactivar rol: " + e.getMessage());
             return false;
         }
     }

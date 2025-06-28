@@ -1,17 +1,19 @@
+// Archivo UsuarioRolFrame.java
 package gui;
 
 import dao.UsuarioRolDAO;
+import modelo.UsuarioRol;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import modelo.UsuarioRol;
 
 public class UsuarioRolFrame extends JFrame {
 
-    private JComboBox<String> cbxCod;
+    private JTextField txtCodigo;
     private JTextField txtDescripcion;
     private JTextField txtEstadoRegistro;
     private JTable tablaRoles;
@@ -22,10 +24,11 @@ public class UsuarioRolFrame extends JFrame {
     private UsuarioRolDAO usuarioRolDAO;
     private int flagCarFlaAct = 0;
     private String operacionActual = "";
+    private int codigoSeleccionado = 0;
 
     public UsuarioRolFrame() {
         setTitle("Mantenimiento de Rol de Usuario");
-        setSize(800, 600);
+        setSize(700, 550);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -35,6 +38,7 @@ public class UsuarioRolFrame extends JFrame {
         habilitarControles(false);
         habilitarBotonesIniciales();
     }
+    
     public static void main(String[] args){
         SwingUtilities.invokeLater(() -> new UsuarioRolFrame().setVisible(true));
     }
@@ -50,12 +54,13 @@ public class UsuarioRolFrame extends JFrame {
         gbc.gridx = 0; gbc.gridy = 0;
         panelRegistro.add(new JLabel("Código:"), gbc);
         gbc.gridx = 1;
-        cbxCod = new JComboBox<>(new String[]{"R", "D"});
-        panelRegistro.add(cbxCod, gbc);
+        txtCodigo = new JTextField(10);
+        txtCodigo.setEditable(false); // El código es AUTO_INCREMENT
+        panelRegistro.add(txtCodigo, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1;
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Descripción:"), gbc);
-        gbc.gridx = 1;
+        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
         txtDescripcion = new JTextField(40);
         panelRegistro.add(txtDescripcion, gbc);
 
@@ -80,9 +85,10 @@ public class UsuarioRolFrame extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 if (operacionActual.isEmpty() && e.getClickCount() == 1) {
                     int i = tablaRoles.getSelectedRow();
-                    cbxCod.setSelectedItem(tableModel.getValueAt(i, 0).toString());
+                    txtCodigo.setText(tableModel.getValueAt(i, 0).toString());
                     txtDescripcion.setText(tableModel.getValueAt(i, 1).toString());
                     txtEstadoRegistro.setText(tableModel.getValueAt(i, 2).toString());
+                    codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(i, 0).toString());
                     habilitarBotonesParaSeleccion();
                 }
             }
@@ -129,7 +135,6 @@ public class UsuarioRolFrame extends JFrame {
             return;
         }
 
-        char codigo = cbxCod.getSelectedItem().toString().charAt(0);
         String desc = txtDescripcion.getText().trim();
         String estadoStr = txtEstadoRegistro.getText().trim();
 
@@ -139,7 +144,6 @@ public class UsuarioRolFrame extends JFrame {
         }
 
         UsuarioRol rol = new UsuarioRol();
-        rol.setRolUsuCod(codigo);
         rol.setRolUsuDesc(desc);
         rol.setRolUsuProEstReg(estadoStr.charAt(0));
 
@@ -149,23 +153,24 @@ public class UsuarioRolFrame extends JFrame {
         switch (operacionActual) {
             case "ADICIONAR":
                 exito = usuarioRolDAO.insertarRol(rol);
-                mensaje = exito ? "Rol registrado con éxito." : "Error al registrar rol.";
+                mensaje = exito ? "Rol de usuario registrado con éxito." : "Error al registrar rol de usuario.";
                 break;
             case "MODIFICAR":
+                rol.setRolUsuCod(codigoSeleccionado);
                 exito = usuarioRolDAO.actualizarRol(rol);
-                mensaje = exito ? "Rol modificado con éxito." : "Error al modificar rol.";
+                mensaje = exito ? "Rol de usuario modificado con éxito." : "Error al modificar rol de usuario.";
                 break;
             case "ELIMINAR":
-                exito = usuarioRolDAO.eliminarLogico(codigo);
-                mensaje = exito ? "Rol eliminado con éxito." : "Error al eliminar rol.";
+                exito = usuarioRolDAO.eliminarLogicamenteRol(codigoSeleccionado);
+                mensaje = exito ? "Rol de usuario eliminado con éxito." : "Error al eliminar rol de usuario.";
                 break;
             case "INACTIVAR":
-                exito = usuarioRolDAO.inactivar(codigo);
-                mensaje = exito ? "Rol inactivado con éxito." : "Error al inactivar rol.";
+                exito = usuarioRolDAO.inactivarRol(codigoSeleccionado);
+                mensaje = exito ? "Rol de usuario inactivado con éxito." : "Error al inactivar rol de usuario.";
                 break;
             case "REACTIVAR":
-                exito = usuarioRolDAO.reactivar(codigo);
-                mensaje = exito ? "Rol reactivado con éxito." : "Error al reactivar rol.";
+                exito = usuarioRolDAO.reactivarRol(codigoSeleccionado);
+                mensaje = exito ? "Rol de usuario reactivado con éxito." : "Error al reactivar rol de usuario.";
                 break;
             default:
                 JOptionPane.showMessageDialog(this, "Operación no reconocida.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -186,6 +191,7 @@ public class UsuarioRolFrame extends JFrame {
         habilitarControles(false);
         operacionActual = "";
         flagCarFlaAct = 0;
+        codigoSeleccionado = 0;
         habilitarBotonesIniciales();
     }
 
@@ -202,12 +208,12 @@ public class UsuarioRolFrame extends JFrame {
     }
 
     private void habilitarControles(boolean b) {
-        cbxCod.setEnabled(b);
         txtDescripcion.setEditable(b);
+        // txtCodigo y txtEstadoRegistro siempre permanecen no editables
     }
 
     private void limpiarCampos() {
-        cbxCod.setSelectedIndex(0);
+        txtCodigo.setText("");
         txtDescripcion.setText("");
         txtEstadoRegistro.setText("");
     }
@@ -233,10 +239,14 @@ public class UsuarioRolFrame extends JFrame {
     }
 
     private void habilitarBotonesParaSeleccion() {
+        btnAdicionar.setEnabled(false);
         btnModificar.setEnabled(true);
         btnEliminar.setEnabled(true);
         btnInactivar.setEnabled(true);
         btnReactivar.setEnabled(true);
+        btnActualizar.setEnabled(false);
+        btnCancelar.setEnabled(false);
+        btnSalir.setEnabled(true);
     }
 
     private void comandoModificar() {
@@ -246,8 +256,6 @@ public class UsuarioRolFrame extends JFrame {
             return;
         }
         habilitarControles(true);
-        cbxCod.setEnabled(false);
-        txtEstadoRegistro.setEditable(false);
         operacionActual = "MODIFICAR";
         flagCarFlaAct = 1;
         habilitarBotonesParaOperacion();
@@ -259,9 +267,10 @@ public class UsuarioRolFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Seleccione un registro para eliminar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        cbxCod.setSelectedItem(tableModel.getValueAt(selectedRow, 0).toString());
+        txtCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
         txtDescripcion.setText(tableModel.getValueAt(selectedRow, 1).toString());
         txtEstadoRegistro.setText("*");
+        codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
         habilitarControles(false);
         operacionActual = "ELIMINAR";
         flagCarFlaAct = 1;
@@ -275,9 +284,10 @@ public class UsuarioRolFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Seleccione un registro para inactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        cbxCod.setSelectedItem(tableModel.getValueAt(selectedRow, 0).toString());
+        txtCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
         txtDescripcion.setText(tableModel.getValueAt(selectedRow, 1).toString());
         txtEstadoRegistro.setText("I");
+        codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
         habilitarControles(false);
         operacionActual = "INACTIVAR";
         flagCarFlaAct = 1;
@@ -291,9 +301,10 @@ public class UsuarioRolFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Seleccione un registro para reactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        cbxCod.setSelectedItem(tableModel.getValueAt(selectedRow, 0).toString());
+        txtCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
         txtDescripcion.setText(tableModel.getValueAt(selectedRow, 1).toString());
         txtEstadoRegistro.setText("A");
+        codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
         habilitarControles(false);
         operacionActual = "REACTIVAR";
         flagCarFlaAct = 1;
