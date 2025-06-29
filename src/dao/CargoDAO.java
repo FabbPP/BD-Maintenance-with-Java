@@ -56,6 +56,29 @@ public class CargoDAO {
 
         return null;
     }
+    
+    public List<Cargo> obtenerCargosActivos() {
+        List<Cargo> cargos = new ArrayList<>();
+        String sql = "SELECT CarCod, CarDesc, CarSue, CarEstReg FROM CARGO WHERE CarEstReg = 'A' ORDER BY CarCod";
+        
+        try (Connection conn = ConexionBD.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery()) {
+            
+            while (rs.next()) {
+                int carCod = rs.getInt("CarCod");
+                String carDesc = rs.getString("CarDesc");
+                double carSue = rs.getDouble("CarSue"); 
+                char carEstReg = rs.getString("CarEstReg").charAt(0); 
+
+                Cargo cargo = new Cargo(carCod, carDesc, carSue, carEstReg);
+                cargos.add(cargo);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener cargos activos: " + e.getMessage());
+        }
+        return cargos;
+    }
 
     public boolean insertarCargo(Cargo cargo) {
         String sql = "INSERT INTO CARGO (CarDesc, CarSue, CarEstReg) VALUES (?, ?, ?)";
