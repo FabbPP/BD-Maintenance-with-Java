@@ -38,7 +38,7 @@ public class RegionDAO{
             pstmt.setInt(1, codigo);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    Region reg = new Region(rs.getInt("RegCod"), rs.getInt("DepCod"), rs.getString("RegNom"), rs.getString("RegEstReg"));
+                    Region reg = new Region(rs.getInt("RegCod"), rs.getInt("DepCod"), rs.getString("RegNom"), rs.getString("RegEstReg").charAt(0));
                     return reg;
                 }
             }
