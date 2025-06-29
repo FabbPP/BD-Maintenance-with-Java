@@ -161,20 +161,7 @@ CREATE TABLE OFICINA (
     CONSTRAINT chk_ofi_est CHECK (OfiEstReg IN ('A', 'I', '*'))
 ) ENGINE=InnoDB COMMENT='Oficinas de la empresa';
 
--- Tabla: Usuario del Sistema (CORREGIDA - creada antes que REPVENTA)
-CREATE TABLE USUARIOSISTEMA (
-    UsuCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Usuario',
-    UsuNom VARCHAR(50) NOT NULL COMMENT 'Nombre Usuario',
-    UsuContr VARCHAR(50) NOT NULL COMMENT 'Contraseña',
-    RolUsuCod INT NOT NULL COMMENT 'Rol Usuario',
-    UsuEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
-    
-    PRIMARY KEY (UsuCod),
-    CONSTRAINT fk_usu_rol FOREIGN KEY (RolUsuCod) REFERENCES USUARIO_ROL(RolUsuCod),
-    CONSTRAINT chk_usu_est CHECK (UsuEstReg IN ('A', 'I', '*'))
-) ENGINE=InnoDB COMMENT='Usuarios del sistema';
-
--- Tabla: Representante de Venta (CORREGIDA)
+-- Tabla: Representante de Venta
 CREATE TABLE REPVENTA (
     RepCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Representante',
     RepNom VARCHAR(50) NOT NULL COMMENT 'Nombre Representante',
@@ -182,22 +169,33 @@ CREATE TABLE REPVENTA (
     OfiCod INT NOT NULL COMMENT 'Código Oficina',
     CarCod INT NOT NULL COMMENT 'Código Cargo',
     RepCon DATE NOT NULL COMMENT 'Fecha Contrato',
-    UsuCod INT NOT NULL COMMENT 'Código Usuario',
-    RepEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
+    RepEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro', 
     
     PRIMARY KEY (RepCod),
     CONSTRAINT chk_rep_edad CHECK (RepEdad BETWEEN 18 AND 65),
     CONSTRAINT chk_rep_contrato CHECK (RepCon >= '2024-01-01'),
-    CONSTRAINT chk_rep_est CHECK (RepEstReg IN ('A', 'I', '*')),
     CONSTRAINT fk_rep_oficina FOREIGN KEY (OfiCod) REFERENCES OFICINA(OfiCod),
     CONSTRAINT fk_rep_cargo FOREIGN KEY (CarCod) REFERENCES CARGO(CarCod),
-    CONSTRAINT fk_rep_usuario FOREIGN KEY (UsuCod) REFERENCES USUARIOSISTEMA(UsuCod),
-    CONSTRAINT uk_rep_usuario UNIQUE (UsuCod)
+    CONSTRAINT chk_rep_estreg CHECK (RepEstReg IN ('A', 'I', '*'))
 ) ENGINE=InnoDB COMMENT='Representantes de venta';
-
 -- Agregar FK de oficina a representante (CORREGIDA)
 ALTER TABLE OFICINA 
 ADD CONSTRAINT fk_ofi_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod);
+
+-- Tabla: Usuario del Sistema
+CREATE TABLE USUARIOSISTEMA (
+    UsuCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Usuario',
+    RepCod INT NOT NULL COMMENT 'Código Representante',
+    UsuNom VARCHAR(50) NOT NULL COMMENT 'Nombre Usuario',
+    UsuContr VARCHAR(50) NOT NULL COMMENT 'Contraseña',
+    RolUsuCod INT NOT NULL COMMENT 'Rol Usuario',
+    UsuEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
+    
+    PRIMARY KEY (UsuCod),
+    CONSTRAINT fk_usu_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod),
+    CONSTRAINT fk_usu_rol FOREIGN KEY (RolUsuCod) REFERENCES USUARIO_ROL(RolUsuCod),
+    CONSTRAINT chk_usu_estreg CHECK (UsuEstReg IN ('A', 'I', '*'))
+) ENGINE=InnoDB COMMENT='Usuarios del sistema';
 
 -- Tabla: Cliente (CORREGIDA - campos de dirección mejorados)
 CREATE TABLE CLIENTE (
