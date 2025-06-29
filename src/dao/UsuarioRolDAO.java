@@ -1,11 +1,10 @@
 package dao;
 
 import conexion.ConexionBD;
-import modelo.UsuarioRol;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import modelo.UsuarioRol;
 
 public class UsuarioRolDAO {
 
@@ -56,6 +55,30 @@ public class UsuarioRolDAO {
 
         return null;
     }
+
+    public List<UsuarioRol> obtenerRolesActivos() {
+        List<UsuarioRol> roles = new ArrayList<>();
+        String sql = "SELECT RolUsuCod, RolUsuDesc, RolUsuProEstReg FROM usuario_rol WHERE RolUsuProEstReg = 'A' ORDER BY RolUsuCod";
+
+        try (Connection conn = ConexionBD.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                UsuarioRol rol = new UsuarioRol();
+                rol.setRolUsuCod(rs.getInt("RolUsuCod"));
+                rol.setRolUsuDesc(rs.getString("RolUsuDesc"));
+                rol.setRolUsuProEstReg(rs.getString("RolUsuProEstReg").charAt(0));
+                roles.add(rol);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener roles activos: " + e.getMessage());
+        }
+
+        return roles;
+    }
+
+
 
     // Insertar un nuevo rol de usuario
     public boolean insertarRol(UsuarioRol rol) {
