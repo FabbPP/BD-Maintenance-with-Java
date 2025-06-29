@@ -4,7 +4,6 @@ import conexion.ConexionBD;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JOptionPane;
 import modelo.RepVenta;
 
 public class RepVentaDAO {
@@ -109,11 +108,6 @@ public class RepVentaDAO {
                 return "Error al insertar representante: " + e.getMessage();
             }
         }
-    }
-
-    // Método auxiliar para mostrar errores
-    private void mostrarError(String mensaje) {
-        JOptionPane.showMessageDialog(null, mensaje, "Error de Validación", JOptionPane.ERROR_MESSAGE);
     }
 
     public String actualizarRepresentante(RepVenta representante) {
