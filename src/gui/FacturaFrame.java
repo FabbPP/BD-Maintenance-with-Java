@@ -474,7 +474,7 @@ public class FacturaFrame extends JFrame{
     }
 
     private void comandoReactivar() {
-        int selectedRow = tablaRegiones.getSelectedRow();
+        int selectedRow = tablaFacturas.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Seleccione un registro de la tabla para reactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
