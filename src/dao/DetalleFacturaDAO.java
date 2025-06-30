@@ -68,7 +68,7 @@ public class DetalleFacturaDAO{
             pstmt.setInt(3, detalle.getDetCan());
             pstmt.setBigDecimal(4, detalle.getDetPre());
             pstmt.setBigDecimal(5, detalle.getDetSub());
-            pstmt.setString(6, String.valueOf(departamento.getDepEstReg()));
+            pstmt.setString(6, String.valueOf(detalle.getDepEstReg()));
 
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
@@ -86,7 +86,7 @@ public class DetalleFacturaDAO{
             pstmt.setInt(1, detalle.getDetCan());
             pstmt.setBigDecimal(2, detalle.getDetPre());
             pstmt.setBigDecimal(3, detalle.getDetSub());
-            pstmt.setString(4, String.valueOf(departamento.getDepEstReg()));
+            pstmt.setString(4, String.valueOf(detalle.getDepEstReg()));
             pstmt.setInt(5, detalle.getFacCod());
             pstmt.setInt(6, detalle.getProCod());
             int rowsAffected = pstmt.executeUpdate();
