@@ -38,10 +38,6 @@ public class UsuarioRol {
 
     @Override
     public String toString() {
-        return "UsuarioRol{" +
-                "rolUsuCod=" + rolUsuCod +
-                ", rolUsuDesc='" + rolUsuDesc + '\'' +
-                ", rolUsuProEstReg=" + rolUsuProEstReg +
-                '}';
+        return rolUsuCod + " - " + rolUsuDesc;
     }
 }

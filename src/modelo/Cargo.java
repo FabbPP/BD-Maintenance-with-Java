@@ -52,11 +52,6 @@ public class Cargo {
 
     @Override
     public String toString() {
-        return "Cargo{" +
-                "carCod=" + carCod +
-                ", carDesc='" + carDesc + '\'' +
-                ", carSue=" + carSue +
-                ", carEstReg=" + carEstReg +
-                '}';
+        return carCod + " - " + carDesc;
     }
 }

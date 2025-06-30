@@ -46,10 +46,6 @@ public class ProdUnidadMedida {
     // Método toString para representar la clase en formato de cadena
     @Override
     public String toString() {
-        return "ProdUnidadMedida{" +
-                "uniMedProCod=" + uniMedProCod +
-                ", uniMedProDesc='" + uniMedProDesc + '\'' +
-                ", uniMedProEstReg=" + uniMedProEstReg +
-                '}';
+        return uniMedProCod + " - " + uniMedProDesc;
     }
 }

@@ -50,11 +50,6 @@ public class CategoriaCliente {
 
 	@Override
 	public String toString() {
-		return "CategoriaCliente{" +
-				"catCliCod=" + catCliCod +
-				", catCliDesc='" + catCliDesc + '\'' +
-				", catCliLimCred=" + catCliLimCred +
-				", catCliEstReg=" + catCliEstReg +
-				'}';
+		return catCliCod + " - " + catCliDesc;
 	}
 }

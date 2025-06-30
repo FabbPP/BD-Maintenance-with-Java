@@ -71,7 +71,6 @@ public class ProductoFrame extends JFrame {
 
     private void initComponents() {
         setLayout(new BorderLayout());
-        
         // Panel de registro
         JPanel panelRegistro = new JPanel(new GridBagLayout());
         panelRegistro.setBorder(BorderFactory.createTitledBorder("Registro de Producto"));
