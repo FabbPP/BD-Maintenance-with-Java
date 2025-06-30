@@ -43,10 +43,6 @@ public class ModuloAuditoria {
 
     @Override
     public String toString() {
-        return "ModuloAuditoria{" +
-                "modAudiCod=" + modAudiCod +
-                ", modAudiDesc='" + modAudiDesc + '\'' +
-                ", modAudiEstReg=" + modAudiEstReg +
-                '}';
+        return modAudiCod + " - " + modAudiDesc;
     }
 }

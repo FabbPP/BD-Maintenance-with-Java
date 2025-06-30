@@ -39,10 +39,6 @@ public class ClasificacionProducto {
 
     @Override
     public String toString() {
-        return "ClasificacionProducto{" +
-                "clasProCod=" + clasProCod +
-                ", clasProDesc='" + clasProDesc + '\'' +
-                ", clasProEstReg=" + clasProEstReg +
-                '}';
+        return clasProCod + " - " + clasProDesc;
     }
 }

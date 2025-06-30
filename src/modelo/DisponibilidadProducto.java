@@ -43,10 +43,6 @@ public class DisponibilidadProducto {
 
     @Override
     public String toString() {
-        return "DisponibilidadProducto{" +
-                "dispoProdCod=" + dispoProdCod +
-                ", dispoProdDesc='" + dispoProdDesc + '\'' +
-                ", dispoProdEstReg=" + dispoProdEstReg +
-                '}';
+        return dispoProdCod + " - " + dispoProdDesc;
     }
 }

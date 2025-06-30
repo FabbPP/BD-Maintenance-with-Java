@@ -37,7 +37,7 @@ public class Ciudad{
 	}
 
 	public void setCiuNom(String ciuNom) {
-		ciuNom = ciuNom;
+		this.ciuNom = ciuNom;
 	}
 
 	public char getCiuEstReg() {
@@ -47,13 +47,8 @@ public class Ciudad{
 	public void setCiuEstReg(char estReg) {
 		ciuEstReg = estReg;
 	}
-
+	@Override
 	public String toString() {
-		return "Ciudad {" +
-			"ciuCod = " + ciuCod +
-			", regCod = " + regCod +
-			", ciuNom = '" + ciuNom + '\'' +
-			", ciuEstReg = '" + ciuEstReg + '\'' +
-			'}';
+		return ciuCod + " - " + ciuNom;
 	}
 }

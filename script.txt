@@ -153,7 +153,6 @@ CREATE TABLE OFICINA (
     OfiDir VARCHAR(100) COMMENT 'Dirección',
     OfiEmp VARCHAR(100) COMMENT 'Empresa',
     OfiObj DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Objetivo de Ventas',
-    RepCod INT COMMENT 'Código Representante Responsable',
     OfiEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
     
     PRIMARY KEY (OfiCod),
@@ -178,9 +177,6 @@ CREATE TABLE REPVENTA (
     CONSTRAINT fk_rep_cargo FOREIGN KEY (CarCod) REFERENCES CARGO(CarCod),
     CONSTRAINT chk_rep_estreg CHECK (RepEstReg IN ('A', 'I', '*'))
 ) ENGINE=InnoDB COMMENT='Representantes de venta';
--- Agregar FK de oficina a representante (CORREGIDA)
-ALTER TABLE OFICINA 
-ADD CONSTRAINT fk_ofi_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod);
 
 -- Tabla: Usuario del Sistema
 CREATE TABLE USUARIOSISTEMA (
@@ -391,4 +387,9 @@ INSERT INTO DEPARTAMENTO (DepNom) VALUES
 
 -- ============================================================================
 -- FIN DEL SCRIPT
+-- ============================================================================
+
+
+-- ============================================================================
+-- SQL de nuevos modificaciones
 -- ============================================================================

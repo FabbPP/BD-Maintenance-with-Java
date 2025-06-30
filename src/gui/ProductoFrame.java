@@ -38,7 +38,9 @@ public class ProductoFrame extends JFrame {
 
     private ProductoDAO productoDAO;
     private FabricanteProductoDAO fabricanteDAO;
-
+    private ClasificacionProductoDAO clasificacionDAO;
+    private ProdUnidadMedidaDAO unidadMedidaDAO;
+    private DisponibilidadProductoDAO disponibilidadDAO;
     
     private int flagCarFlaAct = 0;
     private String operacionActual = "";
@@ -52,6 +54,9 @@ public class ProductoFrame extends JFrame {
 
         productoDAO = new ProductoDAO();
         fabricanteDAO = new FabricanteProductoDAO();
+        clasificacionDAO = new ClasificacionProductoDAO();
+        unidadMedidaDAO = new ProdUnidadMedidaDAO();
+        disponibilidadDAO = new DisponibilidadProductoDAO();
         
         initComponents();
         cargarCombos();
@@ -66,7 +71,6 @@ public class ProductoFrame extends JFrame {
 
     private void initComponents() {
         setLayout(new BorderLayout());
-        
         // Panel de registro
         JPanel panelRegistro = new JPanel(new GridBagLayout());
         panelRegistro.setBorder(BorderFactory.createTitledBorder("Registro de Producto"));
@@ -222,6 +226,27 @@ public class ProductoFrame extends JFrame {
         List<FabricanteProducto> fabricantes = fabricanteDAO.obtenerFabricantesActivos();
         for (FabricanteProducto f : fabricantes) {
             cmbFabricante.addItem(f);
+        }
+
+        // Cargar clasificaciones activas
+        cmbClasificacion.removeAllItems();
+        List<ClasificacionProducto> clasificaciones = clasificacionDAO.obtenerTodasClasificaciones();
+        for (ClasificacionProducto c : clasificaciones) {
+            cmbClasificacion.addItem(c);
+        }
+
+        // Cargar unidades de medida activas
+        cmbUnidadMedida.removeAllItems();
+        List<ProdUnidadMedida> unidades = unidadMedidaDAO.obtenerTodasUnidades();
+        for (ProdUnidadMedida u : unidades) {
+            cmbUnidadMedida.addItem(u);
+        }
+
+        // Cargar disponibilidades activas
+        cmbDisponibilidad.removeAllItems();
+        List<DisponibilidadProducto> disponibilidades = disponibilidadDAO.obtenerTodasDisponibilidades();
+        for (DisponibilidadProducto d : disponibilidades) {
+            cmbDisponibilidad.addItem(d);
         }
     }
 

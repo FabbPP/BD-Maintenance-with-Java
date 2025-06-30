@@ -47,10 +47,6 @@ public class FabricanteProducto {
     
     @Override
     public String toString() {
-        return "FabricanteProducto{" +
-                "fabCod=" + fabCod +
-                ", fabNom='" + fabNom + '\'' +
-                ", fabEstReg=" + fabEstReg +
-                '}';
+        return fabCod + " - " + fabNom;
     }
 }
