@@ -412,3 +412,11 @@ FOREIGN KEY (ProdCod) REFERENCES PRODUCTO(ProdCod);
 -- 5. Actualizar comentario
 ALTER TABLE REPORPROD COMMENT = 'Reporte de productos con stock mínimo y máximo por producto';
 
+ALTER TABLE sistema_ventas.oficina 
+DROP FOREIGN KEY fk_ofi_representante;
+ALTER TABLE sistema_ventas.oficina 
+DROP COLUMN RepCod,
+DROP INDEX fk_ofi_representante ;
+; 
+
+Borrar facFab por grafico :3
