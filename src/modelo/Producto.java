@@ -10,7 +10,6 @@ public class Producto {
     private int prodStock;
     private int clasProCod;
     private int uniMedProCod;
-    private Integer reporProdCod;
     private int dispoProdCod;
     private char prodEstReg;
     
@@ -26,7 +25,7 @@ public class Producto {
     // Constructor principal
     public Producto(int prodCod, int fabCod, String prodDes, BigDecimal prodPre,
                    int prodStock, int clasProCod, int uniMedProCod, 
-                   Integer reporProdCod, int dispoProdCod, char prodEstReg) {
+                   int dispoProdCod, char prodEstReg) {
         this.prodCod = prodCod;
         this.fabCod = fabCod;
         this.prodDes = prodDes;
@@ -34,7 +33,6 @@ public class Producto {
         this.prodStock = prodStock;
         this.clasProCod = clasProCod;
         this.uniMedProCod = uniMedProCod;
-        this.reporProdCod = reporProdCod;
         this.dispoProdCod = dispoProdCod;
         this.prodEstReg = prodEstReg;
     }
@@ -42,11 +40,11 @@ public class Producto {
     // Constructor con descripciones
     public Producto(int prodCod, int fabCod, String prodDes, BigDecimal prodPre,
                    int prodStock, int clasProCod, int uniMedProCod, 
-                   Integer reporProdCod, int dispoProdCod, char prodEstReg,
+                   int dispoProdCod, char prodEstReg,
                    String fabricanteNombre, String clasificacionDescripcion,
                    String unidadMedidaDescripcion, String disponibilidadDescripcion) {
         this(prodCod, fabCod, prodDes, prodPre, prodStock, clasProCod, 
-             uniMedProCod, reporProdCod, dispoProdCod, prodEstReg);
+             uniMedProCod, dispoProdCod, prodEstReg);
         this.fabricanteNombre = fabricanteNombre;
         this.clasificacionDescripcion = clasificacionDescripcion;
         this.unidadMedidaDescripcion = unidadMedidaDescripcion;
@@ -110,14 +108,7 @@ public class Producto {
         this.uniMedProCod = uniMedProCod;
     }
     
-    public Integer getReporProdCod() {
-        return reporProdCod;
-    }
-    
-    public void setReporProdCod(Integer reporProdCod) {
-        this.reporProdCod = reporProdCod;
-    }
-    
+
     public int getDispoProdCod() {
         return dispoProdCod;
     }
@@ -183,17 +174,6 @@ public class Producto {
     
     @Override
     public String toString() {
-        return "Producto{" +
-                "prodCod=" + prodCod +
-                ", fabCod=" + fabCod +
-                ", prodDes='" + prodDes + '\'' +
-                ", prodPre=" + prodPre +
-                ", prodStock=" + prodStock +
-                ", clasProCod=" + clasProCod +
-                ", uniMedProCod=" + uniMedProCod +
-                ", reporProdCod=" + reporProdCod +
-                ", dispoProdCod=" + dispoProdCod +
-                ", prodEstReg=" + prodEstReg +
-                '}';
+        return prodCod + " - " + prodDes;
     }
 }

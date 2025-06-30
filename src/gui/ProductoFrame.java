@@ -416,7 +416,6 @@ public class ProductoFrame extends JFrame {
             Integer.parseInt(txtStock.getText().trim()),
             clasificacion.getClasProCod(),
             unidadMedida.getUniMedProCod(),
-            null, // ReporProdCod puede ser null
             disponibilidad.getDispoProdCod(),
             txtEstadoRegistro.getText().charAt(0),
             fabricante.getFabNom(),
