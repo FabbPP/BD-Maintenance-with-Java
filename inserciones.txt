@@ -140,10 +140,6 @@ INSERT INTO REPORREPVENTA (RepCod, RepoRepVentObj, RepoRepVentNum, RepoRepVentCu
 (29, 121000.00, 119000, 39, 3, 'A'),
 (30, 87000.00, 86000, 33, 1, 'A');
 
-
-
-//Fabricante ProductoAdd commentMore actions
-SELECT * FROM sistema_ventas.fabricante_producto;
 INSERT INTO FABRICANTE_PRODUCTO (FabNom, FabEstReg) VALUES
 ('Nestlé', 'A'),
 ('Unilever', 'A'),
@@ -175,4 +171,121 @@ INSERT INTO FABRICANTE_PRODUCTO (FabNom, FabEstReg) VALUES
 ('Acer Inc.', 'A'),
 ('Canon Inc.', 'A'),
 ('Epson Corporation', 'A');
-Add comment
+Add comment Ciudades y departamentos 
+
+INSERT INTO DEPARTAMENTO (DepNom, DepEstReg) VALUES
+('Lima', 'A'),
+('Arequipa', 'A'),
+('Cusco', 'A'),
+('La Libertad', 'A');
+
+INSERT INTO REGION (DepCod, RegNom, RegEstReg) VALUES
+(1, 'Lima Metropolitana', 'A'),
+(1, 'Callao', 'A'),
+(2, 'Arequipa Norte', 'A'),
+(2, 'Arequipa Sur', 'A'),
+(3, 'Cusco Centro', 'A'),
+(3, 'Cusco Andes', 'A'),
+(4, 'Trujillo Centro', 'A'),
+(4, 'Valle Chicama', 'A');
+
+-- Región: Lima Metropolitana (RegCod = 1)
+INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
+(1, 'Miraflores', 'A'),
+(1, 'San Isidro', 'A'),
+(1, 'Surco', 'A'),
+(1, 'San Borja', 'A');
+
+-- Región: Callao (RegCod = 2)
+INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
+(2, 'Callao', 'A'),
+(2, 'Bellavista', 'A'),
+(2, 'La Perla', 'A'),
+(2, 'Carmen de La Legua', 'A');
+
+-- Región: Arequipa Norte (RegCod = 3)
+INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
+(3, 'Cayma', 'A'),
+(3, 'Alto Selva Alegre', 'A'),
+(3, 'Cerro Colorado', 'A');
+
+-- Región: Arequipa Sur (RegCod = 4)
+INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
+(4, 'Socabaya', 'A'),
+(4, 'Paucarpata', 'A'),
+(4, 'Characato', 'A');
+
+-- Región: Cusco Centro (RegCod = 5)
+INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
+(5, 'Cusco', 'A'),
+(5, 'San Jerónimo', 'A'),
+(5, 'Wanchaq', 'A');
+
+-- Región: Cusco Andes (RegCod = 6)
+INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
+(6, 'Anta', 'A'),
+(6, 'Zurite', 'A'),
+(6, 'Limatambo', 'A');
+
+-- Región: Trujillo Centro (RegCod = 7)
+INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
+(7, 'Trujillo', 'A'),
+(7, 'La Esperanza', 'A'),
+(7, 'Florencia de Mora', 'A');
+
+-- Región: Valle Chicama (RegCod = 8)
+INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
+(8, 'Ascope', 'A'),
+(8, 'Casa Grande', 'A'),
+(8, 'Paiján', 'A');
+
+INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
+-- Lima Metropolitana (RegCod = 17)
+(17, 'Lima', 'A'),
+(17, 'San Isidro', 'A'),
+(17, 'Miraflores', 'A'),
+(17, 'Surco', 'A'),
+
+-- Callao (RegCod = 18)
+(18, 'Callao', 'A'),
+(18, 'Bellavista', 'A'),
+(18, 'La Perla', 'A'),
+(18, 'La Punta', 'A'),
+
+-- Arequipa Norte (RegCod = 19)
+(19, 'Cayma', 'A'),
+(19, 'Alto Selva Alegre', 'A'),
+(19, 'Yura', 'A'),
+(19, 'Cerro Colorado', 'A'),
+
+-- Arequipa Sur (RegCod = 20)
+(20, 'Jose Luis Bustamante y Rivero', 'A'),
+(20, 'Hunter', 'A'),
+(20, 'Paucarpata', 'A'),
+(20, 'Sabandía', 'A'),
+
+-- Cusco Centro (RegCod = 21)
+(21, 'Cusco', 'A'),
+(21, 'Wanchaq', 'A'),
+(21, 'San Sebastián', 'A'),
+(21, 'San Jerónimo', 'A'),
+
+-- Cusco Andes (RegCod = 22)
+(22, 'Pisac', 'A'),
+(22, 'Calca', 'A'),
+(22, 'Urubamba', 'A'),
+(22, 'Chinchero', 'A'),
+
+-- Trujillo Centro (RegCod = 23)
+(23, 'Trujillo', 'A'),
+(23, 'Florencia de Mora', 'A'),
+(23, 'La Esperanza', 'A'),
+(23, 'Víctor Larco Herrera', 'A'),
+
+-- Valle Chicama (RegCod = 24)
+(24, 'Ascope', 'A'),
+(24, 'Casa Grande', 'A'),
+(24, 'Paiján', 'A'),
+(24, 'Chicama', 'A');
+
+
