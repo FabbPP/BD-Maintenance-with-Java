@@ -106,7 +106,7 @@ public class CiudadFrame extends JFrame{
                     int i = tablaCiudades.getSelectedRow();
                     if (i != -1) {
                         txtCodigo.setText(tableModel.getValueAt(i, 0).toString());
-                        int regCod = (int) tableModel.getValueAt(i, 1));
+                        int regCod = (int) tableModel.getValueAt(i, 1);
                         String regNom = getRegionNombre(regCod);
                         cmbRegion.setSelectedItem(regNom);
 
