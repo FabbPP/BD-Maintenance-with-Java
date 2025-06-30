@@ -212,11 +212,11 @@ public class DetalleFacturaFrame extends JFrame {
                     }
                     break;
                 case "INACTIVAR":
-                    exito = detalleFacturaDAO.inactivarDetalle(Integer.parseInt(txtCodigo.getText()));
+                    exito = detalleFacturaDAO.inactivarDetalle(facCod);
                     mensaje = exito ? "Detalle inactivado con éxito." : "Error al inactivar detalle.";
                     break;
                 case "REACTIVAR":
-                    exito = detalleFacturaDAO.reactivarDetalle(Integer.parseInt(txtCodigo.getText()));
+                    exito = detalleFacturaDAO.reactivarDetalle(facCod);
                     mensaje = exito ? "Detalle reactivado con éxito." : "Error al reactivar detalle.";
                     break;
                 default:
