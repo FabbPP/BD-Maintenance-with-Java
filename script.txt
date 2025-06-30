@@ -278,7 +278,7 @@ CREATE TABLE FACTURA (
     CliCod INT NOT NULL COMMENT 'Código Cliente',
     RepCod INT NOT NULL COMMENT 'Código Representante',
     FacFab VARCHAR(50) COMMENT 'Fabricante',
-    Faclmp DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Importe Total',
+    FacImp DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Importe Total',
     FacAño INT NOT NULL COMMENT 'Año',
     FacMes INT NOT NULL COMMENT 'Mes',
     FacDia INT NOT NULL COMMENT 'Día',
