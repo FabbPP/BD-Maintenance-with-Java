@@ -1,7 +1,6 @@
 package gui;
 
 import dao.RepVentaDAO;
-import dao.UsuarioRolDAO;
 import dao.UsuarioSistemaDAO;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -10,7 +9,6 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import modelo.RepVenta;
-import modelo.UsuarioRol;
 import modelo.UsuarioSistema;
 
 public class UsuarioSistemaFrame extends JFrame {
@@ -19,7 +17,6 @@ public class UsuarioSistemaFrame extends JFrame {
     private JComboBox<ComboItem> cbRepresentante;
     private JTextField txtNombreUsuario;
     private JPasswordField txtContrasena;
-    private JComboBox<ComboItem> cbRolUsuario;
     private JTextField txtEstadoRegistro;
     private JTable tablaUsuarios;
     private DefaultTableModel tableModel;
@@ -28,7 +25,6 @@ public class UsuarioSistemaFrame extends JFrame {
 
     private UsuarioSistemaDAO usuarioSistemaDAO;
     private RepVentaDAO repVentaDAO;
-    private UsuarioRolDAO usuarioRolDAO;
     private int flagCarFlaAct = 0;
     private String operacionActual = "";
     private int codigoSeleccionado = 0;
@@ -65,7 +61,6 @@ public class UsuarioSistemaFrame extends JFrame {
 
         usuarioSistemaDAO = new UsuarioSistemaDAO();
         repVentaDAO = new RepVentaDAO();
-        usuarioRolDAO = new UsuarioRolDAO();
         initComponents();
         cargarComboBoxes();
         cargarTablaUsuarios();
@@ -113,14 +108,6 @@ public class UsuarioSistemaFrame extends JFrame {
         txtContrasena = new JPasswordField(20);
         panelRegistro.add(txtContrasena, gbc);
 
-        // Tercera fila
-        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0;
-        panelRegistro.add(new JLabel("Rol Usuario:"), gbc);
-        gbc.gridx = 1; gbc.gridwidth = 2; gbc.weightx = 1.0;
-        cbRolUsuario = new JComboBox<>();
-        cbRolUsuario.setPreferredSize(new Dimension(250, cbRolUsuario.getPreferredSize().height));
-        panelRegistro.add(cbRolUsuario, gbc);
-
         gbc.gridx = 3; gbc.gridy = 2; gbc.gridwidth = 1;
         panelRegistro.add(new JLabel("Estado:"), gbc);
         gbc.gridx = 3; gbc.gridy = 3;
@@ -139,7 +126,7 @@ public class UsuarioSistemaFrame extends JFrame {
 
         JPanel panelTabla = new JPanel(new BorderLayout());
         panelTabla.setBorder(BorderFactory.createTitledBorder("Usuarios del Sistema"));
-        tableModel = new DefaultTableModel(new Object[]{"Código", "Rep. Código", "Usuario", "Contraseña", "Rol Código", "Estado", "Nombre Representante", "Descripción Rol"}, 0) {
+        tableModel = new DefaultTableModel(new Object[]{"Código", "Rep. Código", "Usuario", "Contraseña", "Estado", "Nombre Representante"}, 0) {
             public boolean isCellEditable(int row, int col) { return false; }
         };
         tablaUsuarios = new JTable(tableModel);
@@ -158,10 +145,6 @@ public class UsuarioSistemaFrame extends JFrame {
                         
                         txtNombreUsuario.setText(tableModel.getValueAt(i, 2).toString());
                         txtContrasena.setText(tableModel.getValueAt(i, 3).toString());
-                        
-                        // Seleccionar rol por código
-                        int codigoRol = Integer.parseInt(tableModel.getValueAt(i, 4).toString());
-                        seleccionarEnComboBoxPorCodigo(cbRolUsuario, codigoRol);
                         
                         txtEstadoRegistro.setText(tableModel.getValueAt(i, 5).toString());
                         codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(i, 0).toString());
@@ -206,13 +189,6 @@ public class UsuarioSistemaFrame extends JFrame {
             cbRepresentante.addItem(new ComboItem(rep.getRepCod(), rep.getRepNom()));
         }
 
-        // Cargar roles de usuario activos
-        List<UsuarioRol> roles = usuarioRolDAO.obtenerRolesActivos();
-        cbRolUsuario.removeAllItems();
-        cbRolUsuario.addItem(new ComboItem(0, "-- Seleccionar Rol --"));
-        for (UsuarioRol rol : roles) {
-            cbRolUsuario.addItem(new ComboItem(rol.getRolUsuCod(), rol.getRolUsuDesc()));
-        }
     }
 
     private void seleccionarEnComboBoxPorCodigo(JComboBox<ComboItem> comboBox, int codigo) {
@@ -231,7 +207,6 @@ public class UsuarioSistemaFrame extends JFrame {
         habilitarControles(true);
         txtEstadoRegistro.setText("A");
         cbRepresentante.setSelectedIndex(0);
-        cbRolUsuario.setSelectedIndex(0);
         operacionActual = "ADICIONAR";
         flagCarFlaAct = 1;
         habilitarBotonesParaOperacion();
@@ -259,21 +234,13 @@ public class UsuarioSistemaFrame extends JFrame {
             return;
         }
 
-        // Validar selección de rol
-        ComboItem rolSeleccionado = (ComboItem) cbRolUsuario.getSelectedItem();
-        if (rolSeleccionado == null || rolSeleccionado.getCodigo() == 0) {
-            JOptionPane.showMessageDialog(this, "Debe seleccionar un rol de usuario.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
 
         int repCodigo = representanteSeleccionado.getCodigo();
-        int rolCodigo = rolSeleccionado.getCodigo();
 
         UsuarioSistema usuario = new UsuarioSistema();
         usuario.setRepCod(repCodigo);
         usuario.setUsuNom(nombreUsuario);
         usuario.setUsuContr(contrasena);
-        usuario.setRolUsuCod(rolCodigo);
         usuario.setUsuEstReg(estadoStr.charAt(0));
 
         boolean exito = false;
@@ -334,7 +301,6 @@ public class UsuarioSistemaFrame extends JFrame {
         for (UsuarioSistema u : lista) {
             // Obtener descripciones para mostrar en la tabla
             String nombreRep = "";
-            String descRol = "";
             
             // Buscar nombre del representante
             RepVenta rep = repVentaDAO.obtenerRepresentantePorCodigo(u.getRepCod());
@@ -342,21 +308,13 @@ public class UsuarioSistemaFrame extends JFrame {
                 nombreRep = rep.getRepNom();
             }
             
-            // Buscar descripción del rol
-            UsuarioRol rol = usuarioRolDAO.obtenerRolPorCodigo(u.getRolUsuCod());
-            if (rol != null) {
-                descRol = rol.getRolUsuDesc();
-            }
-            
             tableModel.addRow(new Object[]{
                 u.getUsuCod(), 
                 u.getRepCod(), 
                 u.getUsuNom(), 
                 u.getUsuContr(), 
-                u.getRolUsuCod(), 
                 u.getUsuEstReg(),
-                nombreRep,
-                descRol
+                nombreRep
             });
         }
     }
@@ -365,7 +323,6 @@ public class UsuarioSistemaFrame extends JFrame {
         cbRepresentante.setEnabled(b);
         txtNombreUsuario.setEditable(b);
         txtContrasena.setEditable(b);
-        cbRolUsuario.setEnabled(b);
         // txtCodigo y txtEstadoRegistro siempre permanecen no editables
     }
 
@@ -374,7 +331,6 @@ public class UsuarioSistemaFrame extends JFrame {
         cbRepresentante.setSelectedIndex(0);
         txtNombreUsuario.setText("");
         txtContrasena.setText("");
-        cbRolUsuario.setSelectedIndex(0);
         txtEstadoRegistro.setText("");
     }
 
@@ -475,10 +431,6 @@ public class UsuarioSistemaFrame extends JFrame {
         
         txtNombreUsuario.setText(tableModel.getValueAt(selectedRow, 2).toString());
         txtContrasena.setText(tableModel.getValueAt(selectedRow, 3).toString());
-        
-        // Seleccionar rol por código
-        int codigoRol = Integer.parseInt(tableModel.getValueAt(selectedRow, 4).toString());
-        seleccionarEnComboBoxPorCodigo(cbRolUsuario, codigoRol);
         
         codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
     }

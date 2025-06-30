@@ -393,3 +393,22 @@ INSERT INTO DEPARTAMENTO (DepNom) VALUES
 -- ============================================================================
 -- SQL de nuevos modificaciones
 -- ============================================================================
+-- VERSIÓN SIMPLE - EJECUTAR LÍNEA POR LÍNEA
+USE sistema_ventas;
+
+-- 1. Eliminar FK si existe (ignora error si no existe)
+ALTER TABLE PRODUCTO DROP FOREIGN KEY fk_prod_reporte;
+
+-- 2. Eliminar columna (ignora error si no existe)  
+ALTER TABLE PRODUCTO DROP COLUMN ReporProdCod;
+
+-- 3. Agregar nueva columna (cambié a NULL para evitar errores)
+ALTER TABLE REPORPROD ADD COLUMN ProdCod INT NULL COMMENT 'Código del Producto';
+
+-- 4. Crear nueva FK
+ALTER TABLE REPORPROD ADD CONSTRAINT fk_repor_producto 
+FOREIGN KEY (ProdCod) REFERENCES PRODUCTO(ProdCod);
+
+-- 5. Actualizar comentario
+ALTER TABLE REPORPROD COMMENT = 'Reporte de productos con stock mínimo y máximo por producto';
+

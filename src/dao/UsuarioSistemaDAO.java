@@ -11,7 +11,7 @@ public class UsuarioSistemaDAO {
 
     public List<UsuarioSistema> obtenerTodosUsuarios() {
         List<UsuarioSistema> usuarios = new ArrayList<>();
-        String sql = "SELECT UsuCod, RepCod, UsuNom, UsuContr, RolUsuCod, UsuEstReg FROM USUARIOSISTEMA";
+        String sql = "SELECT UsuCod, RepCod, UsuNom, UsuContr, UsuEstReg FROM USUARIOSISTEMA";
 
         try (Connection conn = ConexionBD.getConnection();
              Statement stmt = conn.createStatement();
@@ -23,7 +23,6 @@ public class UsuarioSistemaDAO {
                 usuario.setRepCod(rs.getInt("RepCod"));
                 usuario.setUsuNom(rs.getString("UsuNom"));
                 usuario.setUsuContr(rs.getString("UsuContr"));
-                usuario.setRolUsuCod(rs.getInt("RolUsuCod"));
                 usuario.setUsuEstReg(rs.getString("UsuEstReg").charAt(0));
                 usuarios.add(usuario);
             }
@@ -35,7 +34,7 @@ public class UsuarioSistemaDAO {
     }
 
     public UsuarioSistema obtenerUsuarioPorCodigo(int codigo) {
-        String sql = "SELECT UsuCod, RepCod, UsuNom, UsuContr, RolUsuCod, UsuEstReg FROM USUARIOSISTEMA WHERE UsuCod = ?";
+        String sql = "SELECT UsuCod, RepCod, UsuNom, UsuContr, UsuEstReg FROM USUARIOSISTEMA WHERE UsuCod = ?";
 
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -49,7 +48,6 @@ public class UsuarioSistemaDAO {
                     usuario.setRepCod(rs.getInt("RepCod"));
                     usuario.setUsuNom(rs.getString("UsuNom"));
                     usuario.setUsuContr(rs.getString("UsuContr"));
-                    usuario.setRolUsuCod(rs.getInt("RolUsuCod"));
                     usuario.setUsuEstReg(rs.getString("UsuEstReg").charAt(0));
                     return usuario;
                 }
@@ -62,7 +60,7 @@ public class UsuarioSistemaDAO {
     }
 
     public UsuarioSistema obtenerUsuarioPorNombre(String nombreUsuario) {
-        String sql = "SELECT UsuCod, RepCod, UsuNom, UsuContr, RolUsuCod, UsuEstReg FROM USUARIOSISTEMA WHERE UsuNom = ?";
+        String sql = "SELECT UsuCod, RepCod, UsuNom, UsuContr, UsuEstReg FROM USUARIOSISTEMA WHERE UsuNom = ?";
 
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -76,7 +74,6 @@ public class UsuarioSistemaDAO {
                     usuario.setRepCod(rs.getInt("RepCod"));
                     usuario.setUsuNom(rs.getString("UsuNom"));
                     usuario.setUsuContr(rs.getString("UsuContr"));
-                    usuario.setRolUsuCod(rs.getInt("RolUsuCod"));
                     usuario.setUsuEstReg(rs.getString("UsuEstReg").charAt(0));
                     return usuario;
                 }
@@ -89,7 +86,7 @@ public class UsuarioSistemaDAO {
     }
 
     public boolean insertarUsuario(UsuarioSistema usuario) {
-        String sql = "INSERT INTO USUARIOSISTEMA (RepCod, UsuNom, UsuContr, RolUsuCod, UsuEstReg) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO USUARIOSISTEMA (RepCod, UsuNom, UsuContr, UsuEstReg) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -97,7 +94,6 @@ public class UsuarioSistemaDAO {
             pstmt.setInt(1, usuario.getRepCod());
             pstmt.setString(2, usuario.getUsuNom());
             pstmt.setString(3, usuario.getUsuContr());
-            pstmt.setInt(4, usuario.getRolUsuCod());
             pstmt.setString(5, String.valueOf(usuario.getUsuEstReg()));
 
             int rowsAffected = pstmt.executeUpdate();
@@ -119,7 +115,7 @@ public class UsuarioSistemaDAO {
     }
 
     public boolean actualizarUsuario(UsuarioSistema usuario) {
-        String sql = "UPDATE USUARIOSISTEMA SET RepCod = ?, UsuNom = ?, UsuContr = ?, RolUsuCod = ?, UsuEstReg = ? WHERE UsuCod = ?";
+        String sql = "UPDATE USUARIOSISTEMA SET RepCod = ?, UsuNom = ?, UsuContr = ?, UsuEstReg = ? WHERE UsuCod = ?";
 
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -127,7 +123,6 @@ public class UsuarioSistemaDAO {
             pstmt.setInt(1, usuario.getRepCod());
             pstmt.setString(2, usuario.getUsuNom());
             pstmt.setString(3, usuario.getUsuContr());
-            pstmt.setInt(4, usuario.getRolUsuCod());
             pstmt.setString(5, String.valueOf(usuario.getUsuEstReg()));
             pstmt.setInt(6, usuario.getUsuCod());
 
@@ -190,7 +185,7 @@ public class UsuarioSistemaDAO {
 
     // Método específico para autenticación
     public UsuarioSistema autenticarUsuario(String nombreUsuario, String contraseña) {
-        String sql = "SELECT UsuCod, RepCod, UsuNom, UsuContr, RolUsuCod, UsuEstReg FROM USUARIOSISTEMA WHERE UsuNom = ? AND UsuContr = ? AND UsuEstReg = 'A'";
+        String sql = "SELECT UsuCod, RepCod, UsuNom, UsuContr, UsuEstReg FROM USUARIOSISTEMA WHERE UsuNom = ? AND UsuContr = ? AND UsuEstReg = 'A'";
 
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -205,7 +200,6 @@ public class UsuarioSistemaDAO {
                     usuario.setRepCod(rs.getInt("RepCod"));
                     usuario.setUsuNom(rs.getString("UsuNom"));
                     usuario.setUsuContr(rs.getString("UsuContr"));
-                    usuario.setRolUsuCod(rs.getInt("RolUsuCod"));
                     usuario.setUsuEstReg(rs.getString("UsuEstReg").charAt(0));
                     return usuario;
                 }
@@ -215,34 +209,5 @@ public class UsuarioSistemaDAO {
         }
 
         return null;
-    }
-
-    // Método para obtener usuarios por rol
-    public List<UsuarioSistema> obtenerUsuariosPorRol(int rolCodigo) {
-        List<UsuarioSistema> usuarios = new ArrayList<>();
-        String sql = "SELECT UsuCod, RepCod, UsuNom, UsuContr, RolUsuCod, UsuEstReg FROM USUARIOSISTEMA WHERE RolUsuCod = ?";
-
-        try (Connection conn = ConexionBD.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setInt(1, rolCodigo);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    UsuarioSistema usuario = new UsuarioSistema();
-                    usuario.setUsuCod(rs.getInt("UsuCod"));
-                    usuario.setRepCod(rs.getInt("RepCod"));
-                    usuario.setUsuNom(rs.getString("UsuNom"));
-                    usuario.setUsuContr(rs.getString("UsuContr"));
-                    usuario.setRolUsuCod(rs.getInt("RolUsuCod"));
-                    usuario.setUsuEstReg(rs.getString("UsuEstReg").charAt(0));
-                    usuarios.add(usuario);
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al obtener usuarios por rol: " + e.getMessage());
-        }
-
-        return usuarios;
     }
 }

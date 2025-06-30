@@ -74,71 +74,37 @@ INSERT INTO REPVENTA (RepNom, RepEdad, OfiCod, CarCod, RepCon, RepEstReg) VALUES
 
 
 
-INSERT INTO USUARIOSISTEMA (RepCod, UsuNom, UsuContr, RolUsuCod, UsuEstReg) VALUES
-(1,  'usuario01', 'pass01', 1, 'A'),
-(2,  'usuario02', 'pass02', 1, 'A'),
-(3,  'usuario03', 'pass03', 1, 'A'),
-(4,  'usuario04', 'pass04', 1, 'A'),
-(5,  'usuario05', 'pass05', 1, 'A'),
-(6,  'usuario06', 'pass06', 1, 'A'),
-(7,  'usuario07', 'pass07', 2, 'A'),
-(8,  'usuario08', 'pass08', 1, 'A'),
-(9,  'usuario09', 'pass09', 1, 'A'),
-(10, 'usuario10', 'pass10', 1, 'A'),
-(11, 'usuario11', 'pass11', 1, 'A'),
-(12, 'usuario12', 'pass12', 1, 'A'),
-(13, 'usuario13', 'pass13', 1, 'A'),
-(14, 'usuario14', 'pass14', 1, 'A'),
-(15, 'usuario15', 'pass15', 2, 'A'),
-(16, 'usuario16', 'pass16', 1, 'A'),
-(17, 'usuario17', 'pass17', 2, 'A'),
-(18, 'usuario18', 'pass18', 1, 'A'),
-(19, 'usuario19', 'pass19', 1, 'A'),
-(20, 'usuario20', 'pass20', 1, 'A'),
-(21, 'usuario21', 'pass21', 1, 'A'),
-(22, 'usuario22', 'pass22', 1, 'A'),
-(23, 'usuario23', 'pass23', 1, 'A'),
-(24, 'usuario24', 'pass24', 1, 'A'),
-(25, 'usuario25', 'pass25', 2, 'A'),
-(26, 'usuario26', 'pass26', 1, 'A'),
-(27, 'usuario27', 'pass27', 1, 'A'),
-(28, 'usuario28', 'pass28', 1, 'A'),
-(29, 'usuario29', 'pass29', 1, 'A'),
-(30, 'usuario30', 'pass30', 1, 'A');
-
-
-
-INSERT INTO REPORREPVENTA (RepCod, RepoRepVentObj, RepoRepVentNum, RepoRepVentCuo, CarCod, RepoRepVentEstReg) VALUES
-(1, 90000.00, 88000, 35, 1, 'A'),
-(2, 60000.00, 55000, 28, 2, 'A'),
-(3, 120000.00, 118000, 42, 3, 'A'),
-(4, 95000.00, 93000, 37, 1, 'A'),
-(5, 87000.00, 60000, 30, 1, 'I'),
-(6, 58000.00, 55000, 25, 2, 'A'),
-(7, 135000.00, 130000, 45, 4, 'A'),
-(8, 110000.00, 105000, 40, 3, '*'),
-(9, 92000.00, 91000, 36, 1, 'A'),
-(10, 61000.00, 59000, 22, 2, 'A'),
-(11, 89000.00, 87000, 32, 1, 'A'),
-(12, 83000.00, 80000, 30, 1, 'A'),
-(13, 125000.00, 123000, 43, 3, 'A'),
-(14, 64000.00, 62000, 26, 2, 'A'),
-(15, 140000.00, 135000, 48, 4, 'A'),
-(16, 86000.00, 75000, 31, 1, '*'),
-(17, 150000.00, 145000, 50, 5, 'A'),
-(18, 57000.00, 53000, 24, 2, 'A'),
-(19, 91000.00, 90000, 33, 1, 'A'),
-(20, 63000.00, 60000, 25, 2, 'I'),
-(21, 118000.00, 116000, 41, 3, 'A'),
-(22, 60000.00, 57000, 26, 2, 'A'),
-(23, 94000.00, 92000, 35, 1, 'A'),
-(24, 58000.00, 50000, 22, 2, 'A'),
-(25, 132000.00, 130000, 44, 4, '*'),
-(26, 88000.00, 86000, 34, 1, 'A'),
-(27, 91000.00, 88000, 32, 1, 'A'),
-(28, 61000.00, 59000, 25, 2, 'A'),
-(29, 121000.00, 119000, 39, 3, 'A'),
-(30, 87000.00, 86000, 33, 1, 'A');
+INSERT INTO USUARIOSISTEMA (RepCod, UsuNom, UsuContr, UsuEstReg) VALUES
+(1,  'usuario01', 'pass01', 'A'),
+(2,  'usuario02', 'pass02', 'A'),
+(3,  'usuario03', 'pass03', 'A'),
+(4,  'usuario04', 'pass04', 'A'),
+(5,  'usuario05', 'pass05', 'A'),
+(6,  'usuario06', 'pass06', 'A'),
+(7,  'usuario07', 'pass07', 'A'),
+(8,  'usuario08', 'pass08', 'A'),
+(9,  'usuario09', 'pass09', 'A'),
+(10, 'usuario10', 'pass10', 'A'),
+(11, 'usuario11', 'pass11', 'A'),
+(12, 'usuario12', 'pass12', 'A'),
+(13, 'usuario13', 'pass13', 'A'),
+(14, 'usuario14', 'pass14', 'A'),
+(15, 'usuario15', 'pass15', 'A'),
+(16, 'usuario16', 'pass16', 'A'),
+(17, 'usuario17', 'pass17', 'A'),
+(18, 'usuario18', 'pass18', 'A'),
+(19, 'usuario19', 'pass19', 'A'),
+(20, 'usuario20', 'pass20', 'A'),
+(21, 'usuario21', 'pass21', 'A'),
+(22, 'usuario22', 'pass22', 'A'),
+(23, 'usuario23', 'pass23', 'A'),
+(24, 'usuario24', 'pass24', 'A'),
+(25, 'usuario25', 'pass25', 'A'),
+(26, 'usuario26', 'pass26', 'A'),
+(27, 'usuario27', 'pass27', 'A'),
+(28, 'usuario28', 'pass28', 'A'),
+(29, 'usuario29', 'pass29', 'A'),
+(30, 'usuario30', 'pass30', 'A');
 
 INSERT INTO FABRICANTE_PRODUCTO (FabNom, FabEstReg) VALUES
 ('Nestlé', 'A'),
@@ -171,7 +137,6 @@ INSERT INTO FABRICANTE_PRODUCTO (FabNom, FabEstReg) VALUES
 ('Acer Inc.', 'A'),
 ('Canon Inc.', 'A'),
 ('Epson Corporation', 'A');
-Add comment Ciudades y departamentos 
 
 INSERT INTO DEPARTAMENTO (DepNom, DepEstReg) VALUES
 ('Lima', 'A'),
@@ -189,104 +154,55 @@ INSERT INTO REGION (DepCod, RegNom, RegEstReg) VALUES
 (4, 'Trujillo Centro', 'A'),
 (4, 'Valle Chicama', 'A');
 
--- Región: Lima Metropolitana (RegCod = 1)
+-- RegCod 9: Lima Metropolitana
 INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
-(1, 'Miraflores', 'A'),
-(1, 'San Isidro', 'A'),
-(1, 'Surco', 'A'),
-(1, 'San Borja', 'A');
+(9, 'Miraflores', 'A'),
+(9, 'San Borja', 'A'),
+(9, 'San Isidro', 'A'),
+(9, 'Surco', 'A');
 
--- Región: Callao (RegCod = 2)
+-- RegCod 10: Callao
 INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
-(2, 'Callao', 'A'),
-(2, 'Bellavista', 'A'),
-(2, 'La Perla', 'A'),
-(2, 'Carmen de La Legua', 'A');
+(10, 'Callao', 'A'),
+(10, 'Bellavista', 'A'),
+(10, 'La Perla', 'A'),
+(10, 'La Punta', 'A');
 
--- Región: Arequipa Norte (RegCod = 3)
+-- RegCod 11: Arequipa Norte
 INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
-(3, 'Cayma', 'A'),
-(3, 'Alto Selva Alegre', 'A'),
-(3, 'Cerro Colorado', 'A');
+(11, 'Cayma', 'A'),
+(11, 'Alto Selva Alegre', 'A'),
+(11, 'Cerro Colorado', 'A');
 
--- Región: Arequipa Sur (RegCod = 4)
+-- RegCod 12: Arequipa Sur
 INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
-(4, 'Socabaya', 'A'),
-(4, 'Paucarpata', 'A'),
-(4, 'Characato', 'A');
+(12, 'Socabaya', 'A'),
+(12, 'Paucarpata', 'A'),
+(12, 'Characato', 'A');
 
--- Región: Cusco Centro (RegCod = 5)
+-- RegCod 13: Cusco Centro
 INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
-(5, 'Cusco', 'A'),
-(5, 'San Jerónimo', 'A'),
-(5, 'Wanchaq', 'A');
+(13, 'Cusco', 'A'),
+(13, 'Wanchaq', 'A'),
+(13, 'San Jerónimo', 'A');
 
--- Región: Cusco Andes (RegCod = 6)
+-- RegCod 14: Cusco Andes
 INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
-(6, 'Anta', 'A'),
-(6, 'Zurite', 'A'),
-(6, 'Limatambo', 'A');
+(14, 'Anta', 'A'),
+(14, 'Calca', 'A'),
+(14, 'Urubamba', 'A');
 
--- Región: Trujillo Centro (RegCod = 7)
+-- RegCod 15: Trujillo Centro
 INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
-(7, 'Trujillo', 'A'),
-(7, 'La Esperanza', 'A'),
-(7, 'Florencia de Mora', 'A');
+(15, 'Trujillo', 'A'),
+(15, 'La Esperanza', 'A'),
+(15, 'Florencia de Mora', 'A');
 
--- Región: Valle Chicama (RegCod = 8)
+-- RegCod 16: Valle Chicama
 INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
-(8, 'Ascope', 'A'),
-(8, 'Casa Grande', 'A'),
-(8, 'Paiján', 'A');
-
-INSERT INTO CIUDADES (RegCod, CiuNom, CiuEstReg) VALUES
--- Lima Metropolitana (RegCod = 17)
-(17, 'Lima', 'A'),
-(17, 'San Isidro', 'A'),
-(17, 'Miraflores', 'A'),
-(17, 'Surco', 'A'),
-
--- Callao (RegCod = 18)
-(18, 'Callao', 'A'),
-(18, 'Bellavista', 'A'),
-(18, 'La Perla', 'A'),
-(18, 'La Punta', 'A'),
-
--- Arequipa Norte (RegCod = 19)
-(19, 'Cayma', 'A'),
-(19, 'Alto Selva Alegre', 'A'),
-(19, 'Yura', 'A'),
-(19, 'Cerro Colorado', 'A'),
-
--- Arequipa Sur (RegCod = 20)
-(20, 'Jose Luis Bustamante y Rivero', 'A'),
-(20, 'Hunter', 'A'),
-(20, 'Paucarpata', 'A'),
-(20, 'Sabandía', 'A'),
-
--- Cusco Centro (RegCod = 21)
-(21, 'Cusco', 'A'),
-(21, 'Wanchaq', 'A'),
-(21, 'San Sebastián', 'A'),
-(21, 'San Jerónimo', 'A'),
-
--- Cusco Andes (RegCod = 22)
-(22, 'Pisac', 'A'),
-(22, 'Calca', 'A'),
-(22, 'Urubamba', 'A'),
-(22, 'Chinchero', 'A'),
-
--- Trujillo Centro (RegCod = 23)
-(23, 'Trujillo', 'A'),
-(23, 'Florencia de Mora', 'A'),
-(23, 'La Esperanza', 'A'),
-(23, 'Víctor Larco Herrera', 'A'),
-
--- Valle Chicama (RegCod = 24)
-(24, 'Ascope', 'A'),
-(24, 'Casa Grande', 'A'),
-(24, 'Paiján', 'A'),
-(24, 'Chicama', 'A');
+(16, 'Ascope', 'A'),
+(16, 'Casa Grande', 'A'),
+(16, 'Paiján', 'A');
 
 
 INSERT INTO CLIENTE 
@@ -418,3 +334,35 @@ INSERT INTO REPORPROD (ReporProdMin, ReporProdMax, ReporProdEstReg, ProdCod) VAL
 (1, 10, 'A', 58),
 (1, 10, 'A', 59),
 (1, 10, 'A', 60);
+
+INSERT INTO FACTURA (CliCod, RepCod, FacFab, Faclmp, FacAño, FacMes, FacDia, FactPlazoPago, FactFechPago, FacEstReg) VALUES
+(2, 3, 'Sony', 3746.52, 2025, 4, 8, '2025-04-27', '2025-05-25', 'A'),
+(68, 1, 'Canon', 571.65, 2025, 7, 2, '2025-07-17', '2025-07-07', 'A'),
+(70, 4, 'Canon', 3069.79, 2025, 9, 7, '2025-10-14', '2025-10-18', 'A'),
+(73, 5, 'Asus', 1219.14, 2025, 10, 9, '2025-11-18', '2025-12-03', 'A'),
+(76, 6, 'Samsung', 3535.98, 2025, 6, 9, '2025-06-28', '2025-06-22', 'A'),
+(79, 7, 'LG', 599.82, 2025, 2, 12, '2025-03-26', '2025-03-06', 'A'),
+(82, 8, 'Sony', 3689.20, 2025, 9, 4, '2025-10-18', '2025-09-28', 'A'),
+(84, 9, 'HP', 4172.61, 2025, 10, 28, '2025-11-23', '2025-12-03', 'A'),
+(86, 10, 'LG', 372.25, 2025, 4, 25, '2025-05-19', '2025-04-30', 'A'),
+(88, 11, 'LG', 1993.61, 2025, 8, 21, '2025-10-01', '2025-09-13', 'A'),
+(90, 12, 'Lenovo', 1166.11, 2025, 5, 23, '2025-07-06', '2025-07-05', 'A'),
+(92, 13, 'Epson', 3229.64, 2025, 9, 24, '2025-10-16', '2025-10-04', 'A'),
+(94, 14, 'HP', 4949.48, 2025, 12, 12, '2026-01-12', '2026-02-02', 'A'),
+(97, 15, 'Acer', 3853.70, 2025, 11, 15, '2025-12-14', '2026-01-06', 'A'),
+(1, 16, 'Asus', 2571.29, 2025, 7, 26, '2025-08-31', '2025-08-14', 'A'),
+(69, 17, 'Lenovo', 1014.99, 2025, 8, 19, '2025-09-12', '2025-10-10', 'A'),
+(72, 18, 'HP', 2833.47, 2025, 3, 4, '2025-04-10', '2025-04-01', 'A'),
+(75, 19, 'LG', 2685.78, 2025, 10, 1, '2025-11-08', '2025-10-14', 'A'),
+(78, 20, 'Epson', 1531.40, 2025, 2, 15, '2025-03-21', '2025-03-17', 'A'),
+(81, 21, 'Canon', 3814.66, 2025, 6, 3, '2025-07-10', '2025-07-28', 'A'),
+(83, 22, 'Acer', 4643.92, 2025, 1, 27, '2025-03-05', '2025-02-21', 'A'),
+(87, 23, 'Epson', 4380.66, 2025, 12, 7, '2026-01-10', '2026-01-22', 'A'),
+(91, 24, 'Sony', 4492.39, 2025, 1, 23, '2025-03-04', '2025-03-05', 'A'),
+(95, 25, 'Samsung', 2017.33, 2025, 3, 10, '2025-04-17', '2025-04-13', 'A'),
+(71, 26, 'Canon', 3137.41, 2025, 7, 17, '2025-08-29', '2025-08-06', 'A'),
+(74, 27, 'Lenovo', 4161.15, 2025, 11, 2, '2025-12-13', '2025-11-27', 'A'),
+(77, 28, 'Samsung', 4372.56, 2025, 6, 1, '2025-07-09', '2025-07-19', 'A'),
+(80, 29, 'HP', 2624.95, 2025, 2, 7, '2025-03-13', '2025-02-21', 'A'),
+(85, 30, 'Dell', 1956.12, 2025, 8, 6, '2025-09-05', '2025-08-17', 'A'),
+(89, 31, 'Epson', 3794.63, 2025, 5, 14, '2025-06-26', '2025-05-25', 'A');

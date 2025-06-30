@@ -5,18 +5,16 @@ public class UsuarioSistema {
     private int repCod;
     private String usuNom;
     private String usuContr;
-    private int rolUsuCod;
     private char usuEstReg;
 
     public UsuarioSistema() {
     }
 
-    public UsuarioSistema(int usuCod, int repCod, String usuNom, String usuContr, int rolUsuCod, char usuEstReg) {
+    public UsuarioSistema(int usuCod, int repCod, String usuNom, String usuContr, char usuEstReg) {
         this.usuCod = usuCod;
         this.repCod = repCod;
         this.usuNom = usuNom;
         this.usuContr = usuContr;
-        this.rolUsuCod = rolUsuCod;
         this.usuEstReg = usuEstReg;
     }
 
@@ -52,14 +50,6 @@ public class UsuarioSistema {
         this.usuContr = usuContr;
     }
 
-    public int getRolUsuCod() {
-        return rolUsuCod;
-    }
-
-    public void setRolUsuCod(int rolUsuCod) {
-        this.rolUsuCod = rolUsuCod;
-    }
-
     public char getUsuEstReg() {
         return usuEstReg;
     }
@@ -75,7 +65,6 @@ public class UsuarioSistema {
                 ", repCod=" + repCod +
                 ", usuNom='" + usuNom + '\'' +
                 ", usuContr='" + usuContr + '\'' +
-                ", rolUsuCod=" + rolUsuCod +
                 ", usuEstReg=" + usuEstReg +
                 '}';
     }
