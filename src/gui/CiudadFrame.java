@@ -24,7 +24,7 @@ public class CiudadFrame extends JFrame{
     private JTable tablaCiudades;
     private DefaultTableModel tableModel;
 
-    private JButton btnAdicionar, btnModificar, btnEliminar, btnInactivar, btnReactivar, btnActualizar, JButton btnCancelar, JButton btnSalir;
+    private JButton btnAdicionar, btnModificar, btnEliminar, btnInactivar, btnReactivar, btnActualizar, btnCancelar, btnSalir;
 
     private CiudadDAO ciudadDAO;
     private RegionDAO regionDAO;
