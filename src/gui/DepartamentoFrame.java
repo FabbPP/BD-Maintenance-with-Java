@@ -276,7 +276,7 @@ public class DepartamentoFrame extends JFrame {
         btnModificar.setEnabled(true);
         btnEliminar.setEnabled(true);
         btnInactivar.setEnabled(true);
-        RegCodRegEstRegctivar.setEnabled(true);
+        btnReactivar.setEnabled(true);
         btnActualizar.setEnabled(false);
         btnCancelar.setEnabled(false);
         btnSalir.setEnabled(true);
