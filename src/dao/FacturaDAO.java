@@ -12,7 +12,7 @@ public class FacturaDAO{
 
     public List<Factura> obtenerTodasFacturas() {
         List<Factura> facturas = new ArrayList<>();
-        String sql = "SELECT FacCod, CliCod, RepCod, FacFab, FacImp, FacAño, FacMes, FacDia, FacPlazoPago, FacFechPago, FacEstReg FROM FACTURA";
+        String sql = "SELECT FacCod, CliCod, RepCod, FacFab, Faclmp, FacAño, FacMes, FacDia, FacPlazoPago, FacFechPago, FacEstReg FROM FACTURA";
         try (Connection conn = ConexionBD.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -23,7 +23,7 @@ public class FacturaDAO{
                      rs.getInt("CliCod"),
                      rs.getInt("RepCod"),
                      rs.getString("FacFab"),
-                     rs.getBigDecimal("FacImp"),
+                     rs.getBigDecimal("Faclmp"),
                      rs.getInt("FacAño"),
                      rs.getInt("FacMes"),
                      rs.getInt("FacDia"),
@@ -40,7 +40,7 @@ public class FacturaDAO{
     }
 
     public Factura obtenerFacturaPorCodigo(int codigo) {
-        String sql = "SELECT FacCod, CliCod, RepCod, FacFab, FacImp, FacAño, FacMes, FacDia, FacPlazoPago, FacFechPago, FacEstReg FROM FACTURA WHERE FacCod = ?";
+        String sql = "SELECT FacCod, CliCod, RepCod, FacFab, Faclmp, FacAño, FacMes, FacDia, FacPlazoPago, FacFechPago, FacEstReg FROM FACTURA WHERE FacCod = ?";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -52,7 +52,7 @@ public class FacturaDAO{
                         rs.getInt("CliCod"),
                         rs.getInt("RepCod"),
                         rs.getString("FacFab"),
-                        rs.getBigDecimal("FacImp"),
+                        rs.getBigDecimal("Faclmp"),
                         rs.getInt("FacAño"),
                         rs.getInt("FacMes"),
                         rs.getInt("FacDia"),
@@ -70,7 +70,7 @@ public class FacturaDAO{
     }
 
     public boolean insertarFactura(Factura factura) {
-        String sql = "INSERT INTO FACTURA (CliCod, RepCod, FacFab, FacImp, FacAño, FacMes, FacDia, FacPlazoPago, FacFechPago, FacEstReg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO FACTURA (CliCod, RepCod, FacFab, Faclmp, FacAño, FacMes, FacDia, FacPlazoPago, FacFechPago, FacEstReg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -101,7 +101,7 @@ public class FacturaDAO{
     }
 
     public boolean actualizarFactura(Factura factura) {
-        String sql = "UPDATE FACTURA SET CliCod = ?, RepCod = ?, FacFab = ?, FacImp = ?, FacAño = ?, FacMes = ?, FacDia = ?, FacPlazoPago = ?, FacFechPago = ?, FacEstReg = ? WHERE FacCod = ?";
+        String sql = "UPDATE FACTURA SET CliCod = ?, RepCod = ?, FacFab = ?, Faclmp = ?, FacAño = ?, FacMes = ?, FacDia = ?, FacPlazoPago = ?, FacFechPago = ?, FacEstReg = ? WHERE FacCod = ?";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
