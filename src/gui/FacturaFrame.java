@@ -129,7 +129,7 @@ public class FacturaFrame extends JFrame{
         gbc.gridx = 1; gbc.gridy = 3; gbc.weightx = 1.0;
         txtEstadoRegistro = new JTextField(1);
         txtEstadoRegistro.setEditable(false);
-        panelRegistro.add(txtEstadoRegistro, gbc)
+        panelRegistro.add(txtEstadoRegistro, gbc);
 
         add(panelRegistro, BorderLayout.NORTH);
 
