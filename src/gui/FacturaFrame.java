@@ -28,6 +28,7 @@ public class FacturaFrame extends JFrame{
     private JTextField txtDia;
     private JTextField txtPlazoPago;
     private JTextField txtFechaPago;
+    private JTextField txtEstadoRegistro;
     private JTable tablaFacturas;
     private DefaultTableModel tableModel;
 
