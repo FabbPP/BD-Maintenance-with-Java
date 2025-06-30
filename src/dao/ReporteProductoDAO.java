@@ -8,14 +8,15 @@ import java.util.List;
 
 public class ReporteProductoDAO {
     public String insertarReporte(ReporteProducto reporteProducto) {
-        String sql = "INSERT INTO REPORPROD (ReporProdMin, ReporProdMax, ReporProdEstReg) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO REPORPROD (ProdCod, ReporProdMin, ReporProdMax, ReporProdEstReg) VALUES (?, ?, ?, ?)";
         
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
-            stmt.setInt(1, reporteProducto.getReporProdMin());
-            stmt.setInt(2, reporteProducto.getReporProdMax());
-            stmt.setString(3, String.valueOf(reporteProducto.getReporProdEstReg()));
+            stmt.setInt(1, reporteProducto.getProdCod());
+            stmt.setInt(2, reporteProducto.getReporProdMin());
+            stmt.setInt(3, reporteProducto.getReporProdMax());
+            stmt.setString(4, String.valueOf(reporteProducto.getReporProdEstReg()));
             
             int rowsAffected = stmt.executeUpdate();
             
@@ -39,6 +40,8 @@ public class ReporteProductoDAO {
                 return "El stock máximo debe ser mayor a 0.";
             } else if (errorMsg.contains("chk_reporte_estreg")) {
                 return "El estado del registro debe ser A, I o *.";
+            } else if (errorMsg.contains("fk_repor_producto")) {
+                return "El código de producto no existe.";
             } else {
                 return "Error al insertar reporte de producto: " + e.getMessage();
             }
@@ -62,6 +65,48 @@ public class ReporteProductoDAO {
             System.err.println("Error al obtener reporte de producto: " + e.getMessage());
         }
         return null;
+    }
+    
+    // Buscar reportes por código de producto
+    public List<ReporteProducto> obtenerReportesPorProducto(int prodCod) {
+        List<ReporteProducto> reportes = new ArrayList<>();
+        String sql = "SELECT * FROM REPORPROD WHERE ProdCod = ? AND ReporProdEstReg = 'A' ORDER BY ReporProdCod";
+        
+        try (Connection conn = ConexionBD.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, prodCod);
+            ResultSet rs = stmt.executeQuery();
+            
+            while (rs.next()) {
+                reportes.add(mapearReporteProducto(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener reportes por producto: " + e.getMessage());
+        }
+        return reportes;
+    }
+    
+    // Listar todos los reportes activos con información del producto
+    public List<ReporteProducto> obtenerTodosReportesConProducto() {
+        List<ReporteProducto> reportes = new ArrayList<>();
+        String sql = "SELECT r.*, p.ProdDes " +
+                    "FROM REPORPROD r " +
+                    "INNER JOIN PRODUCTO p ON r.ProdCod = p.ProdCod " +
+                    "WHERE r.ReporProdEstReg = 'A' " +
+                    "ORDER BY p.ProdDes, r.ReporProdCod";
+        
+        try (Connection conn = ConexionBD.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            while (rs.next()) {
+                reportes.add(mapearReporteProducto(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener todos los reportes con producto: " + e.getMessage());
+        }
+        return reportes;
     }
     
     // Listar todos los reportes activos
@@ -144,15 +189,16 @@ public class ReporteProductoDAO {
     
     // Actualizar reporte de producto
     public String actualizarReporte(ReporteProducto reporteProducto) {
-        String sql = "UPDATE REPORPROD SET ReporProdMin = ?, ReporProdMax = ?, ReporProdEstReg = ? WHERE ReporProdCod = ?";
+        String sql = "UPDATE REPORPROD SET ProdCod = ?, ReporProdMin = ?, ReporProdMax = ?, ReporProdEstReg = ? WHERE ReporProdCod = ?";
         
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setInt(1, reporteProducto.getReporProdMin());
-            stmt.setInt(2, reporteProducto.getReporProdMax());
-            stmt.setString(3, String.valueOf(reporteProducto.getReporProdEstReg()));
-            stmt.setInt(4, reporteProducto.getReporProdCod());
+            stmt.setInt(1, reporteProducto.getProdCod());
+            stmt.setInt(2, reporteProducto.getReporProdMin());
+            stmt.setInt(3, reporteProducto.getReporProdMax());
+            stmt.setString(4, String.valueOf(reporteProducto.getReporProdEstReg()));
+            stmt.setInt(5, reporteProducto.getReporProdCod());
             
             return (stmt.executeUpdate() > 0) ? null : "Error al actualizar reporte de producto.";
         } catch (SQLException e) {
@@ -166,6 +212,8 @@ public class ReporteProductoDAO {
                 return "El stock máximo debe ser mayor a 0.";
             } else if (errorMsg.contains("chk_reporte_estreg")) {
                 return "El estado del registro debe ser A, I o *.";
+            } else if (errorMsg.contains("fk_repor_producto")) {
+                return "El código de producto no existe.";
             } else {
                 return "Error al actualizar reporte de producto: " + e.getMessage();
             }
@@ -249,6 +297,25 @@ public class ReporteProductoDAO {
         return 0;
     }
     
+    // Contar reportes por producto
+    public int contarReportesPorProducto(int prodCod) {
+        String sql = "SELECT COUNT(*) FROM REPORPROD WHERE ProdCod = ? AND ReporProdEstReg = 'A'";
+        
+        try (Connection conn = ConexionBD.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, prodCod);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al contar reportes por producto: " + e.getMessage());
+        }
+        return 0;
+    }
+    
     // Verificar si existe un reporte con el código especificado
     public boolean existeReporte(int reporteProdCod) {
         String sql = "SELECT COUNT(*) FROM REPORPROD WHERE ReporProdCod = ? AND ReporProdEstReg != '*'";
@@ -264,6 +331,25 @@ public class ReporteProductoDAO {
             }
         } catch (SQLException e) {
             System.err.println("Error al verificar existencia del reporte: " + e.getMessage());
+        }
+        return false;
+    }
+    
+    // Verificar si existe un producto
+    public boolean existeProducto(int prodCod) {
+        String sql = "SELECT COUNT(*) FROM PRODUCTO WHERE ProdCod = ? AND ProdEstReg = 'A'";
+        
+        try (Connection conn = ConexionBD.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, prodCod);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al verificar existencia del producto: " + e.getMessage());
         }
         return false;
     }
@@ -292,6 +378,7 @@ public class ReporteProductoDAO {
     private ReporteProducto mapearReporteProducto(ResultSet rs) throws SQLException {
         ReporteProducto reporte = new ReporteProducto();
         reporte.setReporProdCod(rs.getInt("ReporProdCod"));
+        reporte.setProdCod(rs.getInt("ProdCod"));
         reporte.setReporProdMin(rs.getInt("ReporProdMin"));
         reporte.setReporProdMax(rs.getInt("ReporProdMax"));
         reporte.setReporProdEstReg(rs.getString("ReporProdEstReg").charAt(0));

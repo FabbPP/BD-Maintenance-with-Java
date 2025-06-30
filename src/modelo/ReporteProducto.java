@@ -5,13 +5,15 @@ public class ReporteProducto {
     private int reporProdMin;
     private int reporProdMax;
     private char reporProdEstReg;
+    private int prodCod;
     
     // Constructor vacío
     public ReporteProducto() {}
     
     // Constructor principal
-    public ReporteProducto(int reporProdCod, int reporProdMin, int reporProdMax, char reporProdEstReg) {
+    public ReporteProducto(int reporProdCod, int prodCod, int reporProdMin, int reporProdMax, char reporProdEstReg) {
         this.reporProdCod = reporProdCod;
+        this.prodCod = prodCod;
         this.reporProdMin = reporProdMin;
         this.reporProdMax = reporProdMax;
         this.reporProdEstReg = reporProdEstReg;
@@ -24,6 +26,13 @@ public class ReporteProducto {
     
     public void setReporProdCod(int reporProdCod) {
         this.reporProdCod = reporProdCod;
+    }
+    public int getProdCod() {
+        return prodCod;
+    }
+    
+    public void setProdCod(int prodCod) {
+        this.prodCod = prodCod;
     }
     
     public int getReporProdMin() {
@@ -88,6 +97,7 @@ public class ReporteProducto {
     @Override
     public String toString() {
         return "ReporteProducto{" +
+                "prodCod=" + prodCod +
                 "reporProdCod=" + reporProdCod +
                 ", reporProdMin=" + reporProdMin +
                 ", reporProdMax=" + reporProdMax +
