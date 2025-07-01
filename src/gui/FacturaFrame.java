@@ -83,51 +83,51 @@ public class FacturaFrame extends JFrame{
         txtRepresentanteCodigo = new JTextField(10);
         panelRegistro.add(txtRepresentanteCodigo, gbc);
 
-        gbc.gridx = 2; gbc.gridy = 0; gbc.weightx = 0;
+        gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Fabricante:"), gbc);
-        gbc.gridx = 3; gbc.gridy = 0; gbc.weightx = 1.0;
+        gbc.gridx = 1; gbc.gridy = 3; gbc.weightx = 1.0;
         txtFabricante = new JTextField(50);
         panelRegistro.add(txtFabricante, gbc);
 
-        gbc.gridx = 2; gbc.gridy = 1; gbc.weightx = 0;
+        gbc.gridx = 0; gbc.gridy = 4; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Importe Total:"), gbc);
-        gbc.gridx = 3; gbc.gridy = 1; gbc.weightx = 1.0;
+        gbc.gridx = 1; gbc.gridy = 4; gbc.weightx = 1.0;
         txtImporteTotal = new JTextField(15);
         panelRegistro.add(txtImporteTotal, gbc);
 
-        gbc.gridx = 2; gbc.gridy = 2; gbc.weightx = 0;
+        gbc.gridx = 0; gbc.gridy = 5; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Año:"), gbc);
-        gbc.gridx = 3; gbc.gridy = 2; gbc.weightx = 1.0;
+        gbc.gridx = 1; gbc.gridy = 5; gbc.weightx = 1.0;
         txtAño = new JTextField(5);
         panelRegistro.add(txtAño, gbc);
 
-        gbc.gridx = 2; gbc.gridy = 3; gbc.weightx = 0;
+        gbc.gridx = 2; gbc.gridy = 0; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Mes:"), gbc);
-        gbc.gridx = 3; gbc.gridy = 3; gbc.weightx = 1.0;
+        gbc.gridx = 3; gbc.gridy = 0; gbc.weightx = 1.0;
         txtMes = new JTextField(5);
         panelRegistro.add(txtMes, gbc);
 
-        gbc.gridx = 2; gbc.gridy = 4; gbc.weightx = 0;
+        gbc.gridx = 2; gbc.gridy = 1; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Día:"), gbc);
-        gbc.gridx = 3; gbc.gridy = 4; gbc.weightx = 1.0;
+        gbc.gridx = 3; gbc.gridy = 1; gbc.weightx = 1.0;
         txtDia = new JTextField(5);
         panelRegistro.add(txtDia, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 5; gbc.weightx = 0;
+        gbc.gridx = 2; gbc.gridy = 2; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Plazo Pago (AAAA-MM-DD):"), gbc);
-        gbc.gridx = 1; gbc.gridy = 5; gbc.weightx = 1.0;
+        gbc.gridx = 3; gbc.gridy = 2; gbc.weightx = 1.0;
         txtPlazoPago = new JTextField(15);
         panelRegistro.add(txtPlazoPago, gbc);
 
-        gbc.gridx = 2; gbc.gridy = 5; gbc.weightx = 0;
+        gbc.gridx = 2; gbc.gridy = 3; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Fecha Pago (AAAA-MM-DD):"), gbc);
-        gbc.gridx = 3; gbc.gridy = 5; gbc.weightx = 1.0;
+        gbc.gridx = 3; gbc.gridy = 3; gbc.weightx = 1.0;
         txtFechaPago = new JTextField(15);
         panelRegistro.add(txtFechaPago, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0;
+        gbc.gridx = 2; gbc.gridy = 4; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Estado Registro:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 3; gbc.weightx = 1.0;
+        gbc.gridx = 3; gbc.gridy = 4; gbc.weightx = 1.0;
         txtEstadoRegistro = new JTextField(1);
         txtEstadoRegistro.setEditable(false);
         panelRegistro.add(txtEstadoRegistro, gbc);
