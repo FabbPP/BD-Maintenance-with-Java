@@ -93,8 +93,8 @@ public class Factura{
 		return facDia;
 	}
 
-	public void setFacDia(int facDia) {
-		facDia = facDia;
+	public void setFacDia(int dia) {
+		facDia = dia;
 	}
 
 	public Date getFacPlazoPago() {
