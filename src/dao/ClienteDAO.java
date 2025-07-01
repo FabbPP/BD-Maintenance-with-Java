@@ -11,7 +11,7 @@ public class ClienteDAO {
 
     public List<Cliente> obtenerTodosClientes() {
         List<Cliente> clientes = new ArrayList<>();
-        String sql = "SELECT c.CliCod, c.CliEmp, c.RepCod, c.CliLim, c.CliNom, c.CliApePat, c.CliApeMat, " +
+        String sql = "SELECT c.CliCod, c.CliEmp, c.RepCod, c.CliNom, c.CliApePat, c.CliApeMat, " +
                      "c.CiuCod, c.CliDirDetalle, c.CliTel, c.CliCor, c.CatCliCod, c.CliEstReg, " +
                      "r.RepNom as RepresentanteNombre, cc.CatCliDesc as CategoriaDescripcion, " +
                      "ci.CiuNom as CiudadNombre " +
@@ -30,7 +30,6 @@ public class ClienteDAO {
                     rs.getInt("CliCod"),
                     rs.getString("CliEmp"),
                     (Integer) rs.getObject("RepCod"),
-                    rs.getString("CliLim"),
                     rs.getString("CliNom"),
                     rs.getString("CliApePat"),
                     rs.getString("CliApeMat"),
@@ -53,7 +52,7 @@ public class ClienteDAO {
     }
 
     public Cliente obtenerClientePorCodigo(int cliCod) {
-        String sql = "SELECT c.CliCod, c.CliEmp, c.RepCod, c.CliLim, c.CliNom, c.CliApePat, c.CliApeMat, " +
+        String sql = "SELECT c.CliCod, c.CliEmp, c.RepCod, c.CliNom, c.CliApePat, c.CliApeMat, " +
                      "c.CiuCod, c.CliDirDetalle, c.CliTel, c.CliCor, c.CatCliCod, c.CliEstReg, " +
                      "r.RepNom as RepresentanteNombre, cc.CatCliDesc as CategoriaDescripcion, " +
                      "ci.CiuNom as CiudadNombre " +
@@ -74,7 +73,6 @@ public class ClienteDAO {
                     rs.getInt("CliCod"),
                     rs.getString("CliEmp"),
                     (Integer) rs.getObject("RepCod"),
-                    rs.getString("CliLim"),
                     rs.getString("CliNom"),
                     rs.getString("CliApePat"),
                     rs.getString("CliApeMat"),
@@ -96,9 +94,9 @@ public class ClienteDAO {
     }
 
     public String insertarCliente(Cliente cliente) {
-        String sql = "INSERT INTO CLIENTE (CliEmp, RepCod, CliLim, CliNom, CliApePat, CliApeMat, " +
+        String sql = "INSERT INTO CLIENTE (CliEmp, RepCod, CliNom, CliApePat, CliApeMat, " +
                      "CiuCod, CliDirDetalle, CliTel, CliCor, CatCliCod, CliEstReg) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -109,24 +107,23 @@ public class ClienteDAO {
             } else {
                 stmt.setNull(2, Types.INTEGER);
             }
-            stmt.setString(3, cliente.getCliLim());
-            stmt.setString(4, cliente.getCliNom());
-            stmt.setString(5, cliente.getCliApePat());
-            stmt.setString(6, cliente.getCliApeMat());
+            stmt.setString(3, cliente.getCliNom());
+            stmt.setString(4, cliente.getCliApePat());
+            stmt.setString(5, cliente.getCliApeMat());
             if (cliente.getCiuCod() != null) {
-                stmt.setInt(7, cliente.getCiuCod());
+                stmt.setInt(6, cliente.getCiuCod());
             } else {
-                stmt.setNull(7, Types.INTEGER);
+                stmt.setNull(6, Types.INTEGER);
             }
-            stmt.setString(8, cliente.getCliDirDetalle());
+            stmt.setString(7, cliente.getCliDirDetalle());
             if (cliente.getCliTel() != null) {
-                stmt.setLong(9, cliente.getCliTel());
+                stmt.setLong(8, cliente.getCliTel());
             } else {
-                stmt.setNull(9, Types.BIGINT);
+                stmt.setNull(8, Types.BIGINT);
             }
-            stmt.setString(10, cliente.getCliCor());
-            stmt.setInt(11, cliente.getCatCliCod());
-            stmt.setString(12, String.valueOf(cliente.getCliEstReg()));
+            stmt.setString(9, cliente.getCliCor());
+            stmt.setInt(10, cliente.getCatCliCod());
+            stmt.setString(11, String.valueOf(cliente.getCliEstReg()));
             
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -154,7 +151,7 @@ public class ClienteDAO {
     }
 
     public String actualizarCliente(Cliente cliente) {
-        String sql = "UPDATE CLIENTE SET CliEmp = ?, RepCod = ?, CliLim = ?, CliNom = ?, CliApePat = ?, " +
+        String sql = "UPDATE CLIENTE SET CliEmp = ?, RepCod = ?, CliNom = ?, CliApePat = ?, " +
                      "CliApeMat = ?, CiuCod = ?, CliDirDetalle = ?, CliTel = ?, CliCor = ?, " +
                      "CatCliCod = ?, CliEstReg = ? WHERE CliCod = ?";
         
@@ -167,25 +164,24 @@ public class ClienteDAO {
             } else {
                 stmt.setNull(2, Types.INTEGER);
             }
-            stmt.setString(3, cliente.getCliLim());
-            stmt.setString(4, cliente.getCliNom());
-            stmt.setString(5, cliente.getCliApePat());
-            stmt.setString(6, cliente.getCliApeMat());
+            stmt.setString(3, cliente.getCliNom());
+            stmt.setString(4, cliente.getCliApePat());
+            stmt.setString(5, cliente.getCliApeMat());
             if (cliente.getCiuCod() != null) {
-                stmt.setInt(7, cliente.getCiuCod());
+                stmt.setInt(6, cliente.getCiuCod());
             } else {
-                stmt.setNull(7, Types.INTEGER);
+                stmt.setNull(6, Types.INTEGER);
             }
-            stmt.setString(8, cliente.getCliDirDetalle());
+            stmt.setString(7, cliente.getCliDirDetalle());
             if (cliente.getCliTel() != null) {
-                stmt.setLong(9, cliente.getCliTel());
+                stmt.setLong(8, cliente.getCliTel());
             } else {
-                stmt.setNull(9, Types.BIGINT);
+                stmt.setNull(8, Types.BIGINT);
             }
-            stmt.setString(10, cliente.getCliCor());
-            stmt.setInt(11, cliente.getCatCliCod());
-            stmt.setString(12, String.valueOf(cliente.getCliEstReg()));
-            stmt.setInt(13, cliente.getCliCod());
+            stmt.setString(9, cliente.getCliCor());
+            stmt.setInt(10, cliente.getCatCliCod());
+            stmt.setString(11, String.valueOf(cliente.getCliEstReg()));
+            stmt.setInt(12, cliente.getCliCod());
             
             return (stmt.executeUpdate() > 0) ? null : "Error al actualizar cliente.";
         } catch (SQLException e) {
@@ -261,7 +257,7 @@ public class ClienteDAO {
 
     public List<Cliente> obtenerClientesActivos() {
         List<Cliente> clientes = new ArrayList<>();
-        String sql = "SELECT c.CliCod, c.CliEmp, c.RepCod, c.CliLim, c.CliNom, c.CliApePat, c.CliApeMat, " +
+        String sql = "SELECT c.CliCod, c.CliEmp, c.RepCod, c.CliNom, c.CliApePat, c.CliApeMat, " +
                      "c.CiuCod, c.CliDirDetalle, c.CliTel, c.CliCor, c.CatCliCod, c.CliEstReg, " +
                      "r.RepNom as RepresentanteNombre, cc.CatCliDesc as CategoriaDescripcion, " +
                      "ci.CiuNom as CiudadNombre " +
@@ -280,7 +276,6 @@ public class ClienteDAO {
                     rs.getInt("CliCod"),
                     rs.getString("CliEmp"),
                     (Integer) rs.getObject("RepCod"),
-                    rs.getString("CliLim"),
                     rs.getString("CliNom"),
                     rs.getString("CliApePat"),
                     rs.getString("CliApeMat"),
@@ -304,7 +299,7 @@ public class ClienteDAO {
 
     public List<Cliente> buscarClientesPorNombre(String nombre) {
         List<Cliente> clientes = new ArrayList<>();
-        String sql = "SELECT c.CliCod, c.CliEmp, c.RepCod, c.CliLim, c.CliNom, c.CliApePat, c.CliApeMat, " +
+        String sql = "SELECT c.CliCod, c.CliEmp, c.RepCod, c.CliNom, c.CliApePat, c.CliApeMat, " +
                      "c.CiuCod, c.CliDirDetalle, c.CliTel, c.CliCor, c.CatCliCod, c.CliEstReg, " +
                      "r.RepNom as RepresentanteNombre, cc.CatCliDesc as CategoriaDescripcion, " +
                      "ci.CiuNom as CiudadNombre " +
@@ -329,7 +324,6 @@ public class ClienteDAO {
                     rs.getInt("CliCod"),
                     rs.getString("CliEmp"),
                     (Integer) rs.getObject("RepCod"),
-                    rs.getString("CliLim"),
                     rs.getString("CliNom"),
                     rs.getString("CliApePat"),
                     rs.getString("CliApeMat"),
@@ -353,7 +347,7 @@ public class ClienteDAO {
 
     public List<Cliente> buscarClientesPorRepresentante(int repCod) {
         List<Cliente> clientes = new ArrayList<>();
-        String sql = "SELECT c.CliCod, c.CliEmp, c.RepCod, c.CliLim, c.CliNom, c.CliApePat, c.CliApeMat, " +
+        String sql = "SELECT c.CliCod, c.CliEmp, c.RepCod, c.CliNom, c.CliApePat, c.CliApeMat, " +
                      "c.CiuCod, c.CliDirDetalle, c.CliTel, c.CliCor, c.CatCliCod, c.CliEstReg, " +
                      "r.RepNom as RepresentanteNombre, cc.CatCliDesc as CategoriaDescripcion, " +
                      "ci.CiuNom as CiudadNombre " +
@@ -374,7 +368,6 @@ public class ClienteDAO {
                     rs.getInt("CliCod"),
                     rs.getString("CliEmp"),
                     (Integer) rs.getObject("RepCod"),
-                    rs.getString("CliLim"),
                     rs.getString("CliNom"),
                     rs.getString("CliApePat"),
                     rs.getString("CliApeMat"),

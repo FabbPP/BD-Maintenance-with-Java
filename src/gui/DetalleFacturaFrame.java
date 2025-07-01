@@ -1,7 +1,11 @@
 package gui;
 
 import dao.DetalleFacturaDAO;
+import dao.FacturaDAO;
+import dao.ProductoDAO;
 import modelo.DetalleFactura;
+import modelo.Factura;
+import modelo.Producto;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -15,8 +19,8 @@ import java.util.List;
 
 public class DetalleFacturaFrame extends JFrame {
 
-    private JTextField txtFacturaCodigo;
-    private JTextField txtProductoCodigo;
+    private JComboBox<ComboItem> cmbFacturaCodigo;
+    private JComboBox<ComboItem> cmbProductoCodigo;
     private JTextField txtCantidad;
     private JTextField txtPrecioUnitario;
     private JTextField txtSubtotal;
@@ -27,8 +31,43 @@ public class DetalleFacturaFrame extends JFrame {
     private JButton btnAdicionar, btnModificar, btnEliminar, btnInactivar, btnReactivar, btnActualizar, btnCancelar, btnSalir;
 
     private DetalleFacturaDAO detalleFacturaDAO;
+    private FacturaDAO facturaDAO;
+    private ProductoDAO productoDAO;
     private int flagCarFlaAct = 0;
     private String operacionActual = "";
+
+    // Clase interna para items del ComboBox
+    private static class ComboItem {
+        private final int codigo;
+        private final String descripcion;
+
+        public ComboItem(int codigo, String descripcion) {
+            this.codigo = codigo;
+            this.descripcion = descripcion;
+        }
+
+        public int getCodigo() {
+            return codigo;
+        }
+
+        @Override
+        public String toString() {
+            return codigo + " - " + descripcion;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null || getClass() != obj.getClass()) return false;
+            ComboItem that = (ComboItem) obj;
+            return codigo == that.codigo;
+        }
+
+        @Override
+        public int hashCode() {
+            return Integer.hashCode(codigo);
+        }
+    }
 
     public DetalleFacturaFrame() {
         setTitle("Mantenimiento de Detalles de Factura");
@@ -37,7 +76,11 @@ public class DetalleFacturaFrame extends JFrame {
         setLocationRelativeTo(null);
 
         detalleFacturaDAO = new DetalleFacturaDAO();
+        facturaDAO = new FacturaDAO();
+        productoDAO = new ProductoDAO();
+        
         initComponents();
+        cargarComboBoxes();
         cargarTablaDetalles();
         habilitarControles(false);
         habilitarBotonesIniciales();
@@ -56,34 +99,49 @@ public class DetalleFacturaFrame extends JFrame {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // Factura ComboBox
         gbc.gridx = 0; gbc.gridy = 0;
-        panelRegistro.add(new JLabel("Cód. Factura:"), gbc);
+        panelRegistro.add(new JLabel("Factura:"), gbc);
         gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0;
-        txtFacturaCodigo = new JTextField(10);
-        panelRegistro.add(txtFacturaCodigo, gbc);
+        cmbFacturaCodigo = new JComboBox<>();
+        cmbFacturaCodigo.setPreferredSize(new Dimension(300, 25));
+        panelRegistro.add(cmbFacturaCodigo, gbc);
 
+        // Producto ComboBox
         gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
-        panelRegistro.add(new JLabel("Cód. Producto:"), gbc);
+        panelRegistro.add(new JLabel("Producto:"), gbc);
         gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
-        txtProductoCodigo = new JTextField(10);
-        panelRegistro.add(txtProductoCodigo, gbc);
+        cmbProductoCodigo = new JComboBox<>();
+        cmbProductoCodigo.setPreferredSize(new Dimension(300, 25));
+        panelRegistro.add(cmbProductoCodigo, gbc);
+
+        // Listener para actualizar precio cuando se selecciona un producto
+        cmbProductoCodigo.addActionListener(e -> actualizarPrecioUnitario());
 
         gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Cantidad:"), gbc);
         gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 1.0;
         txtCantidad = new JTextField(10);
+        // Listener para calcular subtotal automáticamente
+        txtCantidad.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                calcularSubtotal();
+            }
+        });
         panelRegistro.add(txtCantidad, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Precio Unitario:"), gbc);
         gbc.gridx = 1; gbc.gridy = 3; gbc.weightx = 1.0;
         txtPrecioUnitario = new JTextField(15);
+        txtPrecioUnitario.setEditable(false); // Solo lectura, se obtiene del producto
         panelRegistro.add(txtPrecioUnitario, gbc);
 
         gbc.gridx = 0; gbc.gridy = 4; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Subtotal:"), gbc);
         gbc.gridx = 1; gbc.gridy = 4; gbc.weightx = 1.0;
         txtSubtotal = new JTextField(15);
+        txtSubtotal.setEditable(false); // Solo lectura, se calcula automáticamente
         panelRegistro.add(txtSubtotal, gbc);
 
         gbc.gridx = 0; gbc.gridy = 5; gbc.weightx = 0;
@@ -110,8 +168,8 @@ public class DetalleFacturaFrame extends JFrame {
                 if (operacionActual.isEmpty() && e.getClickCount() == 1) {
                     int i = tablaDetalles.getSelectedRow();
                     if (i != -1) {
-                        txtFacturaCodigo.setText(tableModel.getValueAt(i, 0).toString());
-                        txtProductoCodigo.setText(tableModel.getValueAt(i, 1).toString());
+                        seleccionarEnComboBox(cmbFacturaCodigo, Integer.parseInt(tableModel.getValueAt(i, 0).toString()));
+                        seleccionarEnComboBox(cmbProductoCodigo, Integer.parseInt(tableModel.getValueAt(i, 1).toString()));
                         txtCantidad.setText(tableModel.getValueAt(i, 2).toString());
                         txtPrecioUnitario.setText(tableModel.getValueAt(i, 3).toString());
                         txtSubtotal.setText(tableModel.getValueAt(i, 4).toString());
@@ -150,6 +208,88 @@ public class DetalleFacturaFrame extends JFrame {
         btnSalir.addActionListener(e -> comandoSalir());
     }
 
+    private void cargarComboBoxes() {
+        cargarFacturas();
+        cargarProductos();
+    }
+
+    private void cargarFacturas() {
+        cmbFacturaCodigo.removeAllItems();
+        cmbFacturaCodigo.addItem(new ComboItem(0, "Seleccione una factura"));
+        
+        List<Factura> facturas = facturaDAO.obtenerTodasFacturas();
+        for (Factura factura : facturas) {
+            if (factura.getFacEstReg() == 'A') { // Solo facturas activas
+                String descripcion = String.format("Cliente: %d - Fecha: %d/%d/%d", 
+                    factura.getCliCod(), 
+                    factura.getFacDia(), 
+                    factura.getFacMes(), 
+                    factura.getFacAño());
+                cmbFacturaCodigo.addItem(new ComboItem(factura.getFacCod(), descripcion));
+            }
+        }
+    }
+
+    private void cargarProductos() {
+        cmbProductoCodigo.removeAllItems();
+        cmbProductoCodigo.addItem(new ComboItem(0, "Seleccione un producto"));
+        
+        List<Producto> productos = productoDAO.obtenerTodosProductos();
+        for (Producto producto : productos) {
+            if (producto.getProdEstReg() == 'A' && producto.getProdStock() > 0) { // Solo productos activos con stock
+                String descripcion = String.format("%s - Stock: %d - $%.2f", 
+                    producto.getProdDes(), 
+                    producto.getProdStock(),
+                    producto.getProdPre());
+                cmbProductoCodigo.addItem(new ComboItem(producto.getProdCod(), descripcion));
+            }
+        }
+    }
+
+    private void seleccionarEnComboBox(JComboBox<ComboItem> combo, int codigo) {
+        for (int i = 0; i < combo.getItemCount(); i++) {
+            ComboItem item = combo.getItemAt(i);
+            if (item.getCodigo() == codigo) {
+                combo.setSelectedIndex(i);
+                break;
+            }
+        }
+    }
+
+    private void actualizarPrecioUnitario() {
+        ComboItem selectedItem = (ComboItem) cmbProductoCodigo.getSelectedItem();
+        if (selectedItem != null && selectedItem.getCodigo() != 0) {
+            // Buscar el producto seleccionado para obtener su precio
+            List<Producto> productos = productoDAO.obtenerTodosProductos();
+            for (Producto producto : productos) {
+                if (producto.getProdCod() == selectedItem.getCodigo()) {
+                    txtPrecioUnitario.setText(producto.getProdPre().toString());
+                    calcularSubtotal();
+                    break;
+                }
+            }
+        } else {
+            txtPrecioUnitario.setText("");
+            txtSubtotal.setText("");
+        }
+    }
+
+    private void calcularSubtotal() {
+        try {
+            String cantidadStr = txtCantidad.getText().trim();
+            String precioStr = txtPrecioUnitario.getText().trim();
+            
+            if (!cantidadStr.isEmpty() && !precioStr.isEmpty()) {
+                int cantidad = Integer.parseInt(cantidadStr);
+                BigDecimal precio = new BigDecimal(precioStr);
+                BigDecimal subtotal = precio.multiply(new BigDecimal(cantidad));
+                txtSubtotal.setText(subtotal.toString());
+            }
+        } catch (NumberFormatException ex) {
+            txtSubtotal.setText("");
+        }
+    }
+
     private void comandoAdicionar() {
         limpiarCampos();
         habilitarControles(true);
@@ -157,7 +297,7 @@ public class DetalleFacturaFrame extends JFrame {
         operacionActual = "ADICIONAR";
         flagCarFlaAct = 1;
         habilitarBotonesParaOperacion();
-        txtFacturaCodigo.requestFocusInWindow();
+        cmbFacturaCodigo.requestFocusInWindow();
     }
 
     private void comandoActualizar() {
@@ -167,8 +307,21 @@ public class DetalleFacturaFrame extends JFrame {
         }
 
         try {
-            int facCod = Integer.parseInt(txtFacturaCodigo.getText().trim());
-            int proCod = Integer.parseInt(txtProductoCodigo.getText().trim());
+            ComboItem facturaItem = (ComboItem) cmbFacturaCodigo.getSelectedItem();
+            ComboItem productoItem = (ComboItem) cmbProductoCodigo.getSelectedItem();
+            
+            if (facturaItem == null || facturaItem.getCodigo() == 0) {
+                JOptionPane.showMessageDialog(this, "Debe seleccionar una factura.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            if (productoItem == null || productoItem.getCodigo() == 0) {
+                JOptionPane.showMessageDialog(this, "Debe seleccionar un producto.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int facCod = facturaItem.getCodigo();
+            int proCod = productoItem.getCodigo();
             int cantidad = Integer.parseInt(txtCantidad.getText().trim());
             BigDecimal precioUnitario = new BigDecimal(txtPrecioUnitario.getText().trim());
             BigDecimal subtotal = new BigDecimal(txtSubtotal.getText().trim());
@@ -237,7 +390,7 @@ public class DetalleFacturaFrame extends JFrame {
             }
 
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Error de formato numérico. Asegúrese de que los campos de Cantidad, Precio Unitario y Subtotal contengan valores válidos.", "Error de Entrada", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error de formato numérico. Asegúrese de que los campos de Cantidad contengan valores válidos.", "Error de Entrada", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error inesperado al actualizar: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
@@ -276,17 +429,17 @@ public class DetalleFacturaFrame extends JFrame {
     }
 
     private void habilitarControles(boolean b) {
-        txtFacturaCodigo.setEditable(b);
-        txtProductoCodigo.setEditable(b);
+        cmbFacturaCodigo.setEnabled(b);
+        cmbProductoCodigo.setEnabled(b);
         txtCantidad.setEditable(b);
-        txtPrecioUnitario.setEditable(b);
-        txtSubtotal.setEditable(b);
-        txtEstadoRegistro.setEditable(false);
+        txtPrecioUnitario.setEditable(false); // Siempre solo lectura
+        txtSubtotal.setEditable(false); // Siempre solo lectura
+        txtEstadoRegistro.setEditable(false); // Siempre solo lectura
     }
 
     private void limpiarCampos() {
-        txtFacturaCodigo.setText("");
-        txtProductoCodigo.setText("");
+        cmbFacturaCodigo.setSelectedIndex(0);
+        cmbProductoCodigo.setSelectedIndex(0);
         txtCantidad.setText("");
         txtPrecioUnitario.setText("");
         txtSubtotal.setText("");
@@ -333,8 +486,8 @@ public class DetalleFacturaFrame extends JFrame {
             return;
         }
         habilitarControles(true);
-        txtFacturaCodigo.setEditable(false);
-        txtProductoCodigo.setEditable(false);
+        cmbFacturaCodigo.setEnabled(false); // No se puede cambiar la factura al modificar
+        cmbProductoCodigo.setEnabled(false); // No se puede cambiar el producto al modificar
         operacionActual = "MODIFICAR";
         flagCarFlaAct = 1;
         habilitarBotonesParaOperacion();
@@ -347,8 +500,8 @@ public class DetalleFacturaFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Seleccione un registro de la tabla para eliminar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        txtFacturaCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
-        txtProductoCodigo.setText(tableModel.getValueAt(selectedRow, 1).toString());
+        seleccionarEnComboBox(cmbFacturaCodigo, Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString()));
+        seleccionarEnComboBox(cmbProductoCodigo, Integer.parseInt(tableModel.getValueAt(selectedRow, 1).toString()));
         txtCantidad.setText(tableModel.getValueAt(selectedRow, 2).toString());
         txtPrecioUnitario.setText(tableModel.getValueAt(selectedRow, 3).toString());
         txtSubtotal.setText(tableModel.getValueAt(selectedRow, 4).toString());
@@ -366,8 +519,8 @@ public class DetalleFacturaFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Seleccione un registro de la tabla para inactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        txtFacturaCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
-        txtProductoCodigo.setText(tableModel.getValueAt(selectedRow, 1).toString());
+        seleccionarEnComboBox(cmbFacturaCodigo, Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString()));
+        seleccionarEnComboBox(cmbProductoCodigo, Integer.parseInt(tableModel.getValueAt(selectedRow, 1).toString()));
         txtCantidad.setText(tableModel.getValueAt(selectedRow, 2).toString());
         txtPrecioUnitario.setText(tableModel.getValueAt(selectedRow, 3).toString());
         txtSubtotal.setText(tableModel.getValueAt(selectedRow, 4).toString());
@@ -385,8 +538,8 @@ public class DetalleFacturaFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Seleccione un registro de la tabla para reactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        txtFacturaCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
-        txtProductoCodigo.setText(tableModel.getValueAt(selectedRow, 1).toString());
+        seleccionarEnComboBox(cmbFacturaCodigo, Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString()));
+        seleccionarEnComboBox(cmbProductoCodigo, Integer.parseInt(tableModel.getValueAt(selectedRow, 1).toString()));
         txtCantidad.setText(tableModel.getValueAt(selectedRow, 2).toString());
         txtPrecioUnitario.setText(tableModel.getValueAt(selectedRow, 3).toString());
         txtSubtotal.setText(tableModel.getValueAt(selectedRow, 4).toString());

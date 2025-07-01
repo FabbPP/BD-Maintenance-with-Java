@@ -20,7 +20,6 @@ public class ClienteFrame extends JFrame {
     private JTextField txtCodigo;
     private JTextField txtEmpresa;
     private JComboBox<ComboItem> cbRepresentante;
-    private JTextField txtLimite;
     private JTextField txtNombre;
     private JTextField txtApellidoPaterno;
     private JTextField txtApellidoMaterno;
@@ -120,12 +119,6 @@ public class ClienteFrame extends JFrame {
         cbRepresentante = new JComboBox<>();
         cbRepresentante.setPreferredSize(new Dimension(200, cbRepresentante.getPreferredSize().height));
         panelRegistro.add(cbRepresentante, gbc);
-
-        gbc.gridx = 2; gbc.gridy = 1; gbc.weightx = 0;
-        panelRegistro.add(new JLabel("Límite:"), gbc);
-        gbc.gridx = 3; gbc.weightx = 1.0;
-        txtLimite = new JTextField(15);
-        panelRegistro.add(txtLimite, gbc);
 
         // Tercera fila - Nombre y Apellido Paterno
         gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0;
@@ -388,8 +381,6 @@ public class ClienteFrame extends JFrame {
         if (repSeleccionado != null && repSeleccionado.getCodigo() > 0) {
             cliente.setRepCod(repSeleccionado.getCodigo());
         }
-        
-        cliente.setCliLim(txtLimite.getText().trim());
         cliente.setCliNom(nombre);
         cliente.setCliApePat(apellidoPaterno);
         cliente.setCliApeMat(txtApellidoMaterno.getText().trim());
@@ -490,7 +481,6 @@ public class ClienteFrame extends JFrame {
                 c.getCliCod(),
                 c.getCliEmp(),
                 c.getRepCod(),
-                c.getCliLim(),
                 c.getCliNom(),
                 c.getCliApePat(),
                 c.getCliApeMat(),
@@ -509,7 +499,6 @@ public class ClienteFrame extends JFrame {
     private void habilitarControles(boolean b) {
         txtEmpresa.setEditable(b);
         cbRepresentante.setEnabled(b);
-        txtLimite.setEditable(b);
         txtNombre.setEditable(b);
         txtApellidoPaterno.setEditable(b);
         txtApellidoMaterno.setEditable(b);
@@ -524,7 +513,6 @@ public class ClienteFrame extends JFrame {
         txtCodigo.setText("");
         txtEmpresa.setText("");
         cbRepresentante.setSelectedIndex(0);
-        txtLimite.setText("");
         txtNombre.setText("");
         txtApellidoPaterno.setText("");
         txtApellidoMaterno.setText("");
@@ -663,7 +651,7 @@ public class ClienteFrame extends JFrame {
             tableModel.setRowCount(0);
             for (Cliente c : lista) {
                 tableModel.addRow(new Object[]{
-                    c.getCliCod(), c.getCliEmp(), c.getRepCod(), c.getCliLim(), c.getCliNom(),
+                    c.getCliCod(), c.getCliEmp(), c.getRepCod(), c.getCliNom(),
                     c.getCliApePat(), c.getCliApeMat(), c.getCiuCod(), c.getCliTel(), c.getCliCor(),
                     c.getCatCliCod(), c.getCliEstReg(), c.getRepresentanteNombre(),
                     c.getCategoriaDescripcion(), c.getCiudadNombre()
@@ -681,7 +669,7 @@ public class ClienteFrame extends JFrame {
             tableModel.setRowCount(0);
             for (Cliente c : lista) {
                 tableModel.addRow(new Object[]{
-                    c.getCliCod(), c.getCliEmp(), c.getRepCod(), c.getCliLim(), c.getCliNom(),
+                    c.getCliCod(), c.getCliEmp(), c.getRepCod(), c.getCliNom(),
                     c.getCliApePat(), c.getCliApeMat(), c.getCiuCod(), c.getCliTel(), c.getCliCor(),
                     c.getCatCliCod(), c.getCliEstReg(), c.getRepresentanteNombre(),
                     c.getCategoriaDescripcion(), c.getCiudadNombre()
@@ -699,7 +687,7 @@ public class ClienteFrame extends JFrame {
         tableModel.setRowCount(0);
         for (Cliente c : lista) {
             tableModel.addRow(new Object[]{
-                c.getCliCod(), c.getCliEmp(), c.getRepCod(), c.getCliLim(), c.getCliNom(),
+                c.getCliCod(), c.getCliEmp(), c.getRepCod(), c.getCliNom(),
                 c.getCliApePat(), c.getCliApeMat(), c.getCiuCod(), c.getCliTel(), c.getCliCor(),
                 c.getCatCliCod(), c.getCliEstReg(), c.getRepresentanteNombre(),
                 c.getCategoriaDescripcion(), c.getCiudadNombre()
@@ -715,14 +703,13 @@ public class ClienteFrame extends JFrame {
         txtCodigo.setText(tableModel.getValueAt(rowIndex, 0).toString());
         txtEmpresa.setText((String) tableModel.getValueAt(rowIndex, 1));
         seleccionarEnComboBoxPorCodigo(cbRepresentante, (Integer) tableModel.getValueAt(rowIndex, 2));
-        txtLimite.setText((String) tableModel.getValueAt(rowIndex, 3));
-        txtNombre.setText((String) tableModel.getValueAt(rowIndex, 4));
-        txtApellidoPaterno.setText((String) tableModel.getValueAt(rowIndex, 5));
-        txtApellidoMaterno.setText((String) tableModel.getValueAt(rowIndex, 6));
-        seleccionarEnComboBoxPorCodigo(cbCiudad, (Integer) tableModel.getValueAt(rowIndex, 7));
-        txtTelefono.setText(tableModel.getValueAt(rowIndex, 8) != null ? tableModel.getValueAt(rowIndex, 8).toString() : "");
-        txtCorreo.setText((String) tableModel.getValueAt(rowIndex, 9));
-        seleccionarEnComboBoxPorCodigo(cbCategoria, (Integer) tableModel.getValueAt(rowIndex, 10));
-        txtEstadoRegistro.setText(tableModel.getValueAt(rowIndex, 11).toString());
+        txtNombre.setText((String) tableModel.getValueAt(rowIndex, 3));
+        txtApellidoPaterno.setText((String) tableModel.getValueAt(rowIndex, 4));
+        txtApellidoMaterno.setText((String) tableModel.getValueAt(rowIndex, 5));
+        seleccionarEnComboBoxPorCodigo(cbCiudad, (Integer) tableModel.getValueAt(rowIndex, 6));
+        txtTelefono.setText(tableModel.getValueAt(rowIndex, 8) != null ? tableModel.getValueAt(rowIndex, 7).toString() : "");
+        txtCorreo.setText((String) tableModel.getValueAt(rowIndex, 8));
+        seleccionarEnComboBoxPorCodigo(cbCategoria, (Integer) tableModel.getValueAt(rowIndex, 9));
+        txtEstadoRegistro.setText(tableModel.getValueAt(rowIndex, 10).toString());
     }
 }

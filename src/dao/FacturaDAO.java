@@ -12,7 +12,7 @@ public class FacturaDAO{
 
     public List<Factura> obtenerTodasFacturas() {
         List<Factura> facturas = new ArrayList<>();
-        String sql = "SELECT FacCod, CliCod, RepCod, FacFab, Faclmp, FacAño, FacMes, FacDia, FactPlazoPago, FactFechPago, FacEstReg FROM FACTURA";
+        String sql = "SELECT FacCod, CliCod, RepCod, Faclmp, FacAño, FacMes, FacDia, FactPlazoPago, FactFechPago, FacEstReg FROM FACTURA";
         try (Connection conn = ConexionBD.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -22,7 +22,6 @@ public class FacturaDAO{
                      rs.getInt("FacCod"),
                      rs.getInt("CliCod"),
                      rs.getInt("RepCod"),
-                     rs.getString("FacFab"),
                      rs.getBigDecimal("Faclmp"),
                      rs.getInt("FacAño"),
                      rs.getInt("FacMes"),
@@ -40,7 +39,7 @@ public class FacturaDAO{
     }
 
     public Factura obtenerFacturaPorCodigo(int codigo) {
-        String sql = "SELECT FacCod, CliCod, RepCod, FacFab, Faclmp, FacAño, FacMes, FacDia, FactPlazoPago, FactFechPago, FacEstReg FROM FACTURA WHERE FacCod = ?";
+        String sql = "SELECT FacCod, CliCod, RepCod, Faclmp, FacAño, FacMes, FacDia, FactPlazoPago, FactFechPago, FacEstReg FROM FACTURA WHERE FacCod = ?";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -51,7 +50,6 @@ public class FacturaDAO{
                         rs.getInt("FacCod"),
                         rs.getInt("CliCod"),
                         rs.getInt("RepCod"),
-                        rs.getString("FacFab"),
                         rs.getBigDecimal("Faclmp"),
                         rs.getInt("FacAño"),
                         rs.getInt("FacMes"),
@@ -70,20 +68,19 @@ public class FacturaDAO{
     }
 
     public boolean insertarFactura(Factura factura) {
-        String sql = "INSERT INTO FACTURA (CliCod, RepCod, FacFab, Faclmp, FacAño, FacMes, FacDia, FactPlazoPago, FactFechPago, FacEstReg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO FACTURA (CliCod, RepCod, Faclmp, FacAño, FacMes, FacDia, FactPlazoPago, FactFechPago, FacEstReg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setInt(1, factura.getCliCod());
             pstmt.setInt(2, factura.getRepCod());
-            pstmt.setString(3, factura.getFacFab());
-            pstmt.setBigDecimal(4, factura.getFacImp());
-            pstmt.setInt(5, factura.getFacAño());
-            pstmt.setInt(6, factura.getFacMes());
-            pstmt.setInt(7, factura.getFacDia());
-            pstmt.setDate(8, factura.getFacPlazoPago());
-            pstmt.setDate(9, factura.getFacFechPago());
-            pstmt.setString(10, String.valueOf(factura.getFacEstReg()));
+            pstmt.setBigDecimal(3, factura.getFacImp());
+            pstmt.setInt(4, factura.getFacAño());
+            pstmt.setInt(5, factura.getFacMes());
+            pstmt.setInt(6, factura.getFacDia());
+            pstmt.setDate(7, factura.getFacPlazoPago());
+            pstmt.setDate(8, factura.getFacFechPago());
+            pstmt.setString(9, String.valueOf(factura.getFacEstReg()));
 
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -101,21 +98,20 @@ public class FacturaDAO{
     }
 
     public boolean actualizarFactura(Factura factura) {
-        String sql = "UPDATE FACTURA SET CliCod = ?, RepCod = ?, FacFab = ?, Faclmp = ?, FacAño = ?, FacMes = ?, FacDia = ?, FactPlazoPago = ?, FactFechPago = ?, FacEstReg = ? WHERE FacCod = ?";
+        String sql = "UPDATE FACTURA SET CliCod = ?, RepCod = ?, Faclmp = ?, FacAño = ?, FacMes = ?, FacDia = ?, FactPlazoPago = ?, FactFechPago = ?, FacEstReg = ? WHERE FacCod = ?";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, factura.getCliCod());
             pstmt.setInt(2, factura.getRepCod());
-            pstmt.setString(3, factura.getFacFab());
-            pstmt.setBigDecimal(4, factura.getFacImp());
-            pstmt.setInt(5, factura.getFacAño());
-            pstmt.setInt(6, factura.getFacMes());
-            pstmt.setInt(7, factura.getFacDia());
-            pstmt.setDate(8, factura.getFacPlazoPago());
-            pstmt.setDate(9, factura.getFacFechPago());
-            pstmt.setString(10, String.valueOf(factura.getFacEstReg()));
-            pstmt.setInt(11, factura.getFacCod());
+            pstmt.setBigDecimal(3, factura.getFacImp());
+            pstmt.setInt(4, factura.getFacAño());
+            pstmt.setInt(5, factura.getFacMes());
+            pstmt.setInt(6, factura.getFacDia());
+            pstmt.setDate(7, factura.getFacPlazoPago());
+            pstmt.setDate(8, factura.getFacFechPago());
+            pstmt.setString(9, String.valueOf(factura.getFacEstReg()));
+            pstmt.setInt(10, factura.getFacCod());
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error al actualizar factura: " + e.getMessage());

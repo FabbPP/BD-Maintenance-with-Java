@@ -1,7 +1,11 @@
 package gui;
 
 import dao.FacturaDAO;
+import dao.ClienteDAO;
+import dao.RepVentaDAO;
 import modelo.Factura;
+import modelo.Cliente;
+import modelo.RepVenta;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -19,9 +23,8 @@ import java.util.List;
 public class FacturaFrame extends JFrame{
 
     private JTextField txtCodigo;
-    private JTextField txtClienteCodigo;
-    private JTextField txtRepresentanteCodigo;
-    private JTextField txtFabricante;
+    private JComboBox<String> cmbCliente;
+    private JComboBox<String> cmbRepresentante;
     private JTextField txtImporteTotal;
     private JTextField txtAño;
     private JTextField txtMes;
@@ -35,6 +38,11 @@ public class FacturaFrame extends JFrame{
     private JButton btnAdicionar, btnModificar, btnEliminar, btnInactivar, btnReactivar, btnActualizar, btnCancelar, btnSalir;
 
     private FacturaDAO facturaDAO;
+    private ClienteDAO clienteDAO;
+    private RepVentaDAO repVentaDAO;
+    private List<Cliente> listaClientes;
+    private List<RepVenta> listaRepresentantes;
+    
     private int flagCarFlaAct = 0;
     private String operacionActual = "";
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -46,7 +54,11 @@ public class FacturaFrame extends JFrame{
         setLocationRelativeTo(null);
 
         facturaDAO = new FacturaDAO();
+        clienteDAO = new ClienteDAO();
+        repVentaDAO = new RepVentaDAO();
+        
         initComponents();
+        cargarDatosComboBox();
         cargarTablaFacturas();
         habilitarControles(false);
         habilitarBotonesIniciales();
@@ -72,32 +84,28 @@ public class FacturaFrame extends JFrame{
         panelRegistro.add(txtCodigo, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
-        panelRegistro.add(new JLabel("Cód. Cliente:"), gbc);
+        panelRegistro.add(new JLabel("Cliente:"), gbc);
         gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
-        txtClienteCodigo = new JTextField(10);
-        panelRegistro.add(txtClienteCodigo, gbc);
+        cmbCliente = new JComboBox<>();
+        cmbCliente.setPreferredSize(new Dimension(300, 25));
+        panelRegistro.add(cmbCliente, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0;
-        panelRegistro.add(new JLabel("Cód. Representante:"), gbc);
+        panelRegistro.add(new JLabel("Representante:"), gbc);
         gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 1.0;
-        txtRepresentanteCodigo = new JTextField(10);
-        panelRegistro.add(txtRepresentanteCodigo, gbc);
+        cmbRepresentante = new JComboBox<>();
+        cmbRepresentante.setPreferredSize(new Dimension(300, 25));
+        panelRegistro.add(cmbRepresentante, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0;
-        panelRegistro.add(new JLabel("Fabricante:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 3; gbc.weightx = 1.0;
-        txtFabricante = new JTextField(50);
-        panelRegistro.add(txtFabricante, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 4; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Importe Total:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 4; gbc.weightx = 1.0;
+        gbc.gridx = 1; gbc.gridy = 3; gbc.weightx = 1.0;
         txtImporteTotal = new JTextField(15);
         panelRegistro.add(txtImporteTotal, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 5; gbc.weightx = 0;
+        gbc.gridx = 0; gbc.gridy = 4; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Año:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 5; gbc.weightx = 1.0;
+        gbc.gridx = 1; gbc.gridy = 4; gbc.weightx = 1.0;
         txtAño = new JTextField(5);
         panelRegistro.add(txtAño, gbc);
 
@@ -136,7 +144,7 @@ public class FacturaFrame extends JFrame{
 
         JPanel panelTabla = new JPanel(new BorderLayout());
         panelTabla.setBorder(BorderFactory.createTitledBorder("Facturas"));
-        tableModel = new DefaultTableModel(new Object[]{"Cód. Factura", "Cód. Cliente", "Cód. Rep.", "Fabricante", "Importe", "Año", "Mes", "Día", "Plazo Pago", "Fecha Pago", "Estado"}, 0) {
+        tableModel = new DefaultTableModel(new Object[]{"Cód. Factura", "Cliente", "Representante", "Importe", "Año", "Mes", "Día", "Plazo Pago", "Fecha Pago", "Estado"}, 0) {
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
@@ -150,16 +158,32 @@ public class FacturaFrame extends JFrame{
                     int i = tablaFacturas.getSelectedRow();
                     if (i != -1) {
                         txtCodigo.setText(tableModel.getValueAt(i, 0).toString());
-                        txtClienteCodigo.setText(tableModel.getValueAt(i, 1).toString());
-                        txtRepresentanteCodigo.setText(tableModel.getValueAt(i, 2).toString());
-                        txtFabricante.setText(tableModel.getValueAt(i, 3).toString());
-                        txtImporteTotal.setText(tableModel.getValueAt(i, 4).toString());
-                        txtAño.setText(tableModel.getValueAt(i, 5).toString());
-                        txtMes.setText(tableModel.getValueAt(i, 6).toString());
-                        txtDia.setText(tableModel.getValueAt(i, 7).toString());
-                        txtPlazoPago.setText(tableModel.getValueAt(i, 8) != null ? dateFormat.format((Date) tableModel.getValueAt(i, 8)) : "");
-                        txtFechaPago.setText(tableModel.getValueAt(i, 9) != null ? dateFormat.format((Date) tableModel.getValueAt(i, 9)) : "");
-                        txtEstadoRegistro.setText(tableModel.getValueAt(i, 10).toString());
+                        
+                        // Buscar y seleccionar cliente en el combo
+                        String clienteNombre = tableModel.getValueAt(i, 1).toString();
+                        for (int j = 0; j < cmbCliente.getItemCount(); j++) {
+                            if (cmbCliente.getItemAt(j).equals(clienteNombre)) {
+                                cmbCliente.setSelectedIndex(j);
+                                break;
+                            }
+                        }
+                        
+                        // Buscar y seleccionar representante en el combo
+                        String repNombre = tableModel.getValueAt(i, 2).toString();
+                        for (int j = 0; j < cmbRepresentante.getItemCount(); j++) {
+                            if (cmbRepresentante.getItemAt(j).equals(repNombre)) {
+                                cmbRepresentante.setSelectedIndex(j);
+                                break;
+                            }
+                        }
+                        
+                        txtImporteTotal.setText(tableModel.getValueAt(i, 3).toString());
+                        txtAño.setText(tableModel.getValueAt(i, 4).toString());
+                        txtMes.setText(tableModel.getValueAt(i, 5).toString());
+                        txtDia.setText(tableModel.getValueAt(i, 6).toString());
+                        txtPlazoPago.setText(tableModel.getValueAt(i, 7) != null ? dateFormat.format((Date) tableModel.getValueAt(i, 7)) : "");
+                        txtFechaPago.setText(tableModel.getValueAt(i, 8) != null ? dateFormat.format((Date) tableModel.getValueAt(i, 8)) : "");
+                        txtEstadoRegistro.setText(tableModel.getValueAt(i, 9).toString());
                         habilitarBotonesParaSeleccion();
                     }
                 }
@@ -194,6 +218,36 @@ public class FacturaFrame extends JFrame{
         btnSalir.addActionListener(e -> comandoSalir());
     }
 
+    private void cargarDatosComboBox() {
+        // Cargar clientes activos
+        listaClientes = clienteDAO.obtenerClientesActivos();
+        cmbCliente.removeAllItems();
+        cmbCliente.addItem("Seleccionar Cliente...");
+        for (Cliente cliente : listaClientes) {
+            cmbCliente.addItem(cliente.getCliNom() + " " + cliente.getCliApePat() + " " + cliente.getCliApeMat() + " (Cod: " + cliente.getCliCod() + ")");
+        }
+        
+        // Cargar todos los representantes
+        listaRepresentantes = repVentaDAO.obtenerTodosRepresentantes();
+        cmbRepresentante.removeAllItems();
+        cmbRepresentante.addItem("Seleccionar Representante...");
+        for (RepVenta rep : listaRepresentantes) {
+            cmbRepresentante.addItem(rep.getRepNom() + " (Cod: " + rep.getRepCod() + ")");
+        }
+    }
+
+    private int obtenerCodigoClienteSeleccionado() {
+        int index = cmbCliente.getSelectedIndex();
+        if (index <= 0) return -1;
+        return listaClientes.get(index - 1).getCliCod();
+    }
+
+    private int obtenerCodigoRepresentanteSeleccionado() {
+        int index = cmbRepresentante.getSelectedIndex();
+        if (index <= 0) return -1;
+        return listaRepresentantes.get(index - 1).getRepCod();
+    }
+
     private void comandoAdicionar() {
         limpiarCampos();
         habilitarControles(true);
@@ -201,7 +255,7 @@ public class FacturaFrame extends JFrame{
         operacionActual = "ADICIONAR";
         flagCarFlaAct = 1;
         habilitarBotonesParaOperacion();
-        txtClienteCodigo.requestFocusInWindow();
+        cmbCliente.requestFocusInWindow();
     }
 
     private void comandoActualizar() {
@@ -211,9 +265,19 @@ public class FacturaFrame extends JFrame{
         }
 
         try {
-            int cliCod = Integer.parseInt(txtClienteCodigo.getText().trim());
-            int repCod = Integer.parseInt(txtRepresentanteCodigo.getText().trim());
-            String fab = txtFabricante.getText().trim();
+            int cliCod = obtenerCodigoClienteSeleccionado();
+            int repCod = obtenerCodigoRepresentanteSeleccionado();
+            
+            if (cliCod == -1) {
+                JOptionPane.showMessageDialog(this, "Debe seleccionar un cliente.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            if (repCod == -1) {
+                JOptionPane.showMessageDialog(this, "Debe seleccionar un representante.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
             BigDecimal importe = new BigDecimal(txtImporteTotal.getText().trim());
             int año = Integer.parseInt(txtAño.getText().trim());
             int mes = Integer.parseInt(txtMes.getText().trim());
@@ -246,7 +310,6 @@ public class FacturaFrame extends JFrame{
             Factura factura = new Factura();
             factura.setCliCod(cliCod);
             factura.setRepCod(repCod);
-            factura.setFacFab(fab);
             factura.setFacImp(importe);
             factura.setFacAño(año);
             factura.setFacMes(mes);
@@ -333,11 +396,28 @@ public class FacturaFrame extends JFrame{
         tableModel.setRowCount(0);
         List<Factura> facturas = facturaDAO.obtenerTodasFacturas();
         for (Factura fac : facturas) {
+            // Buscar nombre del cliente
+            String nombreCliente = "Cliente no encontrado";
+            for (Cliente cliente : listaClientes) {
+                if (cliente.getCliCod() == fac.getCliCod()) {
+                    nombreCliente = cliente.getCliNom() + " " + cliente.getCliApePat() + " " + cliente.getCliApeMat();
+                    break;
+                }
+            }
+            
+            // Buscar nombre del representante
+            String nombreRepresentante = "Representante no encontrado";
+            for (RepVenta rep : listaRepresentantes) {
+                if (rep.getRepCod() == fac.getRepCod()) {
+                    nombreRepresentante = rep.getRepNom();
+                    break;
+                }
+            }
+            
             tableModel.addRow(new Object[]{
                 fac.getFacCod(),
-                fac.getCliCod(),
-                fac.getRepCod(),
-                fac.getFacFab(),
+                nombreCliente,
+                nombreRepresentante,
                 fac.getFacImp(),
                 fac.getFacAño(),
                 fac.getFacMes(),
@@ -351,9 +431,8 @@ public class FacturaFrame extends JFrame{
 
     private void habilitarControles(boolean b) {
         txtCodigo.setEditable(false);
-        txtClienteCodigo.setEditable(b);
-        txtRepresentanteCodigo.setEditable(b);
-        txtFabricante.setEditable(b);
+        cmbCliente.setEnabled(b);
+        cmbRepresentante.setEnabled(b);
         txtImporteTotal.setEditable(b);
         txtAño.setEditable(b);
         txtMes.setEditable(b);
@@ -365,9 +444,8 @@ public class FacturaFrame extends JFrame{
 
     private void limpiarCampos() {
         txtCodigo.setText("");
-        txtClienteCodigo.setText("");
-        txtRepresentanteCodigo.setText("");
-        txtFabricante.setText("");
+        cmbCliente.setSelectedIndex(0);
+        cmbRepresentante.setSelectedIndex(0);
         txtImporteTotal.setText("");
         txtAño.setText("");
         txtMes.setText("");
@@ -422,7 +500,7 @@ public class FacturaFrame extends JFrame{
         operacionActual = "MODIFICAR";
         flagCarFlaAct = 1;
         habilitarBotonesParaOperacion();
-        txtClienteCodigo.requestFocusInWindow();
+        cmbCliente.requestFocusInWindow();
     }
 
     private void comandoEliminar() {
@@ -431,16 +509,8 @@ public class FacturaFrame extends JFrame{
             JOptionPane.showMessageDialog(this, "Seleccione un registro de la tabla para eliminar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        txtCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
-        txtClienteCodigo.setText(tableModel.getValueAt(selectedRow, 1).toString());
-        txtRepresentanteCodigo.setText(tableModel.getValueAt(selectedRow, 2).toString());
-        txtFabricante.setText(tableModel.getValueAt(selectedRow, 3).toString());
-        txtImporteTotal.setText(tableModel.getValueAt(selectedRow, 4).toString());
-        txtAño.setText(tableModel.getValueAt(selectedRow, 5).toString());
-        txtMes.setText(tableModel.getValueAt(selectedRow, 6).toString());
-        txtDia.setText(tableModel.getValueAt(selectedRow, 7).toString());
-        txtPlazoPago.setText(tableModel.getValueAt(selectedRow, 8) != null ? dateFormat.format((Date) tableModel.getValueAt(selectedRow, 8)) : "");
-        txtFechaPago.setText(tableModel.getValueAt(selectedRow, 9) != null ? dateFormat.format((Date) tableModel.getValueAt(selectedRow, 9)) : "");
+        
+        cargarDatosDeFilaSeleccionada(selectedRow);
         txtEstadoRegistro.setText("*");
         habilitarControles(false);
         operacionActual = "ELIMINAR";
@@ -455,16 +525,8 @@ public class FacturaFrame extends JFrame{
             JOptionPane.showMessageDialog(this, "Seleccione un registro de la tabla para inactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        txtCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
-        txtClienteCodigo.setText(tableModel.getValueAt(selectedRow, 1).toString());
-        txtRepresentanteCodigo.setText(tableModel.getValueAt(selectedRow, 2).toString());
-        txtFabricante.setText(tableModel.getValueAt(selectedRow, 3).toString());
-        txtImporteTotal.setText(tableModel.getValueAt(selectedRow, 4).toString());
-        txtAño.setText(tableModel.getValueAt(selectedRow, 5).toString());
-        txtMes.setText(tableModel.getValueAt(selectedRow, 6).toString());
-        txtDia.setText(tableModel.getValueAt(selectedRow, 7).toString());
-        txtPlazoPago.setText(tableModel.getValueAt(selectedRow, 8) != null ? dateFormat.format((Date) tableModel.getValueAt(selectedRow, 8)) : "");
-        txtFechaPago.setText(tableModel.getValueAt(selectedRow, 9) != null ? dateFormat.format((Date) tableModel.getValueAt(selectedRow, 9)) : "");
+        
+        cargarDatosDeFilaSeleccionada(selectedRow);
         txtEstadoRegistro.setText("I");
         habilitarControles(false);
         operacionActual = "INACTIVAR";
@@ -479,21 +541,43 @@ public class FacturaFrame extends JFrame{
             JOptionPane.showMessageDialog(this, "Seleccione un registro de la tabla para reactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        txtCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
-        txtClienteCodigo.setText(tableModel.getValueAt(selectedRow, 1).toString());
-        txtRepresentanteCodigo.setText(tableModel.getValueAt(selectedRow, 2).toString());
-        txtFabricante.setText(tableModel.getValueAt(selectedRow, 3).toString());
-        txtImporteTotal.setText(tableModel.getValueAt(selectedRow, 4).toString());
-        txtAño.setText(tableModel.getValueAt(selectedRow, 5).toString());
-        txtMes.setText(tableModel.getValueAt(selectedRow, 6).toString());
-        txtDia.setText(tableModel.getValueAt(selectedRow, 7).toString());
-        txtPlazoPago.setText(tableModel.getValueAt(selectedRow, 8) != null ? dateFormat.format((Date) tableModel.getValueAt(selectedRow, 8)) : "");
-        txtFechaPago.setText(tableModel.getValueAt(selectedRow, 9) != null ? dateFormat.format((Date) tableModel.getValueAt(selectedRow, 9)) : "");
+        
+        cargarDatosDeFilaSeleccionada(selectedRow);
         txtEstadoRegistro.setText("A");
         habilitarControles(false);
         operacionActual = "REACTIVAR";
         flagCarFlaAct = 1;
         habilitarBotonesParaOperacion();
         JOptionPane.showMessageDialog(this, "El registro se marcará como activo ('A').\nPresione 'Actualizar' para confirmar.", "Reactivar Registro", JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    private void cargarDatosDeFilaSeleccionada(int selectedRow) {
+        txtCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
+        
+        // Buscar y seleccionar cliente en el combo
+        String clienteNombre = tableModel.getValueAt(selectedRow, 1).toString();
+        for (int j = 0; j < cmbCliente.getItemCount(); j++) {
+            if (cmbCliente.getItemAt(j).contains(clienteNombre.split(" ")[0])) {
+                cmbCliente.setSelectedIndex(j);
+                break;
+            }
+        }
+        
+        // Buscar y seleccionar representante en el combo
+        String repNombre = tableModel.getValueAt(selectedRow, 2).toString();
+        for (int j = 0; j < cmbRepresentante.getItemCount(); j++) {
+            if (cmbRepresentante.getItemAt(j).contains(repNombre)) {
+                cmbRepresentante.setSelectedIndex(j);
+                break;
+            }
+        }
+        
+        txtImporteTotal.setText(tableModel.getValueAt(selectedRow, 3).toString());
+        txtAño.setText(tableModel.getValueAt(selectedRow, 4).toString());
+        txtMes.setText(tableModel.getValueAt(selectedRow, 5).toString());
+        txtDia.setText(tableModel.getValueAt(selectedRow, 6).toString());
+        txtPlazoPago.setText(tableModel.getValueAt(selectedRow, 7) != null ? dateFormat.format((Date) tableModel.getValueAt(selectedRow, 7)) : "");
+        txtFechaPago.setText(tableModel.getValueAt(selectedRow, 8) != null ? dateFormat.format((Date) tableModel.getValueAt(selectedRow, 8)) : "");
+        txtEstadoRegistro.setText(tableModel.getValueAt(selectedRow, 9).toString());
     }
 }

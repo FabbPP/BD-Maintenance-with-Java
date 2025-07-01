@@ -4,7 +4,6 @@ public class Cliente {
     private int cliCod;
     private String cliEmp;
     private Integer repCod;
-    private String cliLim;
     private String cliNom;
     private String cliApePat;
     private String cliApeMat;
@@ -24,14 +23,13 @@ public class Cliente {
     public Cliente() {}
     
     // Constructor principal
-    public Cliente(int cliCod, String cliEmp, Integer repCod, String cliLim,
+    public Cliente(int cliCod, String cliEmp, Integer repCod,
                    String cliNom, String cliApePat, String cliApeMat,
                    Integer ciuCod, String cliDirDetalle, Long cliTel,
                    String cliCor, int catCliCod, char cliEstReg) {
         this.cliCod = cliCod;
         this.cliEmp = cliEmp;
         this.repCod = repCod;
-        this.cliLim = cliLim;
         this.cliNom = cliNom;
         this.cliApePat = cliApePat;
         this.cliApeMat = cliApeMat;
@@ -44,13 +42,13 @@ public class Cliente {
     }
     
     // Constructor con descripciones
-    public Cliente(int cliCod, String cliEmp, Integer repCod, String cliLim,
+    public Cliente(int cliCod, String cliEmp, Integer repCod,
                    String cliNom, String cliApePat, String cliApeMat,
                    Integer ciuCod, String cliDirDetalle, Long cliTel,
                    String cliCor, int catCliCod, char cliEstReg,
                    String representanteNombre, String categoriaDescripcion,
                    String ciudadNombre) {
-        this(cliCod, cliEmp, repCod, cliLim, cliNom, cliApePat, cliApeMat,
+        this(cliCod, cliEmp, repCod, cliNom, cliApePat, cliApeMat,
              ciuCod, cliDirDetalle, cliTel, cliCor, catCliCod, cliEstReg);
         this.representanteNombre = representanteNombre;
         this.categoriaDescripcion = categoriaDescripcion;
@@ -81,15 +79,6 @@ public class Cliente {
     public void setRepCod(Integer repCod) {
         this.repCod = repCod;
     }
-    
-    public String getCliLim() {
-        return cliLim;
-    }
-    
-    public void setCliLim(String cliLim) {
-        this.cliLim = cliLim;
-    }
-    
     public String getCliNom() {
         return cliNom;
     }
@@ -193,20 +182,6 @@ public class Cliente {
     
     @Override
     public String toString() {
-        return "Cliente{" +
-                "cliCod=" + cliCod +
-                ", cliEmp='" + cliEmp + '\'' +
-                ", repCod=" + repCod +
-                ", cliLim='" + cliLim + '\'' +
-                ", cliNom='" + cliNom + '\'' +
-                ", cliApePat='" + cliApePat + '\'' +
-                ", cliApeMat='" + cliApeMat + '\'' +
-                ", ciuCod=" + ciuCod +
-                ", cliDirDetalle='" + cliDirDetalle + '\'' +
-                ", cliTel=" + cliTel +
-                ", cliCor='" + cliCor + '\'' +
-                ", catCliCod=" + catCliCod +
-                ", cliEstReg=" + cliEstReg +
-                '}';
+        return cliCod + " - " + cliNom;
     }
 }

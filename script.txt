@@ -419,4 +419,8 @@ DROP COLUMN RepCod,
 DROP INDEX fk_ofi_representante ;
 ; 
 
-Borrar facFab por grafico :3
+ALTER TABLE `sistema_ventas`.`factura` 
+DROP COLUMN `FacFab`;
+
+ALTER TABLE `sistema_ventas`.`cliente` 
+DROP COLUMN `CliLim`;

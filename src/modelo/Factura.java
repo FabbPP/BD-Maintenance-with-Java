@@ -7,7 +7,6 @@ public class Factura{
 	private int facCod;
 	private int cliCod;
 	private int repCod;
-	private String facFab;
 	private BigDecimal facImp;
 	private int facAño;
 	private int facMes;
@@ -19,11 +18,10 @@ public class Factura{
 	public Factura() {
 	}
 
-	public Factura(int cod, int cCod, int rCod, String fab, BigDecimal imp, int año, int mes, int dia, Date plazoPago, Date fechPago, char estReg) {
+	public Factura(int cod, int cCod, int rCod, BigDecimal imp, int año, int mes, int dia, Date plazoPago, Date fechPago, char estReg) {
 		facCod = cod;
 		cliCod = cCod;
 		repCod = rCod;
-		facFab = fab;
 		facImp = imp;
 		facAño = año;
 		facMes = mes;
@@ -57,13 +55,6 @@ public class Factura{
 		repCod = rCod;
 	}
 
-	public String getFacFab() {
-		return facFab;
-	}
-
-	public void setFacFab(String fab) {
-		facFab = fab;
-	}
 
 	public BigDecimal getFacImp() {
 		return facImp;
@@ -126,7 +117,6 @@ public class Factura{
 			"facCod=" + facCod +
 			", cliCod=" + cliCod +
 			", repCod=" + repCod +
-			", facFab='" + facFab + '\'' +
 			", facImp=" + facImp +
 			", facAño=" + facAño +
 			", facMes=" + facMes +
