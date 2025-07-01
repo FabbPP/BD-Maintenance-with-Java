@@ -86,9 +86,9 @@ public class DetalleFacturaFrame extends JFrame {
         txtSubtotal = new JTextField(15);
         panelRegistro.add(txtSubtotal, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0;
+        gbc.gridx = 0; gbc.gridy = 5; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Estado Registro:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 3; gbc.weightx = 1.0;
+        gbc.gridx = 1; gbc.gridy = 5; gbc.weightx = 1.0;
         txtEstadoRegistro = new JTextField(1);
         txtEstadoRegistro.setEditable(false);
         panelRegistro.add(txtEstadoRegistro, gbc);
