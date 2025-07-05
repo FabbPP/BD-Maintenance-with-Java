@@ -1,19 +1,19 @@
 package gui;
 
-import dao.ClienteDAO;
-import dao.RepVentaDAO;
 import dao.CategoriaClienteDAO;
 import dao.CiudadDAO;
-import modelo.Cliente;
-import modelo.RepVenta;
-import modelo.CategoriaCliente;
-import modelo.Ciudad;
+import dao.ClienteDAO;
+import dao.RepVentaDAO;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import modelo.CategoriaCliente;
+import modelo.Ciudad;
+import modelo.Cliente;
+import modelo.RepVenta;
 
 public class ClienteFrame extends JFrame {
 
@@ -211,7 +211,7 @@ public class ClienteFrame extends JFrame {
         panelTabla.add(panelBusqueda, BorderLayout.NORTH);
         
         tableModel = new DefaultTableModel(new Object[]{
-            "Código", "Empresa", "RepVenta", "Límite", "Nombre", "Ap. Paterno", 
+            "Código", "Empresa", "RepVenta", "Nombre", "Ap. Paterno", 
             "Ap. Materno", "Ciudad", "Teléfono", "Correo", "Categoría", "Estado",
             "Nombre Rep.", "Desc. Categoría", "Nombre Ciudad"
         }, 0) {

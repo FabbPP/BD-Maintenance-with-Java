@@ -240,15 +240,13 @@ CREATE TABLE REPORREPVENTA (
     RepoRepVentObj DECIMAL(12,2) COMMENT 'Meta Objetivo',
     RepoRepVentNum INT DEFAULT 0 COMMENT 'Ventas Concretas',
     RepoRepVentCuo INT DEFAULT 0 COMMENT 'Cuota',
-    CarCod INT COMMENT 'Código Cargo',
     RepoRepVentEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
     
     PRIMARY KEY (RepoRepVentCod, RepCod),
     CONSTRAINT chk_repoventa_num CHECK (RepoRepVentNum >= 0),
     CONSTRAINT chk_repoventa_cuo CHECK (RepoRepVentCuo >= 0),
     CONSTRAINT chk_repoventa_est CHECK (RepoRepVentEstReg IN ('A', 'I', '*')),
-    CONSTRAINT fk_repoventa_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod),
-    CONSTRAINT fk_repoventa_cargo FOREIGN KEY (CarCod) REFERENCES CARGO(CarCod)
+    CONSTRAINT fk_repoventa_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod)
 ) ENGINE=InnoDB COMMENT='Reporte de representante de venta';
 
 -- Tabla: Factura (CORREGIDA - FK arreglada)
@@ -327,19 +325,11 @@ INSERT INTO CLASIFICACION_PRODUCTO (ClasProDesc) VALUES
 ('Abarrote'),
 ('Accesorio');
 
-
-
 -- Unidades de Medida
 INSERT INTO PROD_UNIDAD_MEDIDA (UniMedProDesc) VALUES 
 ('Unidad'),
 ('Kilogramos'),
 ('Mililitros');
-
--- Estados de Sistema
-INSERT INTO ESTADO_SISTEMA (UsuEstSistDesc) VALUES 
-('Activo'),
-('Suspendido'),
-('Bloqueado');
 
 INSERT INTO `sistema_ventas`.`prod_dispo` (`DispoProdCod`, `DispoProdDesc`, `DispoProdEstReg`) VALUES ('1', 'Disponible', 'A');
 INSERT INTO `sistema_ventas`.`prod_dispo` (`DispoProdCod`, `DispoProdDesc`,`DispoProdEstReg`) VALUES ('2', 'No Disponible', 'A');

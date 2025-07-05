@@ -8,35 +8,30 @@ public class ReporRepVenta {
     private BigDecimal repoRepVentObj;
     private int repoRepVentNum;
     private int repoRepVentCuo;
-    private Integer carCod;
     private char repoRepVentEstReg;
     
     private String representanteNombre;  // Para mostrar nombre del representante
-    private String cargoDescripcion;     // Para mostrar descripción del cargo
     
     public ReporRepVenta() {}
     
     public ReporRepVenta(int repoRepVentCod, int repCod, BigDecimal repoRepVentObj,
-                        int repoRepVentNum, int repoRepVentCuo, int carCod, 
+                        int repoRepVentNum, int repoRepVentCuo, 
                         char repoRepVentEstReg) {
         this.repoRepVentCod = repoRepVentCod;
         this.repCod = repCod;
         this.repoRepVentObj = repoRepVentObj;
         this.repoRepVentNum = repoRepVentNum;
         this.repoRepVentCuo = repoRepVentCuo;
-        this.carCod = carCod;
         this.repoRepVentEstReg = repoRepVentEstReg;
     }
     
     // Constructor con descripciones
     public ReporRepVenta(int repoRepVentCod, int repCod, BigDecimal repoRepVentObj,
-                        int repoRepVentNum, int repoRepVentCuo, int carCod, 
-                        char repoRepVentEstReg, String representanteNombre,
-                        String cargoDescripcion) {
+                        int repoRepVentNum, int repoRepVentCuo, 
+                        char repoRepVentEstReg, String representanteNombre) {
         this(repoRepVentCod, repCod, repoRepVentObj, repoRepVentNum, 
-             repoRepVentCuo, carCod, repoRepVentEstReg);
+             repoRepVentCuo, repoRepVentEstReg);
         this.representanteNombre = representanteNombre;
-        this.cargoDescripcion = cargoDescripcion;
     }
     
     // Getters y Setters
@@ -80,14 +75,6 @@ public class ReporRepVenta {
         this.repoRepVentCuo = repoRepVentCuo;
     }
     
-    public Integer getCarCod() {
-        return carCod;
-    }
-    
-    public void setCarCod(Integer carCod) {
-        this.carCod = carCod;
-    }
-    
     public char getRepoRepVentEstReg() {
         return repoRepVentEstReg;
     }
@@ -103,14 +90,7 @@ public class ReporRepVenta {
     public void setRepresentanteNombre(String representanteNombre) {
         this.representanteNombre = representanteNombre;
     }
-    
-    public String getCargoDescripcion() {
-        return cargoDescripcion;
-    }
-    
-    public void setCargoDescripcion(String cargoDescripcion) {
-        this.cargoDescripcion = cargoDescripcion;
-    }
+
     
     @Override
     public String toString() {
@@ -120,7 +100,6 @@ public class ReporRepVenta {
                 ", repoRepVentObj=" + repoRepVentObj +
                 ", repoRepVentNum=" + repoRepVentNum +
                 ", repoRepVentCuo=" + repoRepVentCuo +
-                ", carCod=" + carCod +
                 ", repoRepVentEstReg=" + repoRepVentEstReg +
                 '}';
     }
