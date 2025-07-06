@@ -25,6 +25,7 @@ public class ProductoFrame extends JFrame {
     private JTextField txtPrecio;
     private JTextField txtStock;
     private JTextField txtEstadoRegistro;
+    private JTextField txtAlerta; // Campo agregado para la alerta
     private JComboBox<FabricanteProducto> cmbFabricante;
     private JComboBox<ClasificacionProducto> cmbClasificacion;
     private JComboBox<ProdUnidadMedida> cmbUnidadMedida;
@@ -139,8 +140,15 @@ public class ProductoFrame extends JFrame {
         cmbDisponibilidad = new JComboBox<>();
         panelRegistro.add(cmbDisponibilidad, gbc);
 
-        // Sexta fila - Nota sobre estados
-        gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 4;
+        // Sexta fila - Campo de Alerta
+        gbc.gridx = 0; gbc.gridy = 5;
+        panelRegistro.add(new JLabel("Alerta:"), gbc);
+        gbc.gridx = 1; gbc.gridwidth = 3; gbc.weightx = 1.0;
+        txtAlerta = new JTextField(40);
+        panelRegistro.add(txtAlerta, gbc);
+
+        // Séptima fila - Nota sobre estados
+        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 4;
         JLabel lblEstados = new JLabel("* Estados: A = Activo, I = Inactivo, * = Eliminado");
         lblEstados.setFont(lblEstados.getFont().deriveFont(Font.ITALIC, 10f));
         lblEstados.setForeground(Color.GRAY);
@@ -165,7 +173,7 @@ public class ProductoFrame extends JFrame {
         panelTabla.setBorder(BorderFactory.createTitledBorder("Productos"));
         tableModel = new DefaultTableModel(new Object[]{
             "Código", "Descripción", "Precio", "Stock", "Fabricante", 
-            "Clasificación", "Unidad Medida", "Disponibilidad", "Estado"
+            "Clasificación", "Unidad Medida", "Disponibilidad", "Estado", "Alerta"
         }, 0) {
             public boolean isCellEditable(int row, int col) { 
                 return false; 
@@ -256,6 +264,10 @@ public class ProductoFrame extends JFrame {
         txtPrecio.setText(tableModel.getValueAt(fila, 2).toString());
         txtStock.setText(tableModel.getValueAt(fila, 3).toString());
         txtEstadoRegistro.setText(tableModel.getValueAt(fila, 8).toString());
+        // Cargar el campo de alerta
+        String alerta = tableModel.getValueAt(fila, 9) != null ? tableModel.getValueAt(fila, 9).toString() : "";
+        txtAlerta.setText(alerta);
+        
         codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(fila, 0).toString());
 
         // Seleccionar en combos
@@ -359,7 +371,7 @@ public class ProductoFrame extends JFrame {
         String stockStr = txtStock.getText().trim();
 
         if (descripcion.isEmpty() || precioStr.isEmpty() || stockStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Todos los campos son obligatorios.", 
+            JOptionPane.showMessageDialog(this, "Los campos Descripción, Precio y Stock son obligatorios.", 
                                         "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
@@ -418,6 +430,7 @@ public class ProductoFrame extends JFrame {
             unidadMedida.getUniMedProCod(),
             disponibilidad.getDispoProdCod(),
             txtEstadoRegistro.getText().charAt(0),
+            txtAlerta.getText().trim(), // Incluir el campo de alerta
             fabricante.getFabNom(),
             clasificacion.getClasProDesc(),
             unidadMedida.getUniMedProDesc(),
@@ -526,7 +539,8 @@ public class ProductoFrame extends JFrame {
                 p.getClasificacionDescripcion(),
                 p.getUnidadMedidaDescripcion(),
                 p.getDisponibilidadDescripcion(),
-                p.getProdEstReg()
+                p.getProdEstReg(),
+                p.getProdAlerta() // Incluir el campo de alerta en la tabla
             });
         }
     }
@@ -544,7 +558,8 @@ public class ProductoFrame extends JFrame {
                 p.getClasificacionDescripcion(),
                 p.getUnidadMedidaDescripcion(),
                 p.getDisponibilidadDescripcion(),
-                p.getProdEstReg()
+                p.getProdEstReg(),
+                p.getProdAlerta() // Incluir el campo de alerta en la tabla
             });
         }
     }
@@ -553,6 +568,7 @@ public class ProductoFrame extends JFrame {
         txtDescripcion.setEditable(b);
         txtPrecio.setEditable(b);
         txtStock.setEditable(b);
+        txtAlerta.setEditable(b); // Habilitar/deshabilitar el campo de alerta
         cmbFabricante.setEnabled(b);
         cmbClasificacion.setEnabled(b);
         cmbUnidadMedida.setEnabled(b);
@@ -565,6 +581,7 @@ public class ProductoFrame extends JFrame {
         txtPrecio.setText("");
         txtStock.setText("");
         txtEstadoRegistro.setText("");
+        txtAlerta.setText(""); // Limpiar el campo de alerta
         if (cmbFabricante.getItemCount() > 0) cmbFabricante.setSelectedIndex(0);
         if (cmbClasificacion.getItemCount() > 0) cmbClasificacion.setSelectedIndex(0);
         if (cmbUnidadMedida.getItemCount() > 0) cmbUnidadMedida.setSelectedIndex(0);

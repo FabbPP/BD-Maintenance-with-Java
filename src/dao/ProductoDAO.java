@@ -1,5 +1,5 @@
 package dao;
-//corregido - sin ReporProdCod
+
 import conexion.ConexionBD;
 import java.sql.*;
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ public class ProductoDAO {
     public List<Producto> obtenerTodosProductos() {
         List<Producto> productos = new ArrayList<>();
         String sql = "SELECT p.ProdCod, p.FabCod, p.ProdDes, p.ProdPre, p.ProdStock, " +
-                     "p.ClasProCod, p.UniMedProCod, p.DispoProdCod, p.ProdEstReg, " +
+                     "p.ClasProCod, p.UniMedProCod, p.DispoProdCod, p.ProdEstReg, p.ProdAlerta, " +
                      "f.FabNom as FabricanteNombre, cp.ClasProDesc as ClasificacionDescripcion, " +
                      "um.UniMedProDesc as UnidadMedidaDescripcion, pd.DispoProdDesc as DisponibilidadDescripcion " +
                      "FROM PRODUCTO p " +
@@ -36,6 +36,7 @@ public class ProductoDAO {
                     rs.getInt("UniMedProCod"),
                     rs.getInt("DispoProdCod"),
                     rs.getString("ProdEstReg").charAt(0),
+                    rs.getString("ProdAlerta"),
                     rs.getString("FabricanteNombre"),
                     rs.getString("ClasificacionDescripcion"),
                     rs.getString("UnidadMedidaDescripcion"),
@@ -51,7 +52,7 @@ public class ProductoDAO {
 
     public Producto obtenerProductoPorCodigo(int prodCod) {
         String sql = "SELECT p.ProdCod, p.FabCod, p.ProdDes, p.ProdPre, p.ProdStock, " +
-                     "p.ClasProCod, p.UniMedProCod, p.DispoProdCod, p.ProdEstReg, " +
+                     "p.ClasProCod, p.UniMedProCod, p.DispoProdCod, p.ProdEstReg, p.ProdAlerta, " +
                      "f.FabNom as FabricanteNombre, cp.ClasProDesc as ClasificacionDescripcion, " +
                      "um.UniMedProDesc as UnidadMedidaDescripcion, pd.DispoProdDesc as DisponibilidadDescripcion " +
                      "FROM PRODUCTO p " +
@@ -78,6 +79,7 @@ public class ProductoDAO {
                     rs.getInt("UniMedProCod"),
                     rs.getInt("DispoProdCod"),
                     rs.getString("ProdEstReg").charAt(0),
+                    rs.getString("ProdAlerta"),
                     rs.getString("FabricanteNombre"),
                     rs.getString("ClasificacionDescripcion"),
                     rs.getString("UnidadMedidaDescripcion"),
@@ -92,8 +94,8 @@ public class ProductoDAO {
 
     public String insertarProducto(Producto producto) {
         String sql = "INSERT INTO PRODUCTO (FabCod, ProdDes, ProdPre, ProdStock, ClasProCod, " +
-                     "UniMedProCod, DispoProdCod, ProdEstReg) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                     "UniMedProCod, DispoProdCod, ProdEstReg, ProdAlerta) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -106,6 +108,7 @@ public class ProductoDAO {
             stmt.setInt(6, producto.getUniMedProCod());
             stmt.setInt(7, producto.getDispoProdCod());
             stmt.setString(8, String.valueOf(producto.getProdEstReg()));
+            stmt.setString(9, producto.getProdAlerta());
             
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -139,7 +142,7 @@ public class ProductoDAO {
     public String actualizarProducto(Producto producto) {
         String sql = "UPDATE PRODUCTO SET FabCod = ?, ProdDes = ?, ProdPre = ?, ProdStock = ?, " +
                      "ClasProCod = ?, UniMedProCod = ?, DispoProdCod = ?, " +
-                     "ProdEstReg = ? WHERE ProdCod = ?";
+                     "ProdEstReg = ?, ProdAlerta = ? WHERE ProdCod = ?";
         
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -152,14 +155,15 @@ public class ProductoDAO {
             stmt.setInt(6, producto.getUniMedProCod());
             stmt.setInt(7, producto.getDispoProdCod());
             stmt.setString(8, String.valueOf(producto.getProdEstReg()));
-            stmt.setInt(9, producto.getProdCod());
+            stmt.setString(9, producto.getProdAlerta());
+            stmt.setInt(10, producto.getProdCod());
             
             return (stmt.executeUpdate() > 0) ? null : "Error al actualizar producto.";
         } catch (SQLException e) {
             String errorMsg = e.getMessage().toLowerCase();
             
             if (errorMsg.contains("chk_prod_precio")) {
-                return "El precio del producto debe ser mayor or igual a 0.00.";
+                return "El precio del producto debe ser mayor o igual a 0.00.";
             } else if (errorMsg.contains("chk_prod_stock")) {
                 return "El stock del producto debe ser mayor o igual a 0.";
             } else if (errorMsg.contains("fk_prod_fabricante")) {
@@ -233,7 +237,7 @@ public class ProductoDAO {
     public List<Producto> obtenerProductosActivos() {
         List<Producto> productos = new ArrayList<>();
         String sql = "SELECT p.ProdCod, p.FabCod, p.ProdDes, p.ProdPre, p.ProdStock, " +
-                     "p.ClasProCod, p.UniMedProCod, p.DispoProdCod, p.ProdEstReg, " +
+                     "p.ClasProCod, p.UniMedProCod, p.DispoProdCod, p.ProdEstReg, p.ProdAlerta, " +
                      "f.FabNom as FabricanteNombre, cp.ClasProDesc as ClasificacionDescripcion, " +
                      "um.UniMedProDesc as UnidadMedidaDescripcion, pd.DispoProdDesc as DisponibilidadDescripcion " +
                      "FROM PRODUCTO p " +
@@ -258,6 +262,7 @@ public class ProductoDAO {
                     rs.getInt("UniMedProCod"),
                     rs.getInt("DispoProdCod"),
                     rs.getString("ProdEstReg").charAt(0),
+                    rs.getString("ProdAlerta"),
                     rs.getString("FabricanteNombre"),
                     rs.getString("ClasificacionDescripcion"),
                     rs.getString("UnidadMedidaDescripcion"),
@@ -274,7 +279,7 @@ public class ProductoDAO {
     public List<Producto> buscarProductosPorDescripcion(String descripcion) {
         List<Producto> productos = new ArrayList<>();
         String sql = "SELECT p.ProdCod, p.FabCod, p.ProdDes, p.ProdPre, p.ProdStock, " +
-                     "p.ClasProCod, p.UniMedProCod, p.DispoProdCod, p.ProdEstReg, " +
+                     "p.ClasProCod, p.UniMedProCod, p.DispoProdCod, p.ProdEstReg, p.ProdAlerta, " +
                      "f.FabNom as FabricanteNombre, cp.ClasProDesc as ClasificacionDescripcion, " +
                      "um.UniMedProDesc as UnidadMedidaDescripcion, pd.DispoProdDesc as DisponibilidadDescripcion " +
                      "FROM PRODUCTO p " +
@@ -302,6 +307,7 @@ public class ProductoDAO {
                     rs.getInt("UniMedProCod"),
                     rs.getInt("DispoProdCod"),
                     rs.getString("ProdEstReg").charAt(0),
+                    rs.getString("ProdAlerta"),
                     rs.getString("FabricanteNombre"),
                     rs.getString("ClasificacionDescripcion"),
                     rs.getString("UnidadMedidaDescripcion"),
@@ -318,7 +324,7 @@ public class ProductoDAO {
     public List<Producto> buscarProductosPorFabricante(int fabCod) {
         List<Producto> productos = new ArrayList<>();
         String sql = "SELECT p.ProdCod, p.FabCod, p.ProdDes, p.ProdPre, p.ProdStock, " +
-                     "p.ClasProCod, p.UniMedProCod, p.DispoProdCod, p.ProdEstReg, " +
+                     "p.ClasProCod, p.UniMedProCod, p.DispoProdCod, p.ProdEstReg, p.ProdAlerta, " +
                      "f.FabNom as FabricanteNombre, cp.ClasProDesc as ClasificacionDescripcion, " +
                      "um.UniMedProDesc as UnidadMedidaDescripcion, pd.DispoProdDesc as DisponibilidadDescripcion " +
                      "FROM PRODUCTO p " +
@@ -345,6 +351,7 @@ public class ProductoDAO {
                     rs.getInt("UniMedProCod"),
                     rs.getInt("DispoProdCod"),
                     rs.getString("ProdEstReg").charAt(0),
+                    rs.getString("ProdAlerta"),
                     rs.getString("FabricanteNombre"),
                     rs.getString("ClasificacionDescripcion"),
                     rs.getString("UnidadMedidaDescripcion"),
@@ -361,7 +368,7 @@ public class ProductoDAO {
     public List<Producto> obtenerProductosDisponibles() {
         List<Producto> productos = new ArrayList<>();
         String sql = "SELECT p.ProdCod, p.FabCod, p.ProdDes, p.ProdPre, p.ProdStock, " +
-                     "p.ClasProCod, p.UniMedProCod, p.DispoProdCod, p.ProdEstReg, " +
+                     "p.ClasProCod, p.UniMedProCod, p.DispoProdCod, p.ProdEstReg, p.ProdAlerta, " +
                      "f.FabNom as FabricanteNombre, cp.ClasProDesc as ClasificacionDescripcion, " +
                      "um.UniMedProDesc as UnidadMedidaDescripcion, pd.DispoProdDesc as DisponibilidadDescripcion " +
                      "FROM PRODUCTO p " +
@@ -386,6 +393,7 @@ public class ProductoDAO {
                     rs.getInt("UniMedProCod"),
                     rs.getInt("DispoProdCod"),
                     rs.getString("ProdEstReg").charAt(0),
+                    rs.getString("ProdAlerta"),
                     rs.getString("FabricanteNombre"),
                     rs.getString("ClasificacionDescripcion"),
                     rs.getString("UnidadMedidaDescripcion"),

@@ -12,6 +12,7 @@ public class Producto {
     private int uniMedProCod;
     private int dispoProdCod;
     private char prodEstReg;
+    private String prodAlerta;  // Nuevo campo para mensaje de alerta
     
     // Campos adicionales para mostrar descripciones
     private String fabricanteNombre;        // Para mostrar nombre del fabricante
@@ -37,6 +38,15 @@ public class Producto {
         this.prodEstReg = prodEstReg;
     }
     
+    // Constructor con alerta
+    public Producto(int prodCod, int fabCod, String prodDes, BigDecimal prodPre,
+                   int prodStock, int clasProCod, int uniMedProCod, 
+                   int dispoProdCod, char prodEstReg, String prodAlerta) {
+        this(prodCod, fabCod, prodDes, prodPre, prodStock, clasProCod, 
+             uniMedProCod, dispoProdCod, prodEstReg);
+        this.prodAlerta = prodAlerta;
+    }
+    
     // Constructor con descripciones
     public Producto(int prodCod, int fabCod, String prodDes, BigDecimal prodPre,
                    int prodStock, int clasProCod, int uniMedProCod, 
@@ -45,6 +55,21 @@ public class Producto {
                    String unidadMedidaDescripcion, String disponibilidadDescripcion) {
         this(prodCod, fabCod, prodDes, prodPre, prodStock, clasProCod, 
              uniMedProCod, dispoProdCod, prodEstReg);
+        this.fabricanteNombre = fabricanteNombre;
+        this.clasificacionDescripcion = clasificacionDescripcion;
+        this.unidadMedidaDescripcion = unidadMedidaDescripcion;
+        this.disponibilidadDescripcion = disponibilidadDescripcion;
+    }
+    
+    // Constructor completo con todas las descripciones y alerta
+    public Producto(int prodCod, int fabCod, String prodDes, BigDecimal prodPre,
+                   int prodStock, int clasProCod, int uniMedProCod, 
+                   int dispoProdCod, char prodEstReg, String prodAlerta,
+                   String fabricanteNombre, String clasificacionDescripcion,
+                   String unidadMedidaDescripcion, String disponibilidadDescripcion) {
+        this(prodCod, fabCod, prodDes, prodPre, prodStock, clasProCod, 
+             uniMedProCod, dispoProdCod, prodEstReg);
+        this.prodAlerta = prodAlerta;
         this.fabricanteNombre = fabricanteNombre;
         this.clasificacionDescripcion = clasificacionDescripcion;
         this.unidadMedidaDescripcion = unidadMedidaDescripcion;
@@ -108,7 +133,6 @@ public class Producto {
         this.uniMedProCod = uniMedProCod;
     }
     
-
     public int getDispoProdCod() {
         return dispoProdCod;
     }
@@ -123,6 +147,14 @@ public class Producto {
     
     public void setProdEstReg(char prodEstReg) {
         this.prodEstReg = prodEstReg;
+    }
+    
+    public String getProdAlerta() {
+        return prodAlerta;
+    }
+    
+    public void setProdAlerta(String prodAlerta) {
+        this.prodAlerta = prodAlerta;
     }
     
     public String getFabricanteNombre() {
@@ -170,6 +202,11 @@ public class Producto {
     // Método para calcular el valor total del stock
     public BigDecimal getValorTotalStock() {
         return prodPre.multiply(BigDecimal.valueOf(prodStock));
+    }
+    
+    // Método para verificar si tiene alerta activa
+    public boolean tieneAlerta() {
+        return prodAlerta != null && !prodAlerta.trim().isEmpty();
     }
     
     @Override
