@@ -14,6 +14,7 @@ public class Factura{
 	private Date facPlazoPago;
 	private Date facFechPago;
 	private char facEstReg;
+	private int facEstado; // Nuevo campo: 0=Generada, 1=Parcial, 2=Completa, 9=Cancelada
 
 	public Factura() {
 	}
@@ -29,6 +30,22 @@ public class Factura{
 		facPlazoPago = plazoPago;
 		facFechPago = fechPago;
 		facEstReg = estReg;
+		facEstado = 0; // Por defecto: Generada
+	}
+
+	// Constructor completo con el nuevo campo
+	public Factura(int cod, int cCod, int rCod, BigDecimal imp, int año, int mes, int dia, Date plazoPago, Date fechPago, char estReg, int estado) {
+		facCod = cod;
+		cliCod = cCod;
+		repCod = rCod;
+		facImp = imp;
+		facAño = año;
+		facMes = mes;
+		facDia = dia;
+		facPlazoPago = plazoPago;
+		facFechPago = fechPago;
+		facEstReg = estReg;
+		facEstado = estado;
 	}
 
 	public int getFacCod() {
@@ -54,7 +71,6 @@ public class Factura{
 	public void setRepCod(int rCod) {
 		repCod = rCod;
 	}
-
 
 	public BigDecimal getFacImp() {
 		return facImp;
@@ -112,6 +128,25 @@ public class Factura{
 		facEstReg = estReg;
 	}
 
+	public int getFacEstado() {
+		return facEstado;
+	}
+
+	public void setFacEstado(int estado) {
+		facEstado = estado;
+	}
+
+	// Método helper para obtener la descripción del estado
+	public String getFacEstadoDescripcion() {
+		switch (facEstado) {
+			case 0: return "Generada";
+			case 1: return "Parcial";
+			case 2: return "Completa";
+			case 9: return "Cancelada";
+			default: return "Desconocido";
+		}
+	}
+
 	public String toString() {
 		return "Factura{" +
 			"facCod=" + facCod +
@@ -124,6 +159,7 @@ public class Factura{
 			", facPlazoPago=" + facPlazoPago +
 			", facFechPago=" + facFechPago +
 			", facEstReg = '" + facEstReg + '\'' +
+			", facEstado=" + facEstado +
 			'}';
 	}
 }

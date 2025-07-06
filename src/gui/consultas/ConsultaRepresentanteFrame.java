@@ -1,21 +1,24 @@
 package gui.consultas;
 
 import dao.consultas.ConsultaRepresentanteDAO;
-import modelo.consultas.ConsultaRepresentante;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.util.Comparator;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+import modelo.consultas.ConsultaRepresentante;
 
 public class ConsultaRepresentanteFrame extends JFrame {
     
     private JTable tablaEstadisticas;
     private DefaultTableModel tableModel;
+    private TableRowSorter<DefaultTableModel> sorter;
     private JButton btnActualizar, btnSalir;
     private JLabel lblTotalRegistros, lblMontoGlobal;
     
@@ -61,10 +64,80 @@ public class ConsultaRepresentanteFrame extends JFrame {
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
+            
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                switch (columnIndex) {
+                    case 0: return String.class;    // Código
+                    case 1: return String.class;    // Nombre Representante
+                    case 2: return Integer.class;   // Total Facturas
+                    case 3: return BigDecimal.class; // Monto Total Ventas
+                    default: return Object.class;
+                }
+            }
         };
         
         tablaEstadisticas = new JTable(tableModel);
         tablaEstadisticas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        // Alinear todo el contenido a la izquierda
+        DefaultTableCellRenderer leftRenderer = new DefaultTableCellRenderer();
+        leftRenderer.setHorizontalAlignment(SwingConstants.LEFT);
+
+        // Aplicar el renderizador a todas las columnas
+        for (int i = 0; i < tablaEstadisticas.getColumnCount(); i++) {
+            tablaEstadisticas.getColumnModel().getColumn(i).setCellRenderer(leftRenderer);
+        }
+
+        
+        // Configurar el sorter con comparadores personalizados
+        sorter = new TableRowSorter<>(tableModel);
+        tablaEstadisticas.setRowSorter(sorter);
+        
+        // Configurar comparadores personalizados para todas las columnas
+        // Columna 0: Código (String pero ordenado numéricamente)
+        sorter.setComparator(0, new Comparator<Object>() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                try {
+                    // Intentar convertir a número para ordenamiento numérico
+                    Integer num1 = Integer.parseInt(String.valueOf(o1));
+                    Integer num2 = Integer.parseInt(String.valueOf(o2));
+                    return num1.compareTo(num2);
+                } catch (NumberFormatException e) {
+                    // Si no son números, ordenar como string
+                    return String.valueOf(o1).compareTo(String.valueOf(o2));
+                }
+            }
+        });
+        
+        // Columna 1: Nombre Representante (String)
+        sorter.setComparator(1, new Comparator<Object>() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                return String.valueOf(o1).compareTo(String.valueOf(o2));
+            }
+        });
+        
+        // Columna 2: Total Facturas (Integer)
+        sorter.setComparator(2, new Comparator<Object>() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                Integer i1 = (Integer) o1;
+                Integer i2 = (Integer) o2;
+                return i1.compareTo(i2);
+            }
+        });
+        
+        // Columna 3: Monto Total Ventas (BigDecimal)
+        sorter.setComparator(3, new Comparator<Object>() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                if (o1 instanceof BigDecimal && o2 instanceof BigDecimal) {
+                    return ((BigDecimal) o1).compareTo((BigDecimal) o2);
+                }
+                return 0;
+            }
+        });
         
         // Configurar el ancho de las columnas
         tablaEstadisticas.getColumnModel().getColumn(0).setPreferredWidth(80);
@@ -122,7 +195,7 @@ public class ConsultaRepresentanteFrame extends JFrame {
                 est.getRepCod(),
                 est.getRepNom(),
                 est.getTotalFacturas(),
-                decimalFormat.format(est.getMontoTotalVentas() != null ? est.getMontoTotalVentas() : BigDecimal.ZERO)
+                est.getMontoTotalVentas() != null ? est.getMontoTotalVentas() : BigDecimal.ZERO
             };
             tableModel.addRow(row);
             
@@ -131,6 +204,20 @@ public class ConsultaRepresentanteFrame extends JFrame {
             }
             totalFacturas += est.getTotalFacturas();
         }
+        
+        // Configurar el renderer personalizado para mostrar formato monetario
+        DefaultTableCellRenderer montoRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public void setValue(Object value) {
+                if (value instanceof BigDecimal) {
+                    setText(decimalFormat.format(value));
+                } else {
+                    setText(value != null ? value.toString() : "S/. 0.00");
+                }
+            }
+        };
+        montoRenderer.setHorizontalAlignment(SwingConstants.LEFT); // también alineado a la izquierda
+        tablaEstadisticas.getColumnModel().getColumn(3).setCellRenderer(montoRenderer);
         
         // Actualizar labels de resumen
         lblTotalRegistros.setText("Total Representantes: " + estadisticas.size());

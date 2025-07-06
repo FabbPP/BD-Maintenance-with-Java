@@ -3,35 +3,32 @@ package gui;
 import dao.FacturaDAO;
 import dao.ClienteDAO;
 import dao.RepVentaDAO;
-import modelo.Factura;
-import modelo.Cliente;
-import modelo.RepVenta;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import modelo.Factura;
+import modelo.Cliente;
+import modelo.RepVenta;
 
-public class FacturaFrame extends JFrame{
+public class FacturaFrame extends JFrame {
 
     private JTextField txtCodigo;
-    private JComboBox<String> cmbCliente;
-    private JComboBox<String> cmbRepresentante;
-    private JTextField txtImporteTotal;
-    private JTextField txtAño;
-    private JTextField txtMes;
-    private JTextField txtDia;
+    private JComboBox<ComboItem> cbCliente;
+    private JComboBox<ComboItem> cbRepresentante;
+    private JTextField txtImporte;
+    private JSpinner spnAño;
+    private JSpinner spnMes;
+    private JSpinner spnDia;
     private JTextField txtPlazoPago;
     private JTextField txtFechaPago;
     private JTextField txtEstadoRegistro;
+    private JComboBox<String> cbEstadoFactura;
     private JTable tablaFacturas;
     private DefaultTableModel tableModel;
 
@@ -40,31 +37,51 @@ public class FacturaFrame extends JFrame{
     private FacturaDAO facturaDAO;
     private ClienteDAO clienteDAO;
     private RepVentaDAO repVentaDAO;
-    private List<Cliente> listaClientes;
-    private List<RepVenta> listaRepresentantes;
-    
     private int flagCarFlaAct = 0;
     private String operacionActual = "";
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private int codigoSeleccionado = 0;
+
+    // Clase auxiliar para manejar items del ComboBox
+    private static class ComboItem {
+        private int codigo;
+        private String descripcion;
+        
+        public ComboItem(int codigo, String descripcion) {
+            this.codigo = codigo;
+            this.descripcion = descripcion;
+        }
+        
+        public int getCodigo() {
+            return codigo;
+        }
+        
+        public String getDescripcion() {
+            return descripcion;
+        }
+        
+        @Override
+        public String toString() {
+            return codigo + " - " + descripcion;
+        }
+    }
 
     public FacturaFrame() {
-        setTitle("Mantenimiento de Factura");
-        setSize(1200, 700);
+        setTitle("Mantenimiento de Facturas");
+        setSize(1200, 800);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
         facturaDAO = new FacturaDAO();
         clienteDAO = new ClienteDAO();
         repVentaDAO = new RepVentaDAO();
-        
         initComponents();
-        cargarDatosComboBox();
+        cargarComboBoxes();
         cargarTablaFacturas();
         habilitarControles(false);
         habilitarBotonesIniciales();
     }
-
-    public static void main(String[] args) {
+    
+    public static void main(String[] args){
         SwingUtilities.invokeLater(() -> new FacturaFrame().setVisible(true));
     }
 
@@ -76,78 +93,95 @@ public class FacturaFrame extends JFrame{
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // Primera fila
         gbc.gridx = 0; gbc.gridy = 0;
-        panelRegistro.add(new JLabel("Código Factura:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0;
+        panelRegistro.add(new JLabel("Código:"), gbc);
+        gbc.gridx = 1;
         txtCodigo = new JTextField(10);
-        txtCodigo.setEditable(false);
+        txtCodigo.setEditable(false); // El código es AUTO_INCREMENT
         panelRegistro.add(txtCodigo, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
+        gbc.gridx = 2; gbc.gridy = 0;
         panelRegistro.add(new JLabel("Cliente:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 1.0;
-        cmbCliente = new JComboBox<>();
-        cmbCliente.setPreferredSize(new Dimension(300, 25));
-        panelRegistro.add(cmbCliente, gbc);
+        gbc.gridx = 3; gbc.weightx = 1.0;
+        cbCliente = new JComboBox<>();
+        cbCliente.setPreferredSize(new Dimension(250, cbCliente.getPreferredSize().height));
+        panelRegistro.add(cbCliente, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0;
+        // Segunda fila
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Representante:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 2; gbc.weightx = 1.0;
-        cmbRepresentante = new JComboBox<>();
-        cmbRepresentante.setPreferredSize(new Dimension(300, 25));
-        panelRegistro.add(cmbRepresentante, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0;
-        panelRegistro.add(new JLabel("Importe Total:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 3; gbc.weightx = 1.0;
-        txtImporteTotal = new JTextField(15);
-        panelRegistro.add(txtImporteTotal, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 4; gbc.weightx = 0;
-        panelRegistro.add(new JLabel("Año:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 4; gbc.weightx = 1.0;
-        txtAño = new JTextField(5);
-        panelRegistro.add(txtAño, gbc);
-
-        gbc.gridx = 2; gbc.gridy = 0; gbc.weightx = 0;
-        panelRegistro.add(new JLabel("Mes:"), gbc);
-        gbc.gridx = 3; gbc.gridy = 0; gbc.weightx = 1.0;
-        txtMes = new JTextField(5);
-        panelRegistro.add(txtMes, gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
+        cbRepresentante = new JComboBox<>();
+        cbRepresentante.setPreferredSize(new Dimension(250, cbRepresentante.getPreferredSize().height));
+        panelRegistro.add(cbRepresentante, gbc);
 
         gbc.gridx = 2; gbc.gridy = 1; gbc.weightx = 0;
-        panelRegistro.add(new JLabel("Día:"), gbc);
-        gbc.gridx = 3; gbc.gridy = 1; gbc.weightx = 1.0;
-        txtDia = new JTextField(5);
-        panelRegistro.add(txtDia, gbc);
+        panelRegistro.add(new JLabel("Importe:"), gbc);
+        gbc.gridx = 3; gbc.weightx = 1.0;
+        txtImporte = new JTextField(15);
+        panelRegistro.add(txtImporte, gbc);
 
-        gbc.gridx = 2; gbc.gridy = 2; gbc.weightx = 0;
-        panelRegistro.add(new JLabel("Plazo Pago (AAAA-MM-DD):"), gbc);
-        gbc.gridx = 3; gbc.gridy = 2; gbc.weightx = 1.0;
+        // Tercera fila - Fecha
+        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0;
+        panelRegistro.add(new JLabel("Año:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0;
+        spnAño = new JSpinner(new SpinnerNumberModel(Calendar.getInstance().get(Calendar.YEAR), 2000, 2100, 1));
+        panelRegistro.add(spnAño, gbc);
+
+        gbc.gridx = 2; gbc.gridy = 2;
+        panelRegistro.add(new JLabel("Mes:"), gbc);
+        gbc.gridx = 3; gbc.weightx = 0;
+        spnMes = new JSpinner(new SpinnerNumberModel(Calendar.getInstance().get(Calendar.MONTH) + 1, 1, 12, 1));
+        panelRegistro.add(spnMes, gbc);
+
+        // Cuarta fila
+        gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0;
+        panelRegistro.add(new JLabel("Día:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0;
+        spnDia = new JSpinner(new SpinnerNumberModel(Calendar.getInstance().get(Calendar.DAY_OF_MONTH), 1, 31, 1));
+        panelRegistro.add(spnDia, gbc);
+
+        gbc.gridx = 2; gbc.gridy = 3;
+        panelRegistro.add(new JLabel("Plazo Pago (YYYY-MM-DD):"), gbc);
+        gbc.gridx = 3; gbc.weightx = 1.0;
         txtPlazoPago = new JTextField(15);
         panelRegistro.add(txtPlazoPago, gbc);
 
-        gbc.gridx = 2; gbc.gridy = 3; gbc.weightx = 0;
-        panelRegistro.add(new JLabel("Fecha Pago (AAAA-MM-DD):"), gbc);
-        gbc.gridx = 3; gbc.gridy = 3; gbc.weightx = 1.0;
+        // Quinta fila
+        gbc.gridx = 0; gbc.gridy = 4; gbc.weightx = 0;
+        panelRegistro.add(new JLabel("Fecha Pago (YYYY-MM-DD):"), gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
         txtFechaPago = new JTextField(15);
         panelRegistro.add(txtFechaPago, gbc);
 
         gbc.gridx = 2; gbc.gridy = 4; gbc.weightx = 0;
+        panelRegistro.add(new JLabel("Estado Factura:"), gbc);
+        gbc.gridx = 3; gbc.weightx = 1.0;
+        cbEstadoFactura = new JComboBox<>(new String[]{" 0 - Generada", " 1 - Parcial", " 2 - Completa", " 9 - Cancelada"});
+        panelRegistro.add(cbEstadoFactura, gbc);
+
+        // Sexta fila
+        gbc.gridx = 0; gbc.gridy = 5; gbc.weightx = 0;
         panelRegistro.add(new JLabel("Estado Registro:"), gbc);
-        gbc.gridx = 3; gbc.gridy = 4; gbc.weightx = 1.0;
-        txtEstadoRegistro = new JTextField(1);
+        gbc.gridx = 1; gbc.weightx = 0;
+        txtEstadoRegistro = new JTextField(5);
         txtEstadoRegistro.setEditable(false);
         panelRegistro.add(txtEstadoRegistro, gbc);
+
+        // Séptima fila - Nota
+        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 4;
+        JLabel lblNota = new JLabel("* Las fechas deben ingresarse en formato YYYY-MM-DD (ej: 2024-12-31)");
+        lblNota.setFont(lblNota.getFont().deriveFont(Font.ITALIC, 10f));
+        lblNota.setForeground(Color.GRAY);
+        panelRegistro.add(lblNota, gbc);
 
         add(panelRegistro, BorderLayout.NORTH);
 
         JPanel panelTabla = new JPanel(new BorderLayout());
         panelTabla.setBorder(BorderFactory.createTitledBorder("Facturas"));
-        tableModel = new DefaultTableModel(new Object[]{"Cód. Factura", "Cliente", "Representante", "Importe", "Año", "Mes", "Día", "Plazo Pago", "Fecha Pago", "Estado"}, 0) {
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
+        tableModel = new DefaultTableModel(new Object[]{"Código", "Cliente", "Representante", "Importe", "Año", "Mes", "Día", "Plazo Pago", "Fecha Pago", "Estado Reg", "Estado Fact", "Nombre Cliente", "Nombre Rep"}, 0) {
+            public boolean isCellEditable(int row, int col) { return false; }
         };
         tablaFacturas = new JTable(tableModel);
         panelTabla.add(new JScrollPane(tablaFacturas), BorderLayout.CENTER);
@@ -159,31 +193,29 @@ public class FacturaFrame extends JFrame{
                     if (i != -1) {
                         txtCodigo.setText(tableModel.getValueAt(i, 0).toString());
                         
-                        // Buscar y seleccionar cliente en el combo
-                        String clienteNombre = tableModel.getValueAt(i, 1).toString();
-                        for (int j = 0; j < cmbCliente.getItemCount(); j++) {
-                            if (cmbCliente.getItemAt(j).equals(clienteNombre)) {
-                                cmbCliente.setSelectedIndex(j);
-                                break;
-                            }
-                        }
+                        // Seleccionar cliente por código
+                        int codigoCli = Integer.parseInt(tableModel.getValueAt(i, 1).toString());
+                        seleccionarEnComboBoxPorCodigo(cbCliente, codigoCli);
                         
-                        // Buscar y seleccionar representante en el combo
-                        String repNombre = tableModel.getValueAt(i, 2).toString();
-                        for (int j = 0; j < cmbRepresentante.getItemCount(); j++) {
-                            if (cmbRepresentante.getItemAt(j).equals(repNombre)) {
-                                cmbRepresentante.setSelectedIndex(j);
-                                break;
-                            }
-                        }
+                        // Seleccionar representante por código
+                        int codigoRep = Integer.parseInt(tableModel.getValueAt(i, 2).toString());
+                        seleccionarEnComboBoxPorCodigo(cbRepresentante, codigoRep);
                         
-                        txtImporteTotal.setText(tableModel.getValueAt(i, 3).toString());
-                        txtAño.setText(tableModel.getValueAt(i, 4).toString());
-                        txtMes.setText(tableModel.getValueAt(i, 5).toString());
-                        txtDia.setText(tableModel.getValueAt(i, 6).toString());
-                        txtPlazoPago.setText(tableModel.getValueAt(i, 7) != null ? dateFormat.format((Date) tableModel.getValueAt(i, 7)) : "");
-                        txtFechaPago.setText(tableModel.getValueAt(i, 8) != null ? dateFormat.format((Date) tableModel.getValueAt(i, 8)) : "");
+                        txtImporte.setText(tableModel.getValueAt(i, 3).toString());
+                        spnAño.setValue(Integer.parseInt(tableModel.getValueAt(i, 4).toString()));
+                        spnMes.setValue(Integer.parseInt(tableModel.getValueAt(i, 5).toString()));
+                        spnDia.setValue(Integer.parseInt(tableModel.getValueAt(i, 6).toString()));
+                        
+                        Object plazoPago = tableModel.getValueAt(i, 7);
+                        txtPlazoPago.setText(plazoPago != null ? plazoPago.toString() : "");
+                        
+                        Object fechaPago = tableModel.getValueAt(i, 8);
+                        txtFechaPago.setText(fechaPago != null ? fechaPago.toString() : "");
+                        
                         txtEstadoRegistro.setText(tableModel.getValueAt(i, 9).toString());
+                        cbEstadoFactura.setSelectedIndex(Integer.parseInt(tableModel.getValueAt(i, 10).toString()));
+                        
+                        codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(i, 0).toString());
                         habilitarBotonesParaSeleccion();
                     }
                 }
@@ -192,8 +224,6 @@ public class FacturaFrame extends JFrame{
         add(panelTabla, BorderLayout.CENTER);
 
         JPanel panelBotones = new JPanel(new GridLayout(2, 4, 10, 10));
-        panelBotones.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
         btnAdicionar = new JButton("Adicionar");
         btnModificar = new JButton("Modificar");
         btnEliminar = new JButton("Eliminar");
@@ -209,53 +239,54 @@ public class FacturaFrame extends JFrame{
         add(panelBotones, BorderLayout.SOUTH);
 
         btnAdicionar.addActionListener(e -> comandoAdicionar());
+        btnActualizar.addActionListener(e -> comandoActualizar());
+        btnCancelar.addActionListener(e -> comandoCancelar());
+        btnSalir.addActionListener(e -> comandoSalir());
         btnModificar.addActionListener(e -> comandoModificar());
         btnEliminar.addActionListener(e -> comandoEliminar());
         btnInactivar.addActionListener(e -> comandoInactivar());
         btnReactivar.addActionListener(e -> comandoReactivar());
-        btnActualizar.addActionListener(e -> comandoActualizar());
-        btnCancelar.addActionListener(e -> comandoCancelar());
-        btnSalir.addActionListener(e -> comandoSalir());
     }
 
-    private void cargarDatosComboBox() {
+    private void cargarComboBoxes() {
         // Cargar clientes activos
-        listaClientes = clienteDAO.obtenerClientesActivos();
-        cmbCliente.removeAllItems();
-        cmbCliente.addItem("Seleccionar Cliente...");
-        for (Cliente cliente : listaClientes) {
-            cmbCliente.addItem(cliente.getCliNom() + " " + cliente.getCliApePat() + " " + cliente.getCliApeMat() + " (Cod: " + cliente.getCliCod() + ")");
+        List<Cliente> clientes = clienteDAO.obtenerClientesActivos();
+        cbCliente.removeAllItems();
+        cbCliente.addItem(new ComboItem(0, "-- Seleccionar Cliente --"));
+        for (Cliente cli : clientes) {
+            cbCliente.addItem(new ComboItem(cli.getCliCod(), cli.getCliNom()));
         }
-        
-        // Cargar todos los representantes
-        listaRepresentantes = repVentaDAO.obtenerTodosRepresentantes();
-        cmbRepresentante.removeAllItems();
-        cmbRepresentante.addItem("Seleccionar Representante...");
-        for (RepVenta rep : listaRepresentantes) {
-            cmbRepresentante.addItem(rep.getRepNom() + " (Cod: " + rep.getRepCod() + ")");
+
+        // Cargar representantes activos
+        List<RepVenta> representantes = repVentaDAO.obtenerRepresentantesActivos();
+        cbRepresentante.removeAllItems();
+        cbRepresentante.addItem(new ComboItem(0, "-- Seleccionar Representante --"));
+        for (RepVenta rep : representantes) {
+            cbRepresentante.addItem(new ComboItem(rep.getRepCod(), rep.getRepNom()));
         }
     }
 
-    private int obtenerCodigoClienteSeleccionado() {
-        int index = cmbCliente.getSelectedIndex();
-        if (index <= 0) return -1;
-        return listaClientes.get(index - 1).getCliCod();
-    }
-
-    private int obtenerCodigoRepresentanteSeleccionado() {
-        int index = cmbRepresentante.getSelectedIndex();
-        if (index <= 0) return -1;
-        return listaRepresentantes.get(index - 1).getRepCod();
+    private void seleccionarEnComboBoxPorCodigo(JComboBox<ComboItem> comboBox, int codigo) {
+        for (int i = 0; i < comboBox.getItemCount(); i++) {
+            ComboItem item = comboBox.getItemAt(i);
+            if (item.getCodigo() == codigo) {
+                comboBox.setSelectedIndex(i);
+                return;
+            }
+        }
+        comboBox.setSelectedIndex(0); // Si no encuentra, selecciona el primer item
     }
 
     private void comandoAdicionar() {
         limpiarCampos();
         habilitarControles(true);
         txtEstadoRegistro.setText("A");
+        cbCliente.setSelectedIndex(0);
+        cbRepresentante.setSelectedIndex(0);
+        cbEstadoFactura.setSelectedIndex(0);
         operacionActual = "ADICIONAR";
         flagCarFlaAct = 1;
         habilitarBotonesParaOperacion();
-        cmbCliente.requestFocusInWindow();
     }
 
     private void comandoActualizar() {
@@ -264,59 +295,57 @@ public class FacturaFrame extends JFrame{
             return;
         }
 
-        try {
-            int cliCod = obtenerCodigoClienteSeleccionado();
-            int repCod = obtenerCodigoRepresentanteSeleccionado();
-            
-            if (cliCod == -1) {
-                JOptionPane.showMessageDialog(this, "Debe seleccionar un cliente.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            
-            if (repCod == -1) {
-                JOptionPane.showMessageDialog(this, "Debe seleccionar un representante.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            
-            BigDecimal importe = new BigDecimal(txtImporteTotal.getText().trim());
-            int año = Integer.parseInt(txtAño.getText().trim());
-            int mes = Integer.parseInt(txtMes.getText().trim());
-            int dia = Integer.parseInt(txtDia.getText().trim());
-            Date plazoPago = txtPlazoPago.getText().trim().isEmpty() ? null : Date.valueOf(txtPlazoPago.getText().trim());
-            Date fechaPago = txtFechaPago.getText().trim().isEmpty() ? null : Date.valueOf(txtFechaPago.getText().trim());
-            String estadoRegistro = txtEstadoRegistro.getText().trim();
+        String importeStr = txtImporte.getText().trim();
+        String estadoStr = txtEstadoRegistro.getText().trim();
 
-            if (importe.compareTo(BigDecimal.ZERO) < 0) { // chk_fac_importe_check
-                JOptionPane.showMessageDialog(this, "El importe total no puede ser negativo.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
-                return;
+        if (importeStr.isEmpty() || estadoStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Los campos Importe y Estado son obligatorios.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Validar selección de cliente
+        ComboItem clienteSeleccionado = (ComboItem) cbCliente.getSelectedItem();
+        if (clienteSeleccionado == null || clienteSeleccionado.getCodigo() == 0) {
+            JOptionPane.showMessageDialog(this, "Debe seleccionar un cliente.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Validar selección de representante
+        ComboItem representanteSeleccionado = (ComboItem) cbRepresentante.getSelectedItem();
+        if (representanteSeleccionado == null || representanteSeleccionado.getCodigo() == 0) {
+            JOptionPane.showMessageDialog(this, "Debe seleccionar un representante.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            BigDecimal importe = new BigDecimal(importeStr);
+            int año = (Integer) spnAño.getValue();
+            int mes = (Integer) spnMes.getValue();
+            int dia = (Integer) spnDia.getValue();
+            
+            Date plazoPago = null;
+            if (!txtPlazoPago.getText().trim().isEmpty()) {
+                plazoPago = Date.valueOf(txtPlazoPago.getText().trim());
             }
-            if (año < 2000) { // chk_fac_año_check
-                JOptionPane.showMessageDialog(this, "El año debe ser 2000 o posterior.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
-                return;
+            
+            Date fechaPago = null;
+            if (!txtFechaPago.getText().trim().isEmpty()) {
+                fechaPago = Date.valueOf(txtFechaPago.getText().trim());
             }
-            if (mes < 1 || mes > 12) { // chk_fac_mes_check
-                JOptionPane.showMessageDialog(this, "El mes debe estar entre 1 y 12.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            if (dia < 1 || dia > 31) { // chk_fac_dia_check
-                JOptionPane.showMessageDialog(this, "El día debe estar entre 1 y 31.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            if (!estadoRegistro.matches("A|I|\\*")) {
-                JOptionPane.showMessageDialog(this, "El Estado de Registro solo puede ser 'A', 'I' o '*'.", "Error de Validación", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
+
+            int estadoFactura = cbEstadoFactura.getSelectedIndex();
 
             Factura factura = new Factura();
-            factura.setCliCod(cliCod);
-            factura.setRepCod(repCod);
+            factura.setCliCod(clienteSeleccionado.getCodigo());
+            factura.setRepCod(representanteSeleccionado.getCodigo());
             factura.setFacImp(importe);
             factura.setFacAño(año);
             factura.setFacMes(mes);
             factura.setFacDia(dia);
             factura.setFacPlazoPago(plazoPago);
             factura.setFacFechPago(fechaPago);
-            factura.setFacEstReg(estadoRegistro.charAt(0));
+            factura.setFacEstReg(estadoStr.charAt(0));
+            factura.setFacEstado(estadoFactura);
 
             boolean exito = false;
             String mensaje = "";
@@ -324,29 +353,23 @@ public class FacturaFrame extends JFrame{
             switch (operacionActual) {
                 case "ADICIONAR":
                     exito = facturaDAO.insertarFactura(factura);
-                    mensaje = exito ? "Factura adicionada con éxito." : "Error al adicionar factura.";
+                    mensaje = exito ? "Factura registrada con éxito." : "Error al registrar factura.";
                     break;
                 case "MODIFICAR":
-                    factura.setFacCod(Integer.parseInt(txtCodigo.getText().trim()));
+                    factura.setFacCod(codigoSeleccionado);
                     exito = facturaDAO.actualizarFactura(factura);
                     mensaje = exito ? "Factura modificada con éxito." : "Error al modificar factura.";
                     break;
                 case "ELIMINAR":
-                    int confirm = JOptionPane.showConfirmDialog(this,  "¿Está seguro de marcar este registro como ELIMINADO LÓGICAMENTE ('*')?", "Confirmar Eliminación Lógica", JOptionPane.YES_NO_OPTION);
-                    if (confirm == JOptionPane.YES_OPTION) {
-                        exito = facturaDAO.eliminarLogicamenteFactura(Integer.parseInt(txtCodigo.getText()));
-                        mensaje = exito ? "Factura eliminada físicamente con éxito." : "Error al eliminar factura.";
-                    } else {
-                        mensaje = "Operación de eliminación cancelada.";
-                        exito = true;
-                    }
+                    exito = facturaDAO.eliminarLogicamenteFactura(codigoSeleccionado);
+                    mensaje = exito ? "Factura eliminada con éxito." : "Error al eliminar factura.";
                     break;
                 case "INACTIVAR":
-                    exito = facturaDAO.inactivarFactura(Integer.parseInt(txtCodigo.getText()));
+                    exito = facturaDAO.inactivarFactura(codigoSeleccionado);
                     mensaje = exito ? "Factura inactivada con éxito." : "Error al inactivar factura.";
                     break;
                 case "REACTIVAR":
-                    exito = facturaDAO.reactivarFactura(Integer.parseInt(txtCodigo.getText()));
+                    exito = facturaDAO.reactivarFactura(codigoSeleccionado);
                     mensaje = exito ? "Factura reactivada con éxito." : "Error al reactivar factura.";
                     break;
                 default:
@@ -356,125 +379,115 @@ public class FacturaFrame extends JFrame{
 
             if (exito) {
                 JOptionPane.showMessageDialog(this, mensaje, "Éxito", JOptionPane.INFORMATION_MESSAGE);
-                limpiarCampos();
-                habilitarControles(false);
                 cargarTablaFacturas();
-                flagCarFlaAct = 0;
-                operacionActual = "";
-                habilitarBotonesIniciales();
+                comandoCancelar();
             } else {
                 JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
             }
 
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Error de formato numérico. Asegúrese de que todos los campos numéricos contengan valores válidos.", "Error de Entrada", JOptionPane.ERROR_MESSAGE);
-        } catch (IllegalArgumentException ex) {
-            JOptionPane.showMessageDialog(this, "Error de formato de fecha. Use el formato AAAA-MM-DD.", "Error de Entrada", JOptionPane.ERROR_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error inesperado al actualizar: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "El importe debe ser un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this, "Formato de fecha inválido. Use YYYY-MM-DD.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void comandoCancelar() {
         limpiarCampos();
         habilitarControles(false);
-        flagCarFlaAct = 0;
         operacionActual = "";
+        flagCarFlaAct = 0;
+        codigoSeleccionado = 0;
         habilitarBotonesIniciales();
-        tablaFacturas.clearSelection();
     }
 
     private void comandoSalir() {
-        int confirm = JOptionPane.showConfirmDialog(this, "¿Está seguro que desea salir del mantenimiento de Facturas?", "Confirmar Salida", JOptionPane.YES_NO_OPTION);
-        if (confirm == JOptionPane.YES_OPTION) {
-            dispose();
-        }
+        dispose();
     }
 
     private void cargarTablaFacturas() {
         tableModel.setRowCount(0);
-        List<Factura> facturas = facturaDAO.obtenerTodasFacturas();
-        for (Factura fac : facturas) {
+        List<Factura> lista = facturaDAO.obtenerTodasFacturas();
+        for (Factura f : lista) {
+            // Obtener descripciones para mostrar en la tabla
+            String nombreCliente = "";
+            String nombreRep = "";
+            
             // Buscar nombre del cliente
-            String nombreCliente = "Cliente no encontrado";
-            for (Cliente cliente : listaClientes) {
-                if (cliente.getCliCod() == fac.getCliCod()) {
-                    nombreCliente = cliente.getCliNom() + " " + cliente.getCliApePat() + " " + cliente.getCliApeMat();
-                    break;
-                }
+            Cliente cliente = clienteDAO.obtenerClientePorCodigo(f.getCliCod());
+            if (cliente != null) {
+                nombreCliente = cliente.getCliNom();
             }
             
             // Buscar nombre del representante
-            String nombreRepresentante = "Representante no encontrado";
-            for (RepVenta rep : listaRepresentantes) {
-                if (rep.getRepCod() == fac.getRepCod()) {
-                    nombreRepresentante = rep.getRepNom();
-                    break;
-                }
+            RepVenta rep = repVentaDAO.obtenerRepresentantePorCodigo(f.getRepCod());
+            if (rep != null) {
+                nombreRep = rep.getRepNom();
             }
             
             tableModel.addRow(new Object[]{
-                fac.getFacCod(),
+                f.getFacCod(), 
+                f.getCliCod(), 
+                f.getRepCod(), 
+                f.getFacImp(), 
+                f.getFacAño(),
+                f.getFacMes(),
+                f.getFacDia(),
+                f.getFacPlazoPago(),
+                f.getFacFechPago(),
+                f.getFacEstReg(),
+                f.getFacEstado(),
                 nombreCliente,
-                nombreRepresentante,
-                fac.getFacImp(),
-                fac.getFacAño(),
-                fac.getFacMes(),
-                fac.getFacDia(),
-                fac.getFacPlazoPago(),
-                fac.getFacFechPago(),
-                fac.getFacEstReg()
+                nombreRep
             });
         }
     }
 
     private void habilitarControles(boolean b) {
-        txtCodigo.setEditable(false);
-        cmbCliente.setEnabled(b);
-        cmbRepresentante.setEnabled(b);
-        txtImporteTotal.setEditable(b);
-        txtAño.setEditable(b);
-        txtMes.setEditable(b);
-        txtDia.setEditable(b);
+        cbCliente.setEnabled(b);
+        cbRepresentante.setEnabled(b);
+        txtImporte.setEditable(b);
+        spnAño.setEnabled(b);
+        spnMes.setEnabled(b);
+        spnDia.setEnabled(b);
         txtPlazoPago.setEditable(b);
         txtFechaPago.setEditable(b);
-        txtEstadoRegistro.setEditable(false);
+        cbEstadoFactura.setEnabled(b);
+        // txtCodigo y txtEstadoRegistro siempre permanecen no editables
     }
 
     private void limpiarCampos() {
         txtCodigo.setText("");
-        cmbCliente.setSelectedIndex(0);
-        cmbRepresentante.setSelectedIndex(0);
-        txtImporteTotal.setText("");
-        txtAño.setText("");
-        txtMes.setText("");
-        txtDia.setText("");
+        cbCliente.setSelectedIndex(0);
+        cbRepresentante.setSelectedIndex(0);
+        txtImporte.setText("");
+        spnAño.setValue(Calendar.getInstance().get(Calendar.YEAR));
+        spnMes.setValue(Calendar.getInstance().get(Calendar.MONTH) + 1);
+        spnDia.setValue(Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
         txtPlazoPago.setText("");
         txtFechaPago.setText("");
         txtEstadoRegistro.setText("");
+        cbEstadoFactura.setSelectedIndex(0);
     }
 
     private void habilitarBotonesIniciales() {
         btnAdicionar.setEnabled(true);
+        btnActualizar.setEnabled(false);
+        btnCancelar.setEnabled(false);
         btnModificar.setEnabled(false);
         btnEliminar.setEnabled(false);
         btnInactivar.setEnabled(false);
         btnReactivar.setEnabled(false);
-        btnActualizar.setEnabled(false);
-        btnCancelar.setEnabled(false);
-        btnSalir.setEnabled(true);
     }
 
     private void habilitarBotonesParaOperacion() {
         btnAdicionar.setEnabled(false);
+        btnActualizar.setEnabled(true);
+        btnCancelar.setEnabled(true);
         btnModificar.setEnabled(false);
         btnEliminar.setEnabled(false);
         btnInactivar.setEnabled(false);
         btnReactivar.setEnabled(false);
-        btnActualizar.setEnabled(true);
-        btnCancelar.setEnabled(true);
-        btnSalir.setEnabled(false);
     }
 
     private void habilitarBotonesParaSeleccion() {
@@ -491,42 +504,37 @@ public class FacturaFrame extends JFrame{
     private void comandoModificar() {
         int selectedRow = tablaFacturas.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un registro de la tabla para modificar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleccione un registro para modificar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
         habilitarControles(true);
-        txtCodigo.setEditable(false);
-        txtEstadoRegistro.setEditable(false);
         operacionActual = "MODIFICAR";
         flagCarFlaAct = 1;
         habilitarBotonesParaOperacion();
-        cmbCliente.requestFocusInWindow();
     }
 
     private void comandoEliminar() {
         int selectedRow = tablaFacturas.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un registro de la tabla para eliminar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleccione un registro para eliminar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
-        cargarDatosDeFilaSeleccionada(selectedRow);
+        cargarDatosSeleccionados(selectedRow);
         txtEstadoRegistro.setText("*");
         habilitarControles(false);
         operacionActual = "ELIMINAR";
         flagCarFlaAct = 1;
         habilitarBotonesParaOperacion();
-        JOptionPane.showMessageDialog(this, "El registro se eliminará FÍSICAMENTE.\nPresione 'Actualizar' para confirmar.", "Confirmar Eliminación", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(this, "El registro se marcará como eliminado ('*').\nPresione 'Actualizar' para confirmar.", "Eliminación Lógica", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void comandoInactivar() {
         int selectedRow = tablaFacturas.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un registro de la tabla para inactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleccione un registro para inactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
-        cargarDatosDeFilaSeleccionada(selectedRow);
+        cargarDatosSeleccionados(selectedRow);
         txtEstadoRegistro.setText("I");
         habilitarControles(false);
         operacionActual = "INACTIVAR";
@@ -538,11 +546,10 @@ public class FacturaFrame extends JFrame{
     private void comandoReactivar() {
         int selectedRow = tablaFacturas.getSelectedRow();
         if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Seleccione un registro de la tabla para reactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Seleccione un registro para reactivar.", "Advertencia", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        
-        cargarDatosDeFilaSeleccionada(selectedRow);
+        cargarDatosSeleccionados(selectedRow);
         txtEstadoRegistro.setText("A");
         habilitarControles(false);
         operacionActual = "REACTIVAR";
@@ -550,34 +557,31 @@ public class FacturaFrame extends JFrame{
         habilitarBotonesParaOperacion();
         JOptionPane.showMessageDialog(this, "El registro se marcará como activo ('A').\nPresione 'Actualizar' para confirmar.", "Reactivar Registro", JOptionPane.INFORMATION_MESSAGE);
     }
-    
-    private void cargarDatosDeFilaSeleccionada(int selectedRow) {
+
+    private void cargarDatosSeleccionados(int selectedRow) {
         txtCodigo.setText(tableModel.getValueAt(selectedRow, 0).toString());
         
-        // Buscar y seleccionar cliente en el combo
-        String clienteNombre = tableModel.getValueAt(selectedRow, 1).toString();
-        for (int j = 0; j < cmbCliente.getItemCount(); j++) {
-            if (cmbCliente.getItemAt(j).contains(clienteNombre.split(" ")[0])) {
-                cmbCliente.setSelectedIndex(j);
-                break;
-            }
-        }
+        // Seleccionar cliente por código
+        int codigoCli = Integer.parseInt(tableModel.getValueAt(selectedRow, 1).toString());
+        seleccionarEnComboBoxPorCodigo(cbCliente, codigoCli);
         
-        // Buscar y seleccionar representante en el combo
-        String repNombre = tableModel.getValueAt(selectedRow, 2).toString();
-        for (int j = 0; j < cmbRepresentante.getItemCount(); j++) {
-            if (cmbRepresentante.getItemAt(j).contains(repNombre)) {
-                cmbRepresentante.setSelectedIndex(j);
-                break;
-            }
-        }
+        // Seleccionar representante por código
+        int codigoRep = Integer.parseInt(tableModel.getValueAt(selectedRow, 2).toString());
+        seleccionarEnComboBoxPorCodigo(cbRepresentante, codigoRep);
         
-        txtImporteTotal.setText(tableModel.getValueAt(selectedRow, 3).toString());
-        txtAño.setText(tableModel.getValueAt(selectedRow, 4).toString());
-        txtMes.setText(tableModel.getValueAt(selectedRow, 5).toString());
-        txtDia.setText(tableModel.getValueAt(selectedRow, 6).toString());
-        txtPlazoPago.setText(tableModel.getValueAt(selectedRow, 7) != null ? dateFormat.format((Date) tableModel.getValueAt(selectedRow, 7)) : "");
-        txtFechaPago.setText(tableModel.getValueAt(selectedRow, 8) != null ? dateFormat.format((Date) tableModel.getValueAt(selectedRow, 8)) : "");
-        txtEstadoRegistro.setText(tableModel.getValueAt(selectedRow, 9).toString());
+        txtImporte.setText(tableModel.getValueAt(selectedRow, 3).toString());
+        spnAño.setValue(Integer.parseInt(tableModel.getValueAt(selectedRow, 4).toString()));
+        spnMes.setValue(Integer.parseInt(tableModel.getValueAt(selectedRow, 5).toString()));
+        spnDia.setValue(Integer.parseInt(tableModel.getValueAt(selectedRow, 6).toString()));
+        
+        Object plazoPago = tableModel.getValueAt(selectedRow, 7);
+        txtPlazoPago.setText(plazoPago != null ? plazoPago.toString() : "");
+        
+        Object fechaPago = tableModel.getValueAt(selectedRow, 8);
+        txtFechaPago.setText(fechaPago != null ? fechaPago.toString() : "");
+        
+        cbEstadoFactura.setSelectedIndex(Integer.parseInt(tableModel.getValueAt(selectedRow, 10).toString()));
+        
+        codigoSeleccionado = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
     }
 }

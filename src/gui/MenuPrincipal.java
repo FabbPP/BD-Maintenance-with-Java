@@ -1,8 +1,6 @@
 package gui;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class MenuPrincipal extends JFrame{
 
@@ -74,5 +72,22 @@ public class MenuPrincipal extends JFrame{
         itemUsuarioSistema.addActionListener(e -> new UsuarioSistemaFrame().setVisible(true));
 
         itemSalir.addActionListener(e -> System.exit(0));
+
+        // Menú para consultas personalizadas
+        JMenu menuConsultas = new JMenu("Consultas");
+
+        JMenuItem itemConsultaRepresentante = new JMenuItem("Ventas por Representante");
+        JMenuItem itemConsultaProducto = new JMenuItem("Estadísticas de Productos");
+
+        itemConsultaRepresentante.addActionListener(e -> new gui.consultas.ConsultaRepresentanteFrame().setVisible(true));
+        itemConsultaProducto.addActionListener(e -> new gui.consultas.ConsultaProductoFrame().setVisible(true));
+
+        menuConsultas.add(itemConsultaRepresentante);
+        menuConsultas.add(itemConsultaProducto);
+
+        // Agregar el nuevo menú a la barra
+        menuBar.add(menuConsultas);
+
+
     }
 }

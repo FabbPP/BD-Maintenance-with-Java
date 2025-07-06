@@ -1,18 +1,16 @@
 package dao;
 
 import conexion.ConexionBD;
-import modelo.Factura;
-
-import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import modelo.Factura;
 
 public class FacturaDAO{
 
     public List<Factura> obtenerTodasFacturas() {
         List<Factura> facturas = new ArrayList<>();
-        String sql = "SELECT FacCod, CliCod, RepCod, Faclmp, FacAño, FacMes, FacDia, FactPlazoPago, FactFechPago, FacEstReg FROM FACTURA";
+        String sql = "SELECT FacCod, CliCod, RepCod, Faclmp, FacAño, FacMes, FacDia, FactPlazoPago, FactFechPago, FacEstReg, FacEstado FROM FACTURA";
         try (Connection conn = ConexionBD.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -28,7 +26,8 @@ public class FacturaDAO{
                      rs.getInt("FacDia"),
                      rs.getDate("FactPlazoPago"),
                      rs.getDate("FactFechPago"),
-                     rs.getString("FacEstReg").charAt(0)
+                     rs.getString("FacEstReg").charAt(0),
+                     rs.getInt("FacEstado")
                 );     
                 facturas.add(fac);
             }
@@ -39,7 +38,7 @@ public class FacturaDAO{
     }
 
     public Factura obtenerFacturaPorCodigo(int codigo) {
-        String sql = "SELECT FacCod, CliCod, RepCod, Faclmp, FacAño, FacMes, FacDia, FactPlazoPago, FactFechPago, FacEstReg FROM FACTURA WHERE FacCod = ?";
+        String sql = "SELECT FacCod, CliCod, RepCod, Faclmp, FacAño, FacMes, FacDia, FactPlazoPago, FactFechPago, FacEstReg, FacEstado FROM FACTURA WHERE FacCod = ?";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -56,7 +55,8 @@ public class FacturaDAO{
                         rs.getInt("FacDia"),
                         rs.getDate("FactPlazoPago"),
                         rs.getDate("FactFechPago"),
-                        rs.getString("FacEstReg").charAt(0)
+                        rs.getString("FacEstReg").charAt(0),
+                        rs.getInt("FacEstado")
                     );
                     return fac;
                 }
@@ -68,7 +68,7 @@ public class FacturaDAO{
     }
 
     public boolean insertarFactura(Factura factura) {
-        String sql = "INSERT INTO FACTURA (CliCod, RepCod, Faclmp, FacAño, FacMes, FacDia, FactPlazoPago, FactFechPago, FacEstReg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO FACTURA (CliCod, RepCod, Faclmp, FacAño, FacMes, FacDia, FactPlazoPago, FactFechPago, FacEstReg, FacEstado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -81,6 +81,7 @@ public class FacturaDAO{
             pstmt.setDate(7, factura.getFacPlazoPago());
             pstmt.setDate(8, factura.getFacFechPago());
             pstmt.setString(9, String.valueOf(factura.getFacEstReg()));
+            pstmt.setInt(10, factura.getFacEstado());
 
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -98,7 +99,7 @@ public class FacturaDAO{
     }
 
     public boolean actualizarFactura(Factura factura) {
-        String sql = "UPDATE FACTURA SET CliCod = ?, RepCod = ?, Faclmp = ?, FacAño = ?, FacMes = ?, FacDia = ?, FactPlazoPago = ?, FactFechPago = ?, FacEstReg = ? WHERE FacCod = ?";
+        String sql = "UPDATE FACTURA SET CliCod = ?, RepCod = ?, Faclmp = ?, FacAño = ?, FacMes = ?, FacDia = ?, FactPlazoPago = ?, FactFechPago = ?, FacEstReg = ?, FacEstado = ? WHERE FacCod = ?";
         try (Connection conn = ConexionBD.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
@@ -111,7 +112,8 @@ public class FacturaDAO{
             pstmt.setDate(7, factura.getFacPlazoPago());
             pstmt.setDate(8, factura.getFacFechPago());
             pstmt.setString(9, String.valueOf(factura.getFacEstReg()));
-            pstmt.setInt(10, factura.getFacCod());
+            pstmt.setInt(10, factura.getFacEstado());
+            pstmt.setInt(11, factura.getFacCod());
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error al actualizar factura: " + e.getMessage());
@@ -128,7 +130,7 @@ public class FacturaDAO{
             return pstmt.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            System.err.println("Error al eliminar lógicamente departamento: " + e.getMessage());
+            System.err.println("Error al eliminar lógicamente factura: " + e.getMessage());
             return false;
         }
     }
@@ -142,7 +144,7 @@ public class FacturaDAO{
             return pstmt.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            System.err.println("Error al inactivar departamento: " + e.getMessage());
+            System.err.println("Error al inactivar factura: " + e.getMessage());
             return false;
         }
     }
@@ -156,8 +158,39 @@ public class FacturaDAO{
             return pstmt.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            System.err.println("Error al reactivar departamento: " + e.getMessage());
+            System.err.println("Error al reactivar factura: " + e.getMessage());
             return false;
         }
+    }
+
+    public List<Factura> obtenerFacturasPorEstado(int estado) {
+        List<Factura> facturas = new ArrayList<>();
+        String sql = "SELECT FacCod, CliCod, RepCod, Faclmp, FacAño, FacMes, FacDia, FactPlazoPago, FactFechPago, FacEstReg, FacEstado FROM FACTURA WHERE FacEstado = ?";
+        try (Connection conn = ConexionBD.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, estado);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Factura fac = new Factura(
+                         rs.getInt("FacCod"),
+                         rs.getInt("CliCod"),
+                         rs.getInt("RepCod"),
+                         rs.getBigDecimal("Faclmp"),
+                         rs.getInt("FacAño"),
+                         rs.getInt("FacMes"),
+                         rs.getInt("FacDia"),
+                         rs.getDate("FactPlazoPago"),
+                         rs.getDate("FactFechPago"),
+                         rs.getString("FacEstReg").charAt(0),
+                         rs.getInt("FacEstado")
+                    );     
+                    facturas.add(fac);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener facturas por estado: " + e.getMessage());
+        }
+        return facturas;
     }
 }

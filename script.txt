@@ -386,3 +386,42 @@ DROP COLUMN `FacFab`;
 
 ALTER TABLE `sistema_ventas`.`cliente` 
 DROP COLUMN `CliLim`;
+
+-- ============================================================================
+-- actualizacion para los triggers
+-- ============================================================================
+
+-- Agregar columna de estado a la tabla FACTURA para el trigger simple
+ALTER TABLE FACTURA ADD COLUMN FacEstado INT DEFAULT 0 COMMENT 'Estado: 0=Generada, 1=Parcial, 2=Completa, 9=Cancelada';
+
+-- ============================================================================
+-- TRIGGER 1: SIMPLE - Auditoría de cambios de estado de factura
+-- ============================================================================
+
+DELIMITER //
+
+CREATE TRIGGER trg_auditoria_factura_estado
+AFTER UPDATE ON FACTURA
+FOR EACH ROW
+BEGIN
+    -- Solo se ejecuta si cambió el estado de la factura
+    IF OLD.FacEstado != NEW.FacEstado THEN
+        INSERT INTO AUDITORIA (
+            UsuCod, 
+            AudiFecha, 
+            AudiHora, 
+            AudiDescri, 
+            AudiDet, 
+            ModAudiCod
+        ) VALUES (
+            1, -- Usuario por defecto (se puede parametrizar)
+            CURDATE(),
+            CURTIME(),
+            'Cambio de estado de factura',
+            CONCAT('Factura ', NEW.FacCod, ' cambió de estado ', OLD.FacEstado, ' a ', NEW.FacEstado),
+            4 -- Módulo Facturas
+        );
+    END IF;
+END //
+
+DELIMITER ;
