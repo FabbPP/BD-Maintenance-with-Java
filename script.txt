@@ -498,3 +498,73 @@ BEGIN
 END //
 
 DELIMITER ;
+
+-- ==============================================================================
+-- Procedimiento almacenado 1: simple - Obtener una lista de productos detallada
+-- ==============================================================================
+
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS PA_ProductosPorCategoria;
+CREATE PROCEDURE PA_ProductosPorCategoria()
+BEGIN
+	CREATE OR REPLACE VIEW Vista_ProductosConCategoria AS
+    SELECT
+        p.ProdCod AS CodigoProducto,
+        p.ProdDes AS DescripcionProducto,
+        p.ProdPre AS PrecioUnitario,
+        p.ProdStock AS StockActual,
+        cp.ClasProDesc AS NombreClasificacionProducto
+    FROM
+        producto p
+    INNER JOIN
+        clasificacion_producto cp ON p.ClasProCod = cp.ClasProCod;
+
+    SELECT * FROM Vista_ProductosConCategoria;
+
+END //
+
+DELIMITER ;
+
+-- =======================================================================================================================================================
+-- Procedimiento almacenado 2: complejo - Monto total de ventas por producto, agrupado por su región geográfica y por el representante de ventas asignado
+-- =======================================================================================================================================================
+
+DELIMITER //
+
+DROP PROCEDURE IF EXISTS PA_ReporteRendimientoVentasRegional;
+CREATE PROCEDURE PA_ReporteRendimientoVentasRegional()
+BEGIN
+    CREATE OR REPLACE VIEW Vista_RendimientoVentasRegional AS
+    SELECT
+        o.OfiReg AS NombreRegion,
+        rep.RepNom AS NombreRepresentante,
+        p.ProdCod AS CodigoProducto,
+        p.ProdDes AS DescripcionProducto,
+        SUM(d.DetCan * d.DetPre) AS TotalVendidoProducto
+    FROM
+        factura f
+    INNER JOIN
+        detalles d ON f.FacCod = d.FacCod 
+    INNER JOIN
+        producto p ON d.ProCod = p.ProdCod
+    INNER JOIN
+        cliente c ON f.CliCod = c.CliCod
+    INNER JOIN
+        repventa rep ON f.RepCod = rep.RepCod
+    INNER JOIN
+        oficina o ON rep.OfiCod = o.OfiCod
+    GROUP BY
+        o.OfiReg,
+        rep.RepNom,
+        p.ProdCod,
+        p.ProdDes
+    ORDER BY
+        o.OfiReg,
+        TotalVendidoProducto DESC;
+
+    SELECT * FROM Vista_RendimientoVentasRegional;
+
+END //
+
+DELIMITER ;
