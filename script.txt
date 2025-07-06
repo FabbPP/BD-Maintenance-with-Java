@@ -393,6 +393,8 @@ DROP COLUMN `CliLim`;
 
 -- Agregar columna de estado a la tabla FACTURA para el trigger simple
 ALTER TABLE FACTURA ADD COLUMN FacEstado INT DEFAULT 0 COMMENT 'Estado: 0=Generada, 1=Parcial, 2=Completa, 9=Cancelada';
+-- Agregar columna de alerta a la tabla PRODUCTO para notificaciones de stock
+ALTER TABLE PRODUCTO ADD COLUMN ProdAlerta VARCHAR(200) NULL COMMENT 'Mensaje de alerta de stock';
 
 -- ============================================================================
 -- TRIGGER 1: SIMPLE - Auditoría de cambios de estado de factura
@@ -420,6 +422,77 @@ BEGIN
             'Cambio de estado de factura',
             CONCAT('Factura ', NEW.FacCod, ' cambió de estado ', OLD.FacEstado, ' a ', NEW.FacEstado),
             4 -- Módulo Facturas
+        );
+    END IF;
+END //
+
+DELIMITER ;
+
+
+-- ============================================================================
+-- TRIGGER 2: COMPLEJO - Control de stock con alertas automáticas
+-- ============================================================================
+
+DELIMITER //
+
+CREATE TRIGGER trg_control_stock_venta
+AFTER INSERT ON DETALLES
+FOR EACH ROW
+BEGIN
+    DECLARE v_stock_actual INT;
+    DECLARE v_stock_minimo INT;
+    DECLARE v_stock_maximo INT;
+    DECLARE v_producto_desc VARCHAR(100);
+    DECLARE v_mensaje_alerta VARCHAR(200);
+    
+    -- Obtener información del producto
+    SELECT p.ProdStock, p.ProdDes, r.ReporProdMin, r.ReporProdMax
+    INTO v_stock_actual, v_producto_desc, v_stock_minimo, v_stock_maximo
+    FROM PRODUCTO p
+    LEFT JOIN REPORPROD r ON p.ProdCod = r.ProdCod
+    WHERE p.ProdCod = NEW.ProCod;
+    
+    -- Actualizar el stock restando la cantidad vendida
+    UPDATE PRODUCTO 
+    SET ProdStock = ProdStock - NEW.DetCan
+    WHERE ProdCod = NEW.ProCod;
+    
+    -- Calcular el nuevo stock después de la venta
+    SET v_stock_actual = v_stock_actual - NEW.DetCan;
+    
+    -- Verificar si se necesita generar alerta
+    IF v_stock_minimo IS NOT NULL AND v_stock_actual <= v_stock_minimo THEN
+        -- Generar mensaje de alerta
+        SET v_mensaje_alerta = CONCAT(
+            'ALERTA: Stock bajo para ',
+            v_producto_desc,
+            '. Stock actual: ',
+            v_stock_actual,
+            ', Mínimo: ',
+            v_stock_minimo,
+            '. Solicitar reposición.'
+        );
+        
+        -- Actualizar la alerta en el producto
+        UPDATE PRODUCTO 
+        SET ProdAlerta = v_mensaje_alerta
+        WHERE ProdCod = NEW.ProCod;
+        
+        -- Registrar en auditoría
+        INSERT INTO AUDITORIA (
+            UsuCod, 
+            AudiFecha, 
+            AudiHora, 
+            AudiDescri, 
+            AudiDet, 
+            ModAudiCod
+        ) VALUES (
+            1, -- Usuario por defecto
+            CURDATE(),
+            CURTIME(),
+            'Alerta de stock mínimo',
+            v_mensaje_alerta,
+            2 -- Módulo Productos
         );
     END IF;
 END //
