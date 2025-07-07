@@ -298,7 +298,7 @@ CREATE TABLE AUDITORIA (
     AudiFecha DATE NOT NULL COMMENT 'Fecha',
     AudiHora TIME NOT NULL COMMENT 'Hora',
     AudiDescri VARCHAR(100) NOT NULL COMMENT 'Descripción Acción',
-    AudiDet VARCHAR(100) COMMENT 'Detalle',
+    AudiDet VARCHAR(250) COMMENT 'Detalle',
     ModAudiCod INT NOT NULL COMMENT 'Módulo Afectado',
     AudiEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
     
@@ -386,6 +386,82 @@ DROP COLUMN `FacFab`;
 
 ALTER TABLE `sistema_ventas`.`cliente` 
 DROP COLUMN `CliLim`;
+-- ============================================================================
+-- actualizacion para las vistas
+-- ============================================================================
+
+-- ============================================================================
+-- Vista Simple
+-- ============================================================================
+CREATE OR REPLACE VIEW View_ClienteDetalle AS
+SELECT
+	c.CliCod,
+    c.CliNom,
+    c.CliApePat,
+    c.CliApeMat,
+    clas.CatCliDesc AS Categoria,
+    ciu.CiuNom AS Ciudad,
+    reg.RegNom AS Region
+FROM 
+	cliente c
+JOIN
+	clascliente clas ON c.CatCliCod = clas.CatCliCod
+LEFT JOIN
+	ciudades ciu ON c.CiuCod = ciu.CiuCod
+LEFT JOIN
+	region reg ON ciu.RegCod = reg.RegCod;
+-- ============================================================================
+-- Vista Compleja 
+-- ============================================================================
+CREATE OR REPLACE VIEW View_FacturaCompletaDetalleProducto AS
+SELECT
+    f.FacCod,
+    f.FacAño,
+    f.FacMes,
+    f.FacDia,
+    f.Faclmp,
+    f.FactPlazoPago,
+    f.FactFechPago,
+    f.FacEstReg,
+    f.FacEstado,
+    -- Cliente
+    cli.CliCod,
+    CONCAT(cli.CliNom, ' ', cli.CliApePat, ' ', cli.CliApeMat) AS ClienteNombreCompleto,
+    cli.CliCor AS ClienteCorreo,
+    -- Representante de Venta
+    rep.RepCod,
+    rep.RepNom AS RepresentanteNombre,
+    rep.RepEdad,
+    rep.RepCon AS FechaContrato,
+    -- Oficina
+    ofi.OfiEmp AS OficinaEmpresa,
+    ofi.OfiCiu AS OficinaCiudad,
+    ofi.OfiReg AS OficinaRegion,
+    -- Producto
+    p.ProdCod,
+    p.ProdDes AS ProductoDescripcion,
+    p.ProdPre AS ProductoPrecioUnitario,
+    p.ProdStock,
+    d.DetCan AS CantidadVendida,
+    d.DetPre AS PrecioUnitarioDetalle,
+    d.DetSub AS SubtotalProducto,
+    -- Clasificación y unidad
+    clas.ClasProDesc AS ClasificacionProducto,
+    um.UniMedProDesc AS UnidadMedida,
+    -- Fabricante
+    fab.FabNom AS NombreFabricante
+
+FROM FACTURA f
+JOIN CLIENTE cli ON f.CliCod = cli.CliCod
+JOIN REPVENTA rep ON f.RepCod = rep.RepCod
+JOIN OFICINA ofi ON rep.OfiCod = ofi.OfiCod
+JOIN DETALLES d ON f.FacCod = d.FacCod
+JOIN PRODUCTO p ON d.ProCod = p.ProdCod
+JOIN CLASIFICACION_PRODUCTO clas ON p.ClasProCod = clas.ClasProCod
+JOIN PROD_UNIDAD_MEDIDA um ON p.UniMedProCod = um.UniMedProCod
+JOIN FABRICANTE_PRODUCTO fab ON p.FabCod = fab.FabCod
+WHERE f.FacEstReg = 'A';
+
 
 -- ============================================================================
 -- actualizacion para los triggers
