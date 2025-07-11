@@ -517,28 +517,19 @@ FOR EACH ROW
 BEGIN
     DECLARE v_stock_actual INT;
     DECLARE v_stock_minimo INT;
-    DECLARE v_stock_maximo INT;
     DECLARE v_producto_desc VARCHAR(100);
     DECLARE v_mensaje_alerta VARCHAR(200);
     
-    -- Obtener información del producto
-    SELECT p.ProdStock, p.ProdDes, r.ReporProdMin, r.ReporProdMax
-    INTO v_stock_actual, v_producto_desc, v_stock_minimo, v_stock_maximo
+    -- Obtener información del producto (stock actual, descripción, stock mínimo y máximo) usando el código de producto
+    SELECT p.ProdStock, p.ProdDes, r.ReporProdMin
+    INTO v_stock_actual, v_producto_desc, v_stock_minimo
     FROM PRODUCTO p
     LEFT JOIN REPORPROD r ON p.ProdCod = r.ProdCod
-    WHERE p.ProdCod = NEW.ProCod;
+    WHERE p.ProdCod = NEW.ProCod; -- Usamos 'NEW.ProCod' porque estamos en un trigger AFTER INSERT
     
-    -- Actualizar el stock restando la cantidad vendida
-    UPDATE PRODUCTO 
-    SET ProdStock = ProdStock - NEW.DetCan
-    WHERE ProdCod = NEW.ProCod;
-    
-    -- Calcular el nuevo stock después de la venta
-    SET v_stock_actual = v_stock_actual - NEW.DetCan;
-    
-    -- Verificar si se necesita generar alerta
+    -- Verificar si el stock actual es menor o igual al stock mínimo
     IF v_stock_minimo IS NOT NULL AND v_stock_actual <= v_stock_minimo THEN
-        -- Generar mensaje de alerta
+        -- Generar un mensaje de alerta indicando que el stock es bajo
         SET v_mensaje_alerta = CONCAT(
             'ALERTA: Stock bajo para ',
             v_producto_desc,
@@ -549,12 +540,7 @@ BEGIN
             '. Solicitar reposición.'
         );
         
-        -- Actualizar la alerta en el producto
-        UPDATE PRODUCTO 
-        SET ProdAlerta = v_mensaje_alerta
-        WHERE ProdCod = NEW.ProCod;
-        
-        -- Registrar en auditoría
+        -- Registrar la alerta en la tabla AUDITORIA para su seguimiento
         INSERT INTO AUDITORIA (
             UsuCod, 
             AudiFecha, 
