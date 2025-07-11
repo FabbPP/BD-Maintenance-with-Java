@@ -391,6 +391,16 @@ DROP COLUMN `CliLim`;
 -- ============================================================================
 
 -- ============================================================================
+-- actualizacion para los triggers
+-- ============================================================================
+
+-- Agregar columna de estado a la tabla FACTURA para el trigger simple
+ALTER TABLE FACTURA ADD COLUMN FacEstado INT DEFAULT 0 COMMENT 'Estado: 0=Generada, 1=Parcial, 2=Completa, 9=Cancelada';
+-- Agregar columna de alerta a la tabla PRODUCTO para notificaciones de stock
+ALTER TABLE PRODUCTO ADD COLUMN ProdAlerta VARCHAR(200) NULL COMMENT 'Mensaje de alerta de stock';
+
+
+-- ============================================================================
 -- Vista Simple
 -- ============================================================================
 CREATE OR REPLACE VIEW View_ClienteDetalle AS
@@ -462,15 +472,6 @@ JOIN PROD_UNIDAD_MEDIDA um ON p.UniMedProCod = um.UniMedProCod
 JOIN FABRICANTE_PRODUCTO fab ON p.FabCod = fab.FabCod
 WHERE f.FacEstReg = 'A';
 
-
--- ============================================================================
--- actualizacion para los triggers
--- ============================================================================
-
--- Agregar columna de estado a la tabla FACTURA para el trigger simple
-ALTER TABLE FACTURA ADD COLUMN FacEstado INT DEFAULT 0 COMMENT 'Estado: 0=Generada, 1=Parcial, 2=Completa, 9=Cancelada';
--- Agregar columna de alerta a la tabla PRODUCTO para notificaciones de stock
-ALTER TABLE PRODUCTO ADD COLUMN ProdAlerta VARCHAR(200) NULL COMMENT 'Mensaje de alerta de stock';
 
 -- ============================================================================
 -- TRIGGER 1: SIMPLE - Auditoría de cambios de estado de factura
