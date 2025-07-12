@@ -459,7 +459,7 @@ COMMENT ON COLUMN AUDITORIA.ModAudiCod IS 'Módulo Afectado';
 COMMENT ON COLUMN AUDITORIA.AudiEstReg IS 'Estado Registro';
 
 -- ============================================================================
--- INSERTAR DATOS INICIALES (OPCIONAL)
+-- INSERTAR DATOS INICIALES PARA TABLAS REFERENCIALES YA DEFINIDDAS EN EL DICCIONARIO DE DATOS
 -- ============================================================================
 
 -- Clasificaciones de Cliente
@@ -530,6 +530,25 @@ END $$;
 -- ============================================================================
 -- Vista Simple
 -- ============================================================================
+CREATE VIEW vista_productos_fabricante AS
+SELECT 
+    p.ProdCod AS codigo_producto,
+    p.ProdDes AS descripcion_producto,
+    p.ProdPre AS precio,
+    p.ProdStock AS stock,
+    f.FabCod AS codigo_fabricante,
+    f.FabNom AS nombre_fabricante,
+    p.ProdEstReg AS estado_producto
+FROM 
+    PRODUCTO p
+INNER JOIN 
+    FABRICANTE_PRODUCTO f ON p.FabCod = f.FabCod
+WHERE 
+    p.ProdEstReg = 'A' 
+    AND f.FabEstReg = 'A';
+-- ============================================================================
+-- Vista Compleja 
+-- ============================================================================
 CREATE OR REPLACE VIEW View_ClienteDetalle AS
 SELECT
     c.CliCod,
@@ -547,58 +566,6 @@ LEFT JOIN
     ciudades ciu ON c.CiuCod = ciu.CiuCod
 LEFT JOIN
     region reg ON ciu.RegCod = reg.RegCod;
-
--- ============================================================================
--- Vista Compleja 
--- ============================================================================
-CREATE OR REPLACE VIEW View_FacturaCompletaDetalleProducto AS
-SELECT
-    f.FacCod,
-    f.FacAño,
-    f.FacMes,
-    f.FacDia,
-    f.Faclmp,
-    f.FactPlazoPago,
-    f.FactFechPago,
-    f.FacEstReg,
-    f.FacEstado,
-    -- Cliente
-    cli.CliCod,
-    CONCAT(cli.CliNom, ' ', cli.CliApePat, ' ', cli.CliApeMat) AS ClienteNombreCompleto,
-    cli.CliCor AS ClienteCorreo,
-    -- Representante de Venta
-    rep.RepCod,
-    rep.RepNom AS RepresentanteNombre,
-    rep.RepEdad,
-    rep.RepCon AS FechaContrato,
-    -- Oficina
-    ofi.OfiEmp AS OficinaEmpresa,
-    ofi.OfiCiu AS OficinaCiudad,
-    ofi.OfiReg AS OficinaRegion,
-    -- Producto
-    p.ProdCod,
-    p.ProdDes AS ProductoDescripcion,
-    p.ProdPre AS ProductoPrecioUnitario,
-    p.ProdStock,
-    d.DetCan AS CantidadVendida,
-    d.DetPre AS PrecioUnitarioDetalle,
-    d.DetSub AS SubtotalProducto,
-    -- Clasificación y unidad
-    clas.ClasProDesc AS ClasificacionProducto,
-    um.UniMedProDesc AS UnidadMedida,
-    -- Fabricante
-    fab.FabNom AS NombreFabricante
-
-FROM FACTURA f
-JOIN CLIENTE cli ON f.CliCod = cli.CliCod
-JOIN REPVENTA rep ON f.RepCod = rep.RepCod
-JOIN OFICINA ofi ON rep.OfiCod = ofi.OfiCod
-JOIN DETALLES d ON f.FacCod = d.FacCod
-JOIN PRODUCTO p ON d.ProCod = p.ProdCod
-JOIN CLASIFICACION_PRODUCTO clas ON p.ClasProCod = clas.ClasProCod
-JOIN PROD_UNIDAD_MEDIDA um ON p.UniMedProCod = um.UniMedProCod
-JOIN FABRICANTE_PRODUCTO fab ON p.FabCod = fab.FabCod
-WHERE f.FacEstReg = 'A';
 
 -- ============================================================================
 -- TRIGGER 1: SIMPLE - Auditoría de cambios de estado de factura
