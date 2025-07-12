@@ -177,7 +177,6 @@ CREATE TABLE CLIENTE (
     CliCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Cliente',
     CliEmp VARCHAR(100) COMMENT 'Empresa',
     RepCod INT COMMENT 'Código Representante',
-    CliLim VARCHAR(10) COMMENT 'Límite de Crédito',
     CliNom VARCHAR(50) NOT NULL COMMENT 'Nombre',
     CliApePat VARCHAR(50) NOT NULL COMMENT 'Apellido Paterno',
     CliApeMat VARCHAR(50) NOT NULL COMMENT 'Apellido Materno',
@@ -202,12 +201,14 @@ CREATE TABLE REPORPROD (
     ReporProdMin INT DEFAULT 0 COMMENT 'Stock Mínimo',
     ReporProdMax INT DEFAULT 1000 COMMENT 'Stock Máximo',
     ReporProdEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
+    ProdCod INT NULL COMMENT 'Código del Producto',
     
     PRIMARY KEY (ReporProdCod),
     CONSTRAINT chk_repor_min CHECK (ReporProdMin >= 0),
     CONSTRAINT chk_repor_max CHECK (ReporProdMax >= 0),
     CONSTRAINT chk_repor_est CHECK (ReporProdEstReg IN ('A', 'I', '*'))
 ) ENGINE=InnoDB COMMENT='Reporte de cada tipo de producto';
+
 
 -- Tabla: Producto (CORREGIDA)
 CREATE TABLE PRODUCTO (
@@ -218,7 +219,6 @@ CREATE TABLE PRODUCTO (
     ProdStock INT DEFAULT 0 COMMENT 'Stock',
     ClasProCod INT NOT NULL COMMENT 'Clasificación',
     UniMedProCod INT NOT NULL COMMENT 'Unidad Medida',
-    ReporProdCod INT COMMENT 'Código Reporte',
     DispoProdCod INT DEFAULT 1 COMMENT 'Disponibilidad',
     ProdEstReg CHAR(1) NOT NULL DEFAULT 'A' COMMENT 'Estado Registro',
     
@@ -229,9 +229,12 @@ CREATE TABLE PRODUCTO (
     CONSTRAINT fk_prod_fabricante FOREIGN KEY (FabCod) REFERENCES FABRICANTE_PRODUCTO(FabCod),
     CONSTRAINT fk_prod_clasificacion FOREIGN KEY (ClasProCod) REFERENCES CLASIFICACION_PRODUCTO(ClasProCod),
     CONSTRAINT fk_prod_unidad FOREIGN KEY (UniMedProCod) REFERENCES PROD_UNIDAD_MEDIDA(UniMedProCod),
-    CONSTRAINT fk_prod_reporte FOREIGN KEY (ReporProdCod) REFERENCES REPORPROD(ReporProdCod),
     CONSTRAINT fk_prod_disponibilidad FOREIGN KEY (DispoProdCod) REFERENCES PROD_DISPO(DispoProdCod)
 ) ENGINE=InnoDB COMMENT='Información sobre producto, fabricante existencia y unidad medida';
+
+ALTER TABLE REPORPROD 
+ADD CONSTRAINT fk_repor_producto 
+FOREIGN KEY (ProdCod) REFERENCES PRODUCTO(ProdCod);
 
 -- Tabla: Reporte de Representante de Venta (CORREGIDA)
 CREATE TABLE REPORREPVENTA (
@@ -254,7 +257,6 @@ CREATE TABLE FACTURA (
     FacCod INT NOT NULL AUTO_INCREMENT COMMENT 'Código Factura',
     CliCod INT NOT NULL COMMENT 'Código Cliente',
     RepCod INT NOT NULL COMMENT 'Código Representante',
-    FacFab VARCHAR(50) COMMENT 'Fabricante',
     Faclmp DECIMAL(10,2) DEFAULT 0.00 COMMENT 'Importe Total',
     FacAño INT NOT NULL COMMENT 'Año',
     FacMes INT NOT NULL COMMENT 'Mes',
@@ -342,54 +344,13 @@ INSERT INTO AUD_MODULO (ModAudiDesc) VALUES
 ('Facturas'),
 ('Reportes');
 
--- Cargos
-INSERT INTO CARGO (CarDesc, CarSue) VALUES 
-('Empleado', 2500.00),
-('Director', 8000.00);
-
--- Departamentos ejemplo
-INSERT INTO DEPARTAMENTO (DepNom) VALUES 
-('Arequipa'),
-('Lima'),
-('Cusco');
-
 -- ============================================================================
 -- FIN DEL SCRIPT
 -- ============================================================================
 
-
--- ============================================================================
--- SQL de nuevos modificaciones
--- ============================================================================
--- VERSIÓN SIMPLE - EJECUTAR LÍNEA POR LÍNEA
-USE sistema_ventas;
-
--- 1. Eliminar FK si existe (ignora error si no existe)
-ALTER TABLE PRODUCTO DROP FOREIGN KEY fk_prod_reporte;
-
--- 2. Eliminar columna (ignora error si no existe)  
-ALTER TABLE PRODUCTO DROP COLUMN ReporProdCod;
-
--- 3. Agregar nueva columna (cambié a NULL para evitar errores)
-ALTER TABLE REPORPROD ADD COLUMN ProdCod INT NULL COMMENT 'Código del Producto';
-
--- 4. Crear nueva FK
-ALTER TABLE REPORPROD ADD CONSTRAINT fk_repor_producto 
-FOREIGN KEY (ProdCod) REFERENCES PRODUCTO(ProdCod);
-
--- 5. Actualizar comentario
-ALTER TABLE REPORPROD COMMENT = 'Reporte de productos con stock mínimo y máximo por producto';
-
-
-ALTER TABLE `sistema_ventas`.`factura` 
-DROP COLUMN `FacFab`;
-
-ALTER TABLE `sistema_ventas`.`cliente` 
-DROP COLUMN `CliLim`;
 -- ============================================================================
 -- actualizacion para las vistas
 -- ============================================================================
-
 -- ============================================================================
 -- actualizacion para los triggers
 -- ============================================================================
@@ -398,7 +359,6 @@ DROP COLUMN `CliLim`;
 ALTER TABLE FACTURA ADD COLUMN FacEstado INT DEFAULT 0 COMMENT 'Estado: 0=Generada, 1=Parcial, 2=Completa, 9=Cancelada';
 -- Agregar columna de alerta a la tabla PRODUCTO para notificaciones de stock
 ALTER TABLE PRODUCTO ADD COLUMN ProdAlerta VARCHAR(200) NULL COMMENT 'Mensaje de alerta de stock';
-
 
 -- ============================================================================
 -- Vista Simple

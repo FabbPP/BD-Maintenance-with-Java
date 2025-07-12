@@ -68,10 +68,10 @@ public class ConsultaRepresentanteFrame extends JFrame {
             @Override
             public Class<?> getColumnClass(int columnIndex) {
                 switch (columnIndex) {
-                    case 0: return String.class;    // Código
-                    case 1: return String.class;    // Nombre Representante
-                    case 2: return Integer.class;   // Total Facturas
-                    case 3: return BigDecimal.class; // Monto Total Ventas
+                    case 0: return String.class;  
+                    case 1: return String.class;  
+                    case 2: return Integer.class; 
+                    case 3: return BigDecimal.class; 
                     default: return Object.class;
                 }
             }

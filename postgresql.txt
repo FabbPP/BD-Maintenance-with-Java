@@ -1,0 +1,836 @@
+-- ============================================================================
+-- SCRIPT POSTGRESQL - SISTEMA DE VENTAS MIGRADO
+-- Fecha: 2025-07-11
+-- Descripción: Estructura completa de base de datos para sistema de ventas  
+--              Migrado de MySQL a PostgreSQL
+-- ============================================================================
+
+-- Conectar a la base de datos sistema_ventas
+\c sistema_ventas;
+
+-- ============================================================================
+-- TABLAS REFERENCIALES (Se crean primero por dependencias FK)
+-- ============================================================================
+
+-- Tabla: Clasificación de Cliente
+CREATE TABLE IF NOT EXISTS CLASCLIENTE (
+    CatCliCod SERIAL PRIMARY KEY,
+    CatCliDesc VARCHAR(40) NOT NULL,
+    CatCliLimCred DECIMAL(10,2) NOT NULL,
+    CatCliEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_catcli_est CHECK (CatCliEstReg IN ('A', 'I', '*'))
+);
+
+-- Comentarios para la tabla CLASCLIENTE
+COMMENT ON TABLE CLASCLIENTE IS 'Clasificación de clientes según comportamiento de pago';
+COMMENT ON COLUMN CLASCLIENTE.CatCliCod IS 'Código Clasificación de Cliente';
+COMMENT ON COLUMN CLASCLIENTE.CatCliDesc IS 'Descripción de la Categoría';
+COMMENT ON COLUMN CLASCLIENTE.CatCliLimCred IS 'Límite de Crédito';
+COMMENT ON COLUMN CLASCLIENTE.CatCliEstReg IS 'Estado Registro (A=Activo, I=Inactivo)';
+
+-- Tabla: Clasificación de Producto  
+CREATE TABLE IF NOT EXISTS CLASIFICACION_PRODUCTO (
+    ClasProCod SERIAL PRIMARY KEY,
+    ClasProDesc VARCHAR(40) NOT NULL,
+    ClasProEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_claspro_est CHECK (ClasProEstReg IN ('A', 'I', '*'))
+);
+
+-- Comentarios para CLASIFICACION_PRODUCTO
+COMMENT ON TABLE CLASIFICACION_PRODUCTO IS 'Clasificación de productos: A=Insumo, B=Abarrote, C=Accesorio';
+COMMENT ON COLUMN CLASIFICACION_PRODUCTO.ClasProCod IS 'Código Clasificación de Producto';
+COMMENT ON COLUMN CLASIFICACION_PRODUCTO.ClasProDesc IS 'Descripción Clasificación';
+COMMENT ON COLUMN CLASIFICACION_PRODUCTO.ClasProEstReg IS 'Estado Registro';
+
+-- Tabla: Unidad de Medida de Producto
+CREATE TABLE IF NOT EXISTS PROD_UNIDAD_MEDIDA (
+    UniMedProCod SERIAL PRIMARY KEY,
+    UniMedProDesc VARCHAR(20) NOT NULL,
+    UniMedEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_unimed_est CHECK (UniMedEstReg IN ('A', 'I', '*'))
+);
+
+-- Comentarios para PROD_UNIDAD_MEDIDA
+COMMENT ON TABLE PROD_UNIDAD_MEDIDA IS 'Unidades de medida para productos';
+COMMENT ON COLUMN PROD_UNIDAD_MEDIDA.UniMedProCod IS 'Código Unidad de Medida';
+COMMENT ON COLUMN PROD_UNIDAD_MEDIDA.UniMedProDesc IS 'Descripción Unidad';
+COMMENT ON COLUMN PROD_UNIDAD_MEDIDA.UniMedEstReg IS 'Estado Registro';
+
+-- Tabla: Disponibilidad de Producto
+CREATE TABLE IF NOT EXISTS PROD_DISPO (
+    DispoProdCod SERIAL PRIMARY KEY,
+    DispoProdDesc VARCHAR(40) NOT NULL,
+    DispoProdEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_dispo_est CHECK (DispoProdEstReg IN ('A', 'I', '*'))
+);
+
+-- Comentarios para PROD_DISPO
+COMMENT ON TABLE PROD_DISPO IS 'Disponibilidad de productos: 0=No Disponible, 1=Disponible';
+COMMENT ON COLUMN PROD_DISPO.DispoProdCod IS 'Código Disponibilidad';
+COMMENT ON COLUMN PROD_DISPO.DispoProdDesc IS 'Descripción Disponibilidad';
+COMMENT ON COLUMN PROD_DISPO.DispoProdEstReg IS 'Estado Registro';
+
+-- Tabla: Módulos de Auditoría
+CREATE TABLE IF NOT EXISTS AUD_MODULO (
+    ModAudiCod SERIAL PRIMARY KEY,
+    ModAudiDesc VARCHAR(40) NOT NULL,
+    ModAudiEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_modaudi_est CHECK (ModAudiEstReg IN ('A', 'I', '*'))
+);
+
+-- Comentarios para AUD_MODULO
+COMMENT ON TABLE AUD_MODULO IS 'Módulos del sistema para auditoría';
+COMMENT ON COLUMN AUD_MODULO.ModAudiCod IS 'Código Módulo';
+COMMENT ON COLUMN AUD_MODULO.ModAudiDesc IS 'Descripción Módulo';
+COMMENT ON COLUMN AUD_MODULO.ModAudiEstReg IS 'Estado Registro';
+
+-- Tabla: Cargo
+CREATE TABLE IF NOT EXISTS CARGO (
+    CarCod SERIAL PRIMARY KEY,
+    CarDesc VARCHAR(50) NOT NULL,
+    CarSue DECIMAL(7,2) NOT NULL,
+    CarEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_car_sueldo CHECK (CarSue >= 0),
+    CONSTRAINT chk_car_est CHECK (CarEstReg IN ('A', 'I', '*'))
+);
+
+-- Comentarios para CARGO
+COMMENT ON TABLE CARGO IS 'Cargos de la empresa';
+COMMENT ON COLUMN CARGO.CarCod IS 'Código Cargo';
+COMMENT ON COLUMN CARGO.CarDesc IS 'Descripcion del Cargo';
+COMMENT ON COLUMN CARGO.CarSue IS 'Sueldo';
+COMMENT ON COLUMN CARGO.CarEstReg IS 'Estado Registro';
+
+-- Tabla: Fabricante de Producto
+CREATE TABLE IF NOT EXISTS FABRICANTE_PRODUCTO (
+    FabCod SERIAL PRIMARY KEY,
+    FabNom VARCHAR(100) NOT NULL,
+    FabEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_fab_est CHECK (FabEstReg IN ('A', 'I', '*'))
+);
+
+-- Comentarios para FABRICANTE_PRODUCTO
+COMMENT ON TABLE FABRICANTE_PRODUCTO IS 'Fabricantes de productos';
+COMMENT ON COLUMN FABRICANTE_PRODUCTO.FabCod IS 'Código Fabricante';
+COMMENT ON COLUMN FABRICANTE_PRODUCTO.FabNom IS 'Nombre Fabricante';
+COMMENT ON COLUMN FABRICANTE_PRODUCTO.FabEstReg IS 'Estado Registro';
+
+-- Tabla: Departamento
+CREATE TABLE IF NOT EXISTS DEPARTAMENTO (
+    DepCod SERIAL PRIMARY KEY,
+    DepNom VARCHAR(50) NOT NULL,
+    DepEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_dep_est CHECK (DepEstReg IN ('A', 'I', '*'))
+);
+
+-- Comentarios para DEPARTAMENTO
+COMMENT ON TABLE DEPARTAMENTO IS 'Departamentos del país';
+COMMENT ON COLUMN DEPARTAMENTO.DepCod IS 'Código Departamento';
+COMMENT ON COLUMN DEPARTAMENTO.DepNom IS 'Nombre Departamento';
+COMMENT ON COLUMN DEPARTAMENTO.DepEstReg IS 'Estado Registro';
+
+-- Tabla: Región
+CREATE TABLE IF NOT EXISTS REGION (
+    RegCod SERIAL PRIMARY KEY,
+    DepCod INTEGER NOT NULL,
+    RegNom VARCHAR(50) NOT NULL,
+    RegEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_reg_est CHECK (RegEstReg IN ('A', 'I', '*')),
+    CONSTRAINT fk_reg_departamento FOREIGN KEY (DepCod) REFERENCES DEPARTAMENTO(DepCod)
+);
+
+-- Comentarios para REGION
+COMMENT ON TABLE REGION IS 'Regiones por departamento';
+COMMENT ON COLUMN REGION.RegCod IS 'Código Región';
+COMMENT ON COLUMN REGION.DepCod IS 'Código Departamento';
+COMMENT ON COLUMN REGION.RegNom IS 'Nombre Región';
+COMMENT ON COLUMN REGION.RegEstReg IS 'Estado Registro';
+
+-- Tabla: Ciudades
+CREATE TABLE IF NOT EXISTS CIUDADES (
+    CiuCod SERIAL PRIMARY KEY,
+    RegCod INTEGER NOT NULL,
+    CiuNom VARCHAR(50) NOT NULL,
+    CiuEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_ciu_est CHECK (CiuEstReg IN ('A', 'I', '*')),
+    CONSTRAINT fk_ciu_region FOREIGN KEY (RegCod) REFERENCES REGION(RegCod)
+);
+
+-- Comentarios para CIUDADES
+COMMENT ON TABLE CIUDADES IS 'Ciudades por región';
+COMMENT ON COLUMN CIUDADES.CiuCod IS 'Código Ciudad';
+COMMENT ON COLUMN CIUDADES.RegCod IS 'Código Región';
+COMMENT ON COLUMN CIUDADES.CiuNom IS 'Nombre Ciudad';
+COMMENT ON COLUMN CIUDADES.CiuEstReg IS 'Estado Registro';
+
+-- ============================================================================
+-- TABLAS PRINCIPALES
+-- ============================================================================
+
+-- Tabla: Oficina (CORREGIDA - sin referencia circular)
+CREATE TABLE OFICINA (
+    OfiCod SERIAL PRIMARY KEY,
+    OfiCiu VARCHAR(100) NOT NULL,
+    OfiReg VARCHAR(50) NOT NULL,
+    OfiDir VARCHAR(100),
+    OfiEmp VARCHAR(100),
+    OfiObj DECIMAL(10,2) DEFAULT 0.00,
+    OfiEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_ofi_obj CHECK (OfiObj >= 0.00),
+    CONSTRAINT chk_ofi_est CHECK (OfiEstReg IN ('A', 'I', '*'))
+);
+
+-- Comentarios para la tabla OFICINA
+COMMENT ON TABLE OFICINA IS 'Oficinas de la empresa';
+COMMENT ON COLUMN OFICINA.OfiCod IS 'Código Oficina';
+COMMENT ON COLUMN OFICINA.OfiCiu IS 'Ciudad';
+COMMENT ON COLUMN OFICINA.OfiReg IS 'Región';
+COMMENT ON COLUMN OFICINA.OfiDir IS 'Dirección';
+COMMENT ON COLUMN OFICINA.OfiEmp IS 'Empresa';
+COMMENT ON COLUMN OFICINA.OfiObj IS 'Objetivo de Ventas';
+COMMENT ON COLUMN OFICINA.OfiEstReg IS 'Estado Registro';
+
+-- Tabla: Representante de Venta
+CREATE TABLE REPVENTA (
+    RepCod SERIAL PRIMARY KEY,
+    RepNom VARCHAR(50) NOT NULL,
+    RepEdad INT NOT NULL,
+    OfiCod INT NOT NULL,
+    CarCod INT NOT NULL,
+    RepCon DATE NOT NULL,
+    RepEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_rep_edad CHECK (RepEdad BETWEEN 18 AND 65),
+    CONSTRAINT chk_rep_contrato CHECK (RepCon >= '2024-01-01'),
+    CONSTRAINT fk_rep_oficina FOREIGN KEY (OfiCod) REFERENCES OFICINA(OfiCod),
+    CONSTRAINT fk_rep_cargo FOREIGN KEY (CarCod) REFERENCES CARGO(CarCod),
+    CONSTRAINT chk_rep_estreg CHECK (RepEstReg IN ('A', 'I', '*'))
+);
+
+-- Comentarios para la tabla REPVENTA
+COMMENT ON TABLE REPVENTA IS 'Representantes de venta';
+COMMENT ON COLUMN REPVENTA.RepCod IS 'Código Representante';
+COMMENT ON COLUMN REPVENTA.RepNom IS 'Nombre Representante';
+COMMENT ON COLUMN REPVENTA.RepEdad IS 'Edad';
+COMMENT ON COLUMN REPVENTA.OfiCod IS 'Código Oficina';
+COMMENT ON COLUMN REPVENTA.CarCod IS 'Código Cargo';
+COMMENT ON COLUMN REPVENTA.RepCon IS 'Fecha Contrato';
+COMMENT ON COLUMN REPVENTA.RepEstReg IS 'Estado Registro';
+
+-- Tabla: Usuario del Sistema
+CREATE TABLE USUARIOSISTEMA (
+    UsuCod SERIAL PRIMARY KEY,
+    RepCod INT NOT NULL,
+    UsuNom VARCHAR(50) NOT NULL,
+    UsuContr VARCHAR(50) NOT NULL,
+    UsuEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT fk_usu_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod),
+    CONSTRAINT chk_usu_estreg CHECK (UsuEstReg IN ('A', 'I', '*'))
+);
+
+-- Comentarios para la tabla USUARIOSISTEMA
+COMMENT ON TABLE USUARIOSISTEMA IS 'Usuarios del sistema';
+COMMENT ON COLUMN USUARIOSISTEMA.UsuCod IS 'Código Usuario';
+COMMENT ON COLUMN USUARIOSISTEMA.RepCod IS 'Código Representante';
+COMMENT ON COLUMN USUARIOSISTEMA.UsuNom IS 'Nombre Usuario';
+COMMENT ON COLUMN USUARIOSISTEMA.UsuContr IS 'Contraseña';
+COMMENT ON COLUMN USUARIOSISTEMA.UsuEstReg IS 'Estado Registro';
+
+-- Tabla: Cliente (CORREGIDA - campos de dirección mejorados)
+CREATE TABLE CLIENTE (
+    CliCod SERIAL PRIMARY KEY,
+    CliEmp VARCHAR(100),
+    RepCod INT,
+    CliNom VARCHAR(50) NOT NULL,
+    CliApePat VARCHAR(50) NOT NULL,
+    CliApeMat VARCHAR(50) NOT NULL,
+    CiuCod INT,
+    CliDirDetalle VARCHAR(100),
+    CliTel BIGINT,
+    CliCor VARCHAR(50),
+    CatCliCod INT NOT NULL,
+    CliEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_cli_tel CHECK (CliTel IS NULL OR CliTel >= 100000000),
+    CONSTRAINT chk_cli_est CHECK (CliEstReg IN ('A', 'I', '*')),
+    CONSTRAINT fk_cli_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod),
+    CONSTRAINT fk_cli_categoria FOREIGN KEY (CatCliCod) REFERENCES CLASCLIENTE(CatCliCod),
+    CONSTRAINT fk_cli_ciudad FOREIGN KEY (CiuCod) REFERENCES CIUDADES(CiuCod)
+);
+
+-- Comentarios para la tabla CLIENTE
+COMMENT ON TABLE CLIENTE IS 'Información personal del cliente';
+COMMENT ON COLUMN CLIENTE.CliCod IS 'Código Cliente';
+COMMENT ON COLUMN CLIENTE.CliEmp IS 'Empresa';
+COMMENT ON COLUMN CLIENTE.RepCod IS 'Código Representante';
+COMMENT ON COLUMN CLIENTE.CliNom IS 'Nombre';
+COMMENT ON COLUMN CLIENTE.CliApePat IS 'Apellido Paterno';
+COMMENT ON COLUMN CLIENTE.CliApeMat IS 'Apellido Materno';
+COMMENT ON COLUMN CLIENTE.CiuCod IS 'Código Ciudad';
+COMMENT ON COLUMN CLIENTE.CliDirDetalle IS 'Dirección Detallada';
+COMMENT ON COLUMN CLIENTE.CliTel IS 'Teléfono';
+COMMENT ON COLUMN CLIENTE.CliCor IS 'Correo';
+COMMENT ON COLUMN CLIENTE.CatCliCod IS 'Categoría Cliente';
+COMMENT ON COLUMN CLIENTE.CliEstReg IS 'Estado Registro';
+
+-- Tabla: Reporte de Producto (CORREGIDA - sin FK circular)
+CREATE TABLE REPORPROD (
+    ReporProdCod SERIAL PRIMARY KEY,
+    ReporProdMin INT DEFAULT 0,
+    ReporProdMax INT DEFAULT 1000,
+    ReporProdEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    ProdCod INT NULL,
+    
+    CONSTRAINT chk_repor_min CHECK (ReporProdMin >= 0),
+    CONSTRAINT chk_repor_max CHECK (ReporProdMax >= 0),
+    CONSTRAINT chk_repor_est CHECK (ReporProdEstReg IN ('A', 'I', '*'))
+);
+
+-- Comentarios para la tabla REPORPROD
+COMMENT ON TABLE REPORPROD IS 'Reporte de cada tipo de producto';
+COMMENT ON COLUMN REPORPROD.ReporProdCod IS 'Código Reporte';
+COMMENT ON COLUMN REPORPROD.ReporProdMin IS 'Stock Mínimo';
+COMMENT ON COLUMN REPORPROD.ReporProdMax IS 'Stock Máximo';
+COMMENT ON COLUMN REPORPROD.ReporProdEstReg IS 'Estado Registro';
+COMMENT ON COLUMN REPORPROD.ProdCod IS 'Código del Producto';
+
+-- Tabla: Producto (CORREGIDA)
+CREATE TABLE PRODUCTO (
+    ProdCod SERIAL PRIMARY KEY,
+    FabCod INT NOT NULL,
+    ProdDes VARCHAR(100) NOT NULL,
+    ProdPre DECIMAL(10,2) NOT NULL,
+    ProdStock INT DEFAULT 0,
+    ClasProCod INT NOT NULL,
+    UniMedProCod INT NOT NULL,
+    DispoProdCod INT DEFAULT 1,
+    ProdEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_prod_precio CHECK (ProdPre >= 0.00),
+    CONSTRAINT chk_prod_stock CHECK (ProdStock >= 0),
+    CONSTRAINT chk_prod_est CHECK (ProdEstReg IN ('A', 'I', '*')),
+    CONSTRAINT fk_prod_fabricante FOREIGN KEY (FabCod) REFERENCES FABRICANTE_PRODUCTO(FabCod),
+    CONSTRAINT fk_prod_clasificacion FOREIGN KEY (ClasProCod) REFERENCES CLASIFICACION_PRODUCTO(ClasProCod),
+    CONSTRAINT fk_prod_unidad FOREIGN KEY (UniMedProCod) REFERENCES PROD_UNIDAD_MEDIDA(UniMedProCod),
+    CONSTRAINT fk_prod_disponibilidad FOREIGN KEY (DispoProdCod) REFERENCES PROD_DISPO(DispoProdCod)
+);
+
+-- Comentarios para la tabla PRODUCTO
+COMMENT ON TABLE PRODUCTO IS 'Información sobre producto, fabricante existencia y unidad medida';
+COMMENT ON COLUMN PRODUCTO.ProdCod IS 'Código Producto';
+COMMENT ON COLUMN PRODUCTO.FabCod IS 'Código Fabricante';
+COMMENT ON COLUMN PRODUCTO.ProdDes IS 'Descripción';
+COMMENT ON COLUMN PRODUCTO.ProdPre IS 'Precio';
+COMMENT ON COLUMN PRODUCTO.ProdStock IS 'Stock';
+COMMENT ON COLUMN PRODUCTO.ClasProCod IS 'Clasificación';
+COMMENT ON COLUMN PRODUCTO.UniMedProCod IS 'Unidad Medida';
+COMMENT ON COLUMN PRODUCTO.DispoProdCod IS 'Disponibilidad';
+COMMENT ON COLUMN PRODUCTO.ProdEstReg IS 'Estado Registro';
+
+-- Agregar la FK entre REPORPROD y PRODUCTO después de crear ambas tablas
+ALTER TABLE REPORPROD 
+ADD CONSTRAINT fk_repor_producto 
+FOREIGN KEY (ProdCod) REFERENCES PRODUCTO(ProdCod);
+
+-- Tabla: Reporte de Representante de Venta (CORREGIDA)
+CREATE TABLE REPORREPVENTA (
+    RepoRepVentCod SERIAL,
+    RepCod INT NOT NULL,
+    RepoRepVentObj DECIMAL(12,2),
+    RepoRepVentNum INT DEFAULT 0,
+    RepoRepVentCuo INT DEFAULT 0,
+    RepoRepVentEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    PRIMARY KEY (RepoRepVentCod, RepCod),
+    CONSTRAINT chk_repoventa_num CHECK (RepoRepVentNum >= 0),
+    CONSTRAINT chk_repoventa_cuo CHECK (RepoRepVentCuo >= 0),
+    CONSTRAINT chk_repoventa_est CHECK (RepoRepVentEstReg IN ('A', 'I', '*')),
+    CONSTRAINT fk_repoventa_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod)
+);
+
+-- Comentarios para la tabla REPORREPVENTA
+COMMENT ON TABLE REPORREPVENTA IS 'Reporte de representante de venta';
+COMMENT ON COLUMN REPORREPVENTA.RepoRepVentCod IS 'Código Reporte';
+COMMENT ON COLUMN REPORREPVENTA.RepCod IS 'Código Representante';
+COMMENT ON COLUMN REPORREPVENTA.RepoRepVentObj IS 'Meta Objetivo';
+COMMENT ON COLUMN REPORREPVENTA.RepoRepVentNum IS 'Ventas Concretas';
+COMMENT ON COLUMN REPORREPVENTA.RepoRepVentCuo IS 'Cuota';
+COMMENT ON COLUMN REPORREPVENTA.RepoRepVentEstReg IS 'Estado Registro';
+
+-- Tabla: Factura (CORREGIDA - FK arreglada)
+CREATE TABLE FACTURA (
+    FacCod SERIAL PRIMARY KEY,
+    CliCod INT NOT NULL,
+    RepCod INT NOT NULL,
+    Faclmp DECIMAL(10,2) DEFAULT 0.00,
+    FacAño INT NOT NULL,
+    FacMes INT NOT NULL,
+    FacDia INT NOT NULL,
+    FactPlazoPago DATE,
+    FactFechPago DATE,
+    FacEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_fac_importe CHECK (Faclmp >= 0.00),
+    CONSTRAINT chk_fac_año CHECK (FacAño >= 2000),
+    CONSTRAINT chk_fac_mes CHECK (FacMes BETWEEN 1 AND 12),
+    CONSTRAINT chk_fac_dia CHECK (FacDia BETWEEN 1 AND 31),
+    CONSTRAINT chk_fac_est CHECK (FacEstReg IN ('A', 'I', '*')),
+    CONSTRAINT fk_fac_cliente FOREIGN KEY (CliCod) REFERENCES CLIENTE(CliCod),
+    CONSTRAINT fk_fac_representante FOREIGN KEY (RepCod) REFERENCES REPVENTA(RepCod)
+);
+
+-- Comentarios para la tabla FACTURA
+COMMENT ON TABLE FACTURA IS 'Datos generales del pedido y productos asociados';
+COMMENT ON COLUMN FACTURA.FacCod IS 'Código Factura';
+COMMENT ON COLUMN FACTURA.CliCod IS 'Código Cliente';
+COMMENT ON COLUMN FACTURA.RepCod IS 'Código Representante';
+COMMENT ON COLUMN FACTURA.Faclmp IS 'Importe Total';
+COMMENT ON COLUMN FACTURA.FacAño IS 'Año';
+COMMENT ON COLUMN FACTURA.FacMes IS 'Mes';
+COMMENT ON COLUMN FACTURA.FacDia IS 'Día';
+COMMENT ON COLUMN FACTURA.FactPlazoPago IS 'Plazo de Pago';
+COMMENT ON COLUMN FACTURA.FactFechPago IS 'Fecha de Pago';
+COMMENT ON COLUMN FACTURA.FacEstReg IS 'Estado Registro';
+
+-- Tabla: Detalle de Factura (CORREGIDA)
+CREATE TABLE DETALLES (
+    FacCod INT NOT NULL,
+    ProCod INT NOT NULL,
+    DetCan INT NOT NULL,
+    DetPre DECIMAL(6,2) NOT NULL,
+    DetSub DECIMAL(8,2) NOT NULL,
+    DetEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    PRIMARY KEY (FacCod, ProCod),
+    CONSTRAINT chk_det_can CHECK (DetCan >= 1),
+    CONSTRAINT chk_det_pre CHECK (DetPre >= 0.01),
+    CONSTRAINT chk_det_sub CHECK (DetSub >= 0.00),
+    CONSTRAINT chk_det_est CHECK (DetEstReg IN ('A', 'I', '*')),
+    CONSTRAINT fk_det_factura FOREIGN KEY (FacCod) REFERENCES FACTURA(FacCod),
+    CONSTRAINT fk_det_producto FOREIGN KEY (ProCod) REFERENCES PRODUCTO(ProdCod)
+);
+
+-- Comentarios para la tabla DETALLES
+COMMENT ON TABLE DETALLES IS 'Lista de productos en cada factura';
+COMMENT ON COLUMN DETALLES.FacCod IS 'Código Factura';
+COMMENT ON COLUMN DETALLES.ProCod IS 'Código Producto';
+COMMENT ON COLUMN DETALLES.DetCan IS 'Cantidad';
+COMMENT ON COLUMN DETALLES.DetPre IS 'Precio Unitario';
+COMMENT ON COLUMN DETALLES.DetSub IS 'Subtotal';
+COMMENT ON COLUMN DETALLES.DetEstReg IS 'Estado Registro';
+
+-- Tabla: Auditoría (CORREGIDA)
+CREATE TABLE AUDITORIA (
+    AudiCod SERIAL PRIMARY KEY,
+    UsuCod INT NOT NULL,
+    AudiFecha DATE NOT NULL,
+    AudiHora TIME NOT NULL,
+    AudiDescri VARCHAR(100) NOT NULL,
+    AudiDet VARCHAR(250),
+    ModAudiCod INT NOT NULL,
+    AudiEstReg CHAR(1) NOT NULL DEFAULT 'A',
+    
+    CONSTRAINT chk_audi_est CHECK (AudiEstReg IN ('A', 'I', '*')),
+    CONSTRAINT fk_audi_usuario FOREIGN KEY (UsuCod) REFERENCES USUARIOSISTEMA(UsuCod),
+    CONSTRAINT fk_audi_modulo FOREIGN KEY (ModAudiCod) REFERENCES AUD_MODULO(ModAudiCod)
+);
+
+-- Comentarios para la tabla AUDITORIA
+COMMENT ON TABLE AUDITORIA IS 'Registro de eventos del sistema';
+COMMENT ON COLUMN AUDITORIA.AudiCod IS 'Código Auditoría';
+COMMENT ON COLUMN AUDITORIA.UsuCod IS 'Código Usuario';
+COMMENT ON COLUMN AUDITORIA.AudiFecha IS 'Fecha';
+COMMENT ON COLUMN AUDITORIA.AudiHora IS 'Hora';
+COMMENT ON COLUMN AUDITORIA.AudiDescri IS 'Descripción Acción';
+COMMENT ON COLUMN AUDITORIA.AudiDet IS 'Detalle';
+COMMENT ON COLUMN AUDITORIA.ModAudiCod IS 'Módulo Afectado';
+COMMENT ON COLUMN AUDITORIA.AudiEstReg IS 'Estado Registro';
+
+-- ============================================================================
+-- INSERTAR DATOS INICIALES (OPCIONAL)
+-- ============================================================================
+
+-- Clasificaciones de Cliente
+INSERT INTO CLASCLIENTE (CatCliDesc, CatCliLimCred) VALUES 
+('Excelente', 50000.00),
+('Bueno', 30000.00),
+('Regular', 15000.00),
+('Malo', 5000.00);
+
+-- Clasificaciones de Producto
+INSERT INTO CLASIFICACION_PRODUCTO (ClasProDesc) VALUES 
+('Insumo'),
+('Abarrote'),
+('Accesorio');
+
+-- Unidades de Medida
+INSERT INTO PROD_UNIDAD_MEDIDA (UniMedProDesc) VALUES 
+('Unidad'),
+('Kilogramos'),
+('Mililitros');
+
+INSERT INTO prod_dispo (DispoProdCod, DispoProdDesc, DispoProdEstReg) VALUES ('1', 'Disponible', 'A');
+INSERT INTO prod_dispo (DispoProdCod, DispoProdDesc, DispoProdEstReg) VALUES ('2', 'No Disponible', 'A');
+
+-- Módulos de Auditoría
+INSERT INTO AUD_MODULO (ModAudiDesc) VALUES 
+('Usuarios'),
+('Productos'),
+('Clientes'),
+('Facturas'),
+('Reportes');
+
+
+-- ============================================================================
+-- FIN DEL SCRIPT
+-- ============================================================================
+
+-- ============================================================================
+-- actualizacion para las vistas
+-- ============================================================================
+
+-- ============================================================================
+-- actualización para los triggers
+-- ============================================================================
+
+-- Agregar columna de estado a la tabla FACTURA para el trigger simple
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'factura' 
+                   AND column_name = 'facestado') THEN
+        ALTER TABLE FACTURA ADD COLUMN FacEstado INT DEFAULT 0;
+        COMMENT ON COLUMN FACTURA.FacEstado IS 'Estado: 0=Generada, 1=Parcial, 2=Completa, 9=Cancelada';
+    END IF;
+END $$;
+
+-- Agregar columna de alerta a la tabla PRODUCTO para notificaciones de stock
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'producto' 
+                   AND column_name = 'prodalerta') THEN
+        ALTER TABLE PRODUCTO ADD COLUMN ProdAlerta VARCHAR(200) NULL;
+        COMMENT ON COLUMN PRODUCTO.ProdAlerta IS 'Mensaje de alerta de stock';
+    END IF;
+END $$;
+
+-- ============================================================================
+-- Vista Simple
+-- ============================================================================
+CREATE OR REPLACE VIEW View_ClienteDetalle AS
+SELECT
+    c.CliCod,
+    c.CliNom,
+    c.CliApePat,
+    c.CliApeMat,
+    clas.CatCliDesc AS Categoria,
+    ciu.CiuNom AS Ciudad,
+    reg.RegNom AS Region
+FROM 
+    cliente c
+JOIN
+    clascliente clas ON c.CatCliCod = clas.CatCliCod
+LEFT JOIN
+    ciudades ciu ON c.CiuCod = ciu.CiuCod
+LEFT JOIN
+    region reg ON ciu.RegCod = reg.RegCod;
+
+-- ============================================================================
+-- Vista Compleja 
+-- ============================================================================
+CREATE OR REPLACE VIEW View_FacturaCompletaDetalleProducto AS
+SELECT
+    f.FacCod,
+    f.FacAño,
+    f.FacMes,
+    f.FacDia,
+    f.Faclmp,
+    f.FactPlazoPago,
+    f.FactFechPago,
+    f.FacEstReg,
+    f.FacEstado,
+    -- Cliente
+    cli.CliCod,
+    CONCAT(cli.CliNom, ' ', cli.CliApePat, ' ', cli.CliApeMat) AS ClienteNombreCompleto,
+    cli.CliCor AS ClienteCorreo,
+    -- Representante de Venta
+    rep.RepCod,
+    rep.RepNom AS RepresentanteNombre,
+    rep.RepEdad,
+    rep.RepCon AS FechaContrato,
+    -- Oficina
+    ofi.OfiEmp AS OficinaEmpresa,
+    ofi.OfiCiu AS OficinaCiudad,
+    ofi.OfiReg AS OficinaRegion,
+    -- Producto
+    p.ProdCod,
+    p.ProdDes AS ProductoDescripcion,
+    p.ProdPre AS ProductoPrecioUnitario,
+    p.ProdStock,
+    d.DetCan AS CantidadVendida,
+    d.DetPre AS PrecioUnitarioDetalle,
+    d.DetSub AS SubtotalProducto,
+    -- Clasificación y unidad
+    clas.ClasProDesc AS ClasificacionProducto,
+    um.UniMedProDesc AS UnidadMedida,
+    -- Fabricante
+    fab.FabNom AS NombreFabricante
+
+FROM FACTURA f
+JOIN CLIENTE cli ON f.CliCod = cli.CliCod
+JOIN REPVENTA rep ON f.RepCod = rep.RepCod
+JOIN OFICINA ofi ON rep.OfiCod = ofi.OfiCod
+JOIN DETALLES d ON f.FacCod = d.FacCod
+JOIN PRODUCTO p ON d.ProCod = p.ProdCod
+JOIN CLASIFICACION_PRODUCTO clas ON p.ClasProCod = clas.ClasProCod
+JOIN PROD_UNIDAD_MEDIDA um ON p.UniMedProCod = um.UniMedProCod
+JOIN FABRICANTE_PRODUCTO fab ON p.FabCod = fab.FabCod
+WHERE f.FacEstReg = 'A';
+
+-- ============================================================================
+-- TRIGGER 1: SIMPLE - Auditoría de cambios de estado de factura
+-- ============================================================================
+
+-- Función para el trigger de auditoría de factura
+CREATE OR REPLACE FUNCTION fn_auditoria_factura_estado()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Solo se ejecuta si cambió el estado de la factura
+    IF OLD.FacEstado != NEW.FacEstado THEN
+        INSERT INTO AUDITORIA (
+            UsuCod, 
+            AudiFecha, 
+            AudiHora, 
+            AudiDescri, 
+            AudiDet, 
+            ModAudiCod
+        ) VALUES (
+            1, -- Usuario por defecto (se puede parametrizar)
+            CURRENT_DATE,
+            CURRENT_TIME,
+            'Cambio de estado de factura',
+            CONCAT('Factura ', NEW.FacCod, ' cambió de estado ', OLD.FacEstado, ' a ', NEW.FacEstado),
+            4 -- Módulo Facturas
+        );
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear el trigger
+DROP TRIGGER IF EXISTS trg_auditoria_factura_estado ON FACTURA;
+CREATE TRIGGER trg_auditoria_factura_estado
+    AFTER UPDATE ON FACTURA
+    FOR EACH ROW
+    EXECUTE FUNCTION fn_auditoria_factura_estado();
+
+-- ============================================================================
+-- TRIGGER 2: COMPLEJO - Control de stock con alertas automáticas
+-- ============================================================================
+
+-- Función para el trigger de control de stock
+CREATE OR REPLACE FUNCTION fn_control_stock_venta()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_stock_actual INT;
+    v_stock_minimo INT;
+    v_producto_desc VARCHAR(100);
+    v_mensaje_alerta VARCHAR(200);
+BEGIN
+    -- Obtener información del producto (stock actual, descripción, stock mínimo y máximo) usando el código de producto
+    SELECT p.ProdStock, p.ProdDes, r.ReporProdMin
+    INTO v_stock_actual, v_producto_desc, v_stock_minimo
+    FROM PRODUCTO p
+    LEFT JOIN REPORPROD r ON p.ProdCod = r.ProdCod
+    WHERE p.ProdCod = NEW.ProCod; -- Usamos 'NEW.ProCod' porque estamos en un trigger AFTER INSERT
+    
+    -- Verificar si el stock actual es menor o igual al stock mínimo
+    IF v_stock_minimo IS NOT NULL AND v_stock_actual <= v_stock_minimo THEN
+        -- Generar un mensaje de alerta indicando que el stock es bajo
+        v_mensaje_alerta := CONCAT(
+            'ALERTA: Stock bajo para ',
+            v_producto_desc,
+            '. Stock actual: ',
+            v_stock_actual,
+            ', Mínimo: ',
+            v_stock_minimo,
+            '. Solicitar reposición.'
+        );
+        
+        -- Registrar la alerta en la tabla AUDITORIA para su seguimiento
+        INSERT INTO AUDITORIA (
+            UsuCod, 
+            AudiFecha, 
+            AudiHora, 
+            AudiDescri, 
+            AudiDet, 
+            ModAudiCod
+        ) VALUES (
+            1, -- Usuario por defecto
+            CURRENT_DATE,
+            CURRENT_TIME,
+            'Alerta de stock mínimo',
+            v_mensaje_alerta,
+            2 -- Módulo Productos
+        );
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear el trigger
+DROP TRIGGER IF EXISTS trg_control_stock_venta ON DETALLES;
+CREATE TRIGGER trg_control_stock_venta
+    AFTER INSERT ON DETALLES
+    FOR EACH ROW
+    EXECUTE FUNCTION fn_control_stock_venta();
+
+
+-- ==============================================================================
+-- Procedimiento almacenado 1: simple - Obtener una lista de productos detallada
+-- ==============================================================================
+
+-- Eliminar procedimiento si existe
+DROP FUNCTION IF EXISTS PA_ProductosPorCategoria();
+
+-- Crear función en PostgreSQL
+CREATE OR REPLACE FUNCTION PA_ProductosPorCategoria()
+RETURNS TABLE (
+    CodigoProducto INTEGER,
+    DescripcionProducto VARCHAR(100),
+    PrecioUnitario DECIMAL(10,2),
+    StockActual INTEGER,
+    NombreClasificacionProducto VARCHAR(255)
+) 
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- Crear o reemplazar vista
+    CREATE OR REPLACE VIEW Vista_ProductosConCategoria AS
+    SELECT
+        p.ProdCod AS CodigoProducto,
+        p.ProdDes AS DescripcionProducto,
+        p.ProdPre AS PrecioUnitario,
+        p.ProdStock AS StockActual,
+        cp.ClasProDesc AS NombreClasificacionProducto
+    FROM
+        PRODUCTO p
+    INNER JOIN
+        CLASIFICACION_PRODUCTO cp ON p.ClasProCod = cp.ClasProCod;
+    
+    -- Retornar datos de la vista
+    RETURN QUERY SELECT * FROM Vista_ProductosConCategoria;
+END;
+$$;
+
+-- =======================================================================================================================================================
+-- Procedimiento almacenado 2: complejo - Monto total de ventas por producto, agrupado por su región geográfica y por el representante de ventas asignado
+-- =======================================================================================================================================================
+
+-- Eliminar procedimiento si existe
+DROP FUNCTION IF EXISTS PA_ReporteRendimientoVentasRegional();
+
+-- Crear función en PostgreSQL
+CREATE OR REPLACE FUNCTION PA_ReporteRendimientoVentasRegional()
+RETURNS TABLE (
+    NombreRegion VARCHAR(50),
+    NombreRepresentante VARCHAR(100),
+    CodigoProducto INTEGER,
+    DescripcionProducto VARCHAR(100),
+    TotalVendidoProducto DECIMAL(15,2)
+) 
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- Crear o reemplazar vista
+    CREATE OR REPLACE VIEW Vista_RendimientoVentasRegional AS
+    SELECT
+        o.OfiReg AS NombreRegion,
+        rep.RepNom AS NombreRepresentante,
+        p.ProdCod AS CodigoProducto,
+        p.ProdDes AS DescripcionProducto,
+        SUM(d.DetCan * d.DetPre) AS TotalVendidoProducto
+    FROM
+        FACTURA f
+    INNER JOIN
+        DETALLES d ON f.FacCod = d.FacCod 
+    INNER JOIN
+        PRODUCTO p ON d.ProCod = p.ProdCod
+    INNER JOIN
+        CLIENTE c ON f.CliCod = c.CliCod
+    INNER JOIN
+        REPVENTA rep ON f.RepCod = rep.RepCod
+    INNER JOIN
+        OFICINA o ON rep.OfiCod = o.OfiCod
+    GROUP BY
+        o.OfiReg,
+        rep.RepNom,
+        p.ProdCod,
+        p.ProdDes
+    ORDER BY
+        o.OfiReg,
+        TotalVendidoProducto DESC;
+    
+    -- Retornar datos de la vista
+    RETURN QUERY SELECT * FROM Vista_RendimientoVentasRegional;
+END;
+$$;
+
+-- =======================================================================================================================================================
+-- Instrucciones de uso:
+-- =======================================================================================================================================================
+
+-- Para ejecutar los procedimientos (ahora funciones):
+-- SELECT * FROM PA_ProductosPorCategoria();
+-- SELECT * FROM PA_ReporteRendimientoVentasRegional();
+
+-- =======================================================================================================================================================
+-- Notas importantes sobre la migración:
+-- =======================================================================================================================================================
+
+/*
+CAMBIOS PRINCIPALES REALIZADOS:
+
+1. DELIMITER: PostgreSQL no usa DELIMITER, se eliminó completamente.
+
+2. PROCEDURE → FUNCTION: 
+   - MySQL: CREATE PROCEDURE
+   - PostgreSQL: CREATE OR REPLACE FUNCTION
+
+3. RETURNS TABLE: Se especifica explícitamente la estructura de retorno con tipos de datos.
+
+4. $$ LANGUAGE plpgsql: Se usa la sintaxis de delimitador $$ y se especifica el lenguaje.
+
+5. RETURN QUERY: Se usa RETURN QUERY para retornar el resultado del SELECT.
+
+6. BEGIN/END: Se mantiene la estructura, pero ahora dentro de la función.
+
+7. Tipos de datos: Se mantienen genéricos (VARCHAR, DECIMAL, INTEGER) pero podrían 
+   necesitar ajustes según el esquema específico de tu base de datos.
+
+CONSIDERACIONES ADICIONALES:
+
+- Verifica que los tipos de datos coincidan con tu esquema PostgreSQL
+- Si usas tipos específicos como NUMERIC(10,2) en lugar de DECIMAL, ajústalos
+- Las vistas se crean igual en ambos sistemas
+- Los JOINs y la lógica SQL se mantienen idénticos
+
+EJECUCIÓN:
+En lugar de CALL PA_ProductosPorCategoria() (MySQL), 
+ahora usas SELECT * FROM PA_ProductosPorCategoria() (PostgreSQL)
+*/
