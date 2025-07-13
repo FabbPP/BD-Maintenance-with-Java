@@ -4,13 +4,17 @@
 -- Descripción: Estructura completa de base de datos para sistema de ventas  
 --              Migrado de MySQL a PostgreSQL
 -- ============================================================================
-
--- Conectar a la base de datos sistema_ventas
-\c sistema_ventas;
-
 -- ============================================================================
 -- TABLAS REFERENCIALES (Se crean primero por dependencias FK)
 -- ============================================================================
+-- Eliminar el esquema si existe
+DROP SCHEMA IF EXISTS sistema_ventas CASCADE;
+
+-- Crear el esquema
+CREATE SCHEMA sistema_ventas;
+
+-- Para usar el esquema, puedes configurar el search_path
+SET search_path TO sistema_ventas;
 
 -- Tabla: Clasificación de Cliente
 CREATE TABLE IF NOT EXISTS CLASCLIENTE (
@@ -178,7 +182,7 @@ COMMENT ON COLUMN CIUDADES.CiuEstReg IS 'Estado Registro';
 -- ============================================================================
 
 -- Tabla: Oficina (CORREGIDA - sin referencia circular)
-CREATE TABLE OFICINA (
+CREATE TABLE IF NOT EXISTS OFICINA(
     OfiCod SERIAL PRIMARY KEY,
     OfiCiu VARCHAR(100) NOT NULL,
     OfiReg VARCHAR(50) NOT NULL,
@@ -202,7 +206,7 @@ COMMENT ON COLUMN OFICINA.OfiObj IS 'Objetivo de Ventas';
 COMMENT ON COLUMN OFICINA.OfiEstReg IS 'Estado Registro';
 
 -- Tabla: Representante de Venta
-CREATE TABLE REPVENTA (
+CREATE TABLE IF NOT EXISTS REPVENTA (
     RepCod SERIAL PRIMARY KEY,
     RepNom VARCHAR(50) NOT NULL,
     RepEdad INT NOT NULL,
@@ -229,7 +233,7 @@ COMMENT ON COLUMN REPVENTA.RepCon IS 'Fecha Contrato';
 COMMENT ON COLUMN REPVENTA.RepEstReg IS 'Estado Registro';
 
 -- Tabla: Usuario del Sistema
-CREATE TABLE USUARIOSISTEMA (
+CREATE TABLE IF NOT EXISTS USUARIOSISTEMA (
     UsuCod SERIAL PRIMARY KEY,
     RepCod INT NOT NULL,
     UsuNom VARCHAR(50) NOT NULL,
@@ -249,7 +253,7 @@ COMMENT ON COLUMN USUARIOSISTEMA.UsuContr IS 'Contraseña';
 COMMENT ON COLUMN USUARIOSISTEMA.UsuEstReg IS 'Estado Registro';
 
 -- Tabla: Cliente (CORREGIDA - campos de dirección mejorados)
-CREATE TABLE CLIENTE (
+CREATE TABLE IF NOT EXISTS CLIENTE (
     CliCod SERIAL PRIMARY KEY,
     CliEmp VARCHAR(100),
     RepCod INT,
@@ -286,7 +290,7 @@ COMMENT ON COLUMN CLIENTE.CatCliCod IS 'Categoría Cliente';
 COMMENT ON COLUMN CLIENTE.CliEstReg IS 'Estado Registro';
 
 -- Tabla: Reporte de Producto (CORREGIDA - sin FK circular)
-CREATE TABLE REPORPROD (
+CREATE TABLE IF NOT EXISTS REPORPROD (
     ReporProdCod SERIAL PRIMARY KEY,
     ReporProdMin INT DEFAULT 0,
     ReporProdMax INT DEFAULT 1000,
@@ -307,7 +311,7 @@ COMMENT ON COLUMN REPORPROD.ReporProdEstReg IS 'Estado Registro';
 COMMENT ON COLUMN REPORPROD.ProdCod IS 'Código del Producto';
 
 -- Tabla: Producto (CORREGIDA)
-CREATE TABLE PRODUCTO (
+CREATE TABLE IF NOT EXISTS PRODUCTO (
     ProdCod SERIAL PRIMARY KEY,
     FabCod INT NOT NULL,
     ProdDes VARCHAR(100) NOT NULL,
@@ -370,7 +374,7 @@ COMMENT ON COLUMN REPORREPVENTA.RepoRepVentCuo IS 'Cuota';
 COMMENT ON COLUMN REPORREPVENTA.RepoRepVentEstReg IS 'Estado Registro';
 
 -- Tabla: Factura (CORREGIDA - FK arreglada)
-CREATE TABLE FACTURA (
+CREATE TABLE IF NOT EXISTS FACTURA (
     FacCod SERIAL PRIMARY KEY,
     CliCod INT NOT NULL,
     RepCod INT NOT NULL,
@@ -566,6 +570,53 @@ LEFT JOIN
     ciudades ciu ON c.CiuCod = ciu.CiuCod
 LEFT JOIN
     region reg ON ciu.RegCod = reg.RegCod;
+-- ============================================================================
+-- Vista 1 : NUEVA DE MIGRACION
+-- ============================================================================
+CREATE OR REPLACE VIEW View_UsuarioSistema AS
+SELECT
+    u.UsuCod AS codigo_usuario,
+    u.UsuNom AS nombre_usuario,
+    u.UsuEstReg AS estado_usuario,
+    v.RepCod AS codigo_representante,
+    v.RepNom AS nombre_representante,
+    v.RepEdad AS edad_representante,
+    v.RepCon AS fecha_contrato,
+    v.RepEstReg AS estado_representante
+FROM
+    USUARIOSISTEMA u
+INNER JOIN 
+    REPVENTA v ON u.RepCod = v.RepCod
+WHERE 
+    u.UsuEstReg = 'A'
+    AND v.RepEstReg = 'A';
+
+-- ============================================================================
+-- Vista 2 : NUEVA DE MIGRACION
+-- ============================================================================
+CREATE OR REPLACE VIEW View_ProductoDetalle AS
+SELECT 
+    p.ProdCod AS codigo_producto,
+    p.ProdDes AS descripcion,
+    p.ProdPre AS precio,
+    p.ProdStock AS stock,
+    p.ProdAlerta AS alerta_stock,
+    
+    f.FabNom AS fabricante,
+    cp.ClasProDesc AS clasificacion,
+    um.UniMedProDesc AS unidad_medida,
+    dp.DispoProdDesc AS disponibilidad,
+    
+    p.ProdEstReg AS estado_producto
+FROM 
+    PRODUCTO p
+INNER JOIN FABRICANTE_PRODUCTO f ON p.FabCod = f.FabCod
+INNER JOIN CLASIFICACION_PRODUCTO cp ON p.ClasProCod = cp.ClasProCod
+INNER JOIN PROD_UNIDAD_MEDIDA um ON p.UniMedProCod = um.UniMedProCod
+INNER JOIN PROD_DISPO dp ON p.DispoProdCod = dp.DispoProdCod
+WHERE 
+    p.ProdEstReg = 'A'
+    AND f.FabEstReg = 'A';
 
 -- ============================================================================
 -- TRIGGER 1: SIMPLE - Auditoría de cambios de estado de factura
@@ -668,6 +719,49 @@ CREATE TRIGGER trg_control_stock_venta
     EXECUTE FUNCTION fn_control_stock_venta();
 
 
+-- =======================================================================================================================================================
+-- Instrucciones de uso:
+-- =======================================================================================================================================================
+
+-- Para ejecutar los procedimientos (ahora funciones):
+-- SELECT * FROM PA_ProductosPorCategoria();
+-- SELECT * FROM PA_ReporteRendimientoVentasRegional();
+
+-- =======================================================================================================================================================
+-- Notas importantes sobre la migración:
+-- =======================================================================================================================================================
+
+/*
+CAMBIOS PRINCIPALES REALIZADOS:
+
+1. DELIMITER: PostgreSQL no usa DELIMITER, se eliminó completamente.
+
+2. PROCEDURE → FUNCTION: 
+   - MySQL: CREATE PROCEDURE
+   - PostgreSQL: CREATE OR REPLACE FUNCTION
+
+3. RETURNS TABLE: Se especifica explícitamente la estructura de retorno con tipos de datos.
+
+4. $$ LANGUAGE plpgsql: Se usa la sintaxis de delimitador $$ y se especifica el lenguaje.
+
+5. RETURN QUERY: Se usa RETURN QUERY para retornar el resultado del SELECT.
+
+6. BEGIN/END: Se mantiene la estructura, pero ahora dentro de la función.
+
+7. Tipos de datos: Se mantienen genéricos (VARCHAR, DECIMAL, INTEGER) pero podrían 
+   necesitar ajustes según el esquema específico de tu base de datos.
+
+CONSIDERACIONES ADICIONALES:
+
+- Verifica que los tipos de datos coincidan con tu esquema PostgreSQL
+- Si usas tipos específicos como NUMERIC(10,2) en lugar de DECIMAL, ajústalos
+- Las vistas se crean igual en ambos sistemas
+- Los JOINs y la lógica SQL se mantienen idénticos
+
+EJECUCIÓN:
+En lugar de CALL PA_ProductosPorCategoria() (MySQL), 
+ahora usas SELECT * FROM PA_ProductosPorCategoria() (PostgreSQL)
+*/
 -- ==============================================================================
 -- Procedimiento almacenado 1: simple - Obtener una lista de productos detallada
 -- ==============================================================================
