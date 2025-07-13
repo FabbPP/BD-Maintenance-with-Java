@@ -296,7 +296,10 @@ public class CiudadFrame extends JFrame{
 
     private void limpiarCampos() {
         txtCodigo.setText("");
-        cmbRegion.setSelectedIndex(0);
+        if (cmbRegion.getItemCount() > 0) {
+            cmbRegion.setSelectedIndex(0);
+        }
+        
         txtNombre.setText("");
         txtEstadoRegistro.setText("");
     }
