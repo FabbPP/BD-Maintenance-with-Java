@@ -1003,3 +1003,150 @@ EJECUCIÓN:
 En lugar de CALL PA_ProductosPorCategoria() (MySQL), 
 ahora usas SELECT * FROM PA_ProductosPorCategoria() (PostgreSQL)
 */
+
+
+
+
+-- ============================================================================
+-- TRIGGER 3: SIMPLE - Validación de formato de teléfono del cliente
+-- ============================================================================
+
+-- Función para validar formato de teléfono (TRIGGER SIMPLE)
+CREATE OR REPLACE FUNCTION fn_validar_telefono_cliente()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Validar que el teléfono tenga el formato correcto (9 dígitos)
+    IF NEW.CliTel IS NOT NULL THEN
+        -- Verificar que tenga exactamente 9 dígitos
+        IF LENGTH(NEW.CliTel::TEXT) != 9 THEN
+            RAISE EXCEPTION 'TELÉFONO INVÁLIDO: El teléfono debe tener exactamente 9 dígitos. Teléfono ingresado: %', 
+                NEW.CliTel;
+        END IF;
+        
+        -- Verificar que empiece con 9 (celular)
+        IF LEFT(NEW.CliTel::TEXT, 1) != '9' THEN
+            RAISE EXCEPTION 'TELÉFONO INVÁLIDO: El teléfono debe empezar con 9 (celular). Teléfono ingresado: %', 
+                NEW.CliTel;
+        END IF;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear el trigger simple
+DROP TRIGGER IF EXISTS trg_validar_telefono_cliente ON CLIENTE;
+CREATE TRIGGER trg_validar_telefono_cliente
+    BEFORE INSERT OR UPDATE ON CLIENTE
+    FOR EACH ROW
+    EXECUTE FUNCTION fn_validar_telefono_cliente();
+
+
+
+-- ============================================================================
+-- TRIGGER 4:- Validación integral de factura con validaciones esenciales
+-- ============================================================================
+
+-- Función para validación simplificada de factura (TRIGGER COMPLEJO)
+CREATE OR REPLACE FUNCTION fn_validacion_integral_factura()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_limite_credito DECIMAL(10,2);
+    v_total_facturas_pendientes DECIMAL(10,2);
+    v_categoria_cliente VARCHAR(40);
+    v_nombre_cliente VARCHAR(150);
+    v_representante_activo CHAR(1);
+    v_representante_nombre VARCHAR(50);
+    v_cliente_activo CHAR(1);
+    v_fecha_factura DATE;
+BEGIN
+    -- ========================================
+    -- 1. VALIDACIONES BÁSICAS DE EXISTENCIA
+    -- ========================================
+    
+    -- Validar que el cliente esté activo
+    SELECT CliEstReg, CONCAT(CliNom, ' ', CliApePat, ' ', CliApeMat)
+    INTO v_cliente_activo, v_nombre_cliente
+    FROM CLIENTE
+    WHERE CliCod = NEW.CliCod;
+    
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'CLIENTE NO ENCONTRADO: El cliente con código % no existe en el sistema', NEW.CliCod;
+    END IF;
+    
+    IF v_cliente_activo != 'A' THEN
+        RAISE EXCEPTION 'CLIENTE INACTIVO: El cliente % no está activo para realizar ventas', v_nombre_cliente;
+    END IF;
+    
+    -- Validar que el representante esté activo
+    SELECT RepEstReg, RepNom
+    INTO v_representante_activo, v_representante_nombre
+    FROM REPVENTA
+    WHERE RepCod = NEW.RepCod;
+    
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'REPRESENTANTE NO ENCONTRADO: El representante con código % no existe', NEW.RepCod;
+    END IF;
+    
+    IF v_representante_activo != 'A' THEN
+        RAISE EXCEPTION 'REPRESENTANTE INACTIVO: El representante % no está activo', v_representante_nombre;
+    END IF;
+    
+    -- ========================================
+    -- 2. VALIDACIONES DE LÍMITE DE CRÉDITO
+    -- ========================================
+    
+    -- Obtener información del cliente y su límite de crédito
+    SELECT cc.CatCliLimCred, cc.CatCliDesc
+    INTO v_limite_credito, v_categoria_cliente
+    FROM CLIENTE c
+    INNER JOIN CLASCLIENTE cc ON c.CatCliCod = cc.CatCliCod
+    WHERE c.CliCod = NEW.CliCod;
+    
+    -- Calcular total de facturas pendientes
+    SELECT COALESCE(SUM(Faclmp), 0.00)
+    INTO v_total_facturas_pendientes
+    FROM FACTURA
+    WHERE CliCod = NEW.CliCod 
+      AND FactFechPago IS NULL 
+      AND FacEstReg = 'A';
+    
+    -- Validar límite de crédito
+    IF (v_total_facturas_pendientes + NEW.Faclmp) > v_limite_credito THEN
+        RAISE EXCEPTION 'LÍMITE DE CRÉDITO EXCEDIDO: Cliente % (categoría %) - Límite: $%, Pendiente: $%, Nueva factura: $%, Total: $%',
+            v_nombre_cliente, v_categoria_cliente, v_limite_credito, 
+            v_total_facturas_pendientes, NEW.Faclmp, 
+            (v_total_facturas_pendientes + NEW.Faclmp);
+    END IF;
+    
+    -- ========================================
+    -- 3. VALIDACIONES DE FECHA
+    -- ========================================
+    
+    -- Construir fecha de factura
+    BEGIN
+        v_fecha_factura := make_date(NEW.FacAño, NEW.FacMes, NEW.FacDia);
+    EXCEPTION
+        WHEN OTHERS THEN
+            RAISE EXCEPTION 'FECHA INVÁLIDA: Los valores Año=%, Mes=%, Día=% no forman una fecha válida',
+                NEW.FacAño, NEW.FacMes, NEW.FacDia;
+    END;
+    
+    -- Validar que la fecha no sea futura
+    IF v_fecha_factura > CURRENT_DATE THEN
+        RAISE EXCEPTION 'FECHA FUTURA: La fecha de factura (%) no puede ser posterior a hoy (%)',
+            v_fecha_factura, CURRENT_DATE;
+    END IF;
+    
+
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear el trigger simplificado
+DROP TRIGGER IF EXISTS trg_validacion_integral_factura ON FACTURA;
+CREATE TRIGGER trg_validacion_integral_factura
+    BEFORE INSERT ON FACTURA
+    FOR EACH ROW
+    EXECUTE FUNCTION fn_validacion_integral_factura();
