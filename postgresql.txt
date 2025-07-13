@@ -860,6 +860,114 @@ $$;
 -- SELECT * FROM PA_ProductosPorCategoria();
 -- SELECT * FROM PA_ReporteRendimientoVentasRegional();
 
+-- ==============================================================================
+-- SEGUNDA RECUPERACION
+-- ==============================================================================
+
+-- ==============================================================================
+-- Procedimiento almacenado 1: simple - Clientes y su número total de reportes de ventas
+-- ==============================================================================
+
+CREATE OR REPLACE PROCEDURE PA_ClientesConReporteVentas()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DROP VIEW IF EXISTS vista_clientes_reportes_ventas;
+    CREATE VIEW vista_clientes_reportes_ventas; AS
+    SELECT
+        c.CliCod AS codigo_cliente,
+        c.CliNom AS nombre_cliente,
+        c.CliApePat AS apePat_cliente,
+        c.CliApeMat AS apeMat_cliente,
+        COUNT(c.RepCod) AS total_repVent
+    FROM
+        cliente c
+    GROUP BY
+        c.CliCod, c.CliNom, c.CliApePat, c.CliApeMat
+    ORDER BY
+        c.CliCod;
+END;
+$$;
+
+-- =======================================================================================================================================================
+-- Procedimiento almacenado 2: complejo - Procesamiento de datos analizando vistas de productos_bajo_stock y ventas_region_mensual
+-- =======================================================================================================================================================
+
+CREATE OR REPLACE PROCEDURE PA_AnalisisInventarioYVentas()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DROP VIEW IF EXISTS vista_productos_bajo_stock;
+    CREATE VIEW vista_productos_bajo_stock AS
+    SELECT
+        p.ProdCod AS codigo_producto,
+        p.ProdDes AS nombre_producto,
+        p.ProdStock AS stock_actual,
+		r.ReporProdMin AS stock_minimo
+    FROM
+        reporprod r
+	JOIN
+        producto p ON r.ProdCod = p.ProdCod
+    WHERE
+        p.ProdStock < r.ReporProdMin
+    ORDER BY
+        p.ProdStock ASC;
+
+    DROP VIEW IF EXISTS vista_ventas_region_mensual;
+    CREATE VIEW vista_ventas_region_mensual AS
+    SELECT
+        r.RegCod AS codigo_region,
+        r.RegNom AS nombre_region,
+		f.FacMes AS mes,
+		f.FacAño AS año,
+        SUM(d.DetCan * d.DetPre) AS total_ventas_netas
+    FROM
+        factura f
+    JOIN
+        cliente c ON f.CliCod = c.CliCod
+	JOIN
+        ciudades ci ON c.CiuCod = ci.CiuCod
+	JOIN
+        region r ON ci.RegCod = r.RegCod
+	JOIN
+        detalles d ON f.FacCod = d.FacCod
+    GROUP BY
+        r.RegCod, r.RegNom, f.FacAño, f.FacMes
+    ORDER BY
+        f.FacAño DESC, f.FacMes DESC, total_ventas_netas DESC;
+
+    DECLARE
+        region_baja TEXT;
+        ventas_bajas NUMERIC;
+    BEGIN
+        SELECT nombre_region, total_ventas_netas
+        INTO region_baja, ventas_bajas
+        FROM vista_ventas_region_mensual
+        ORDER BY total_ventas_netas ASC
+        LIMIT 1;
+
+        IF region_baja IS NOT NULL AND ventas_bajas < 1000 THEN
+            RAISE WARNING 'ALERTA: La región % tuvo ventas inusualmente bajas ($%) en el último mes con datos.', region_baja, ventas_bajas;
+        ELSE
+            RAISE NOTICE 'Análisis de ventas por región completado. No se detectaron alertas de ventas extremadamente bajas.';
+        END IF;
+    END;
+
+    DECLARE
+        total_productos_bajo_stock INTEGER;
+    BEGIN
+        SELECT COUNT(*) INTO total_productos_bajo_stock FROM vista_productos_bajo_stock;
+
+        IF total_productos_bajo_stock > 0 THEN
+            RAISE WARNING '¡ATENCIÓN! Hay % productos actualmente por debajo del stock mínimo. Se recomienda revisar el inventario.', total_productos_bajo_stock;
+        ELSE
+            RAISE NOTICE 'Inventario: No hay productos por debajo del stock mínimo.';
+        END IF;
+    END;
+
+END;
+$$;
+
 -- =======================================================================================================================================================
 -- Notas importantes sobre la migración:
 -- =======================================================================================================================================================
