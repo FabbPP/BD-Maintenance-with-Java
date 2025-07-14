@@ -1150,3 +1150,44 @@ CREATE TRIGGER trg_validacion_integral_factura
     BEFORE INSERT ON FACTURA
     FOR EACH ROW
     EXECUTE FUNCTION fn_validacion_integral_factura();
+
+-- =====================================================================================================
+-- Consulta 1: simple - Lista de todos los empleados con su cargo, ordenados de mayor a menor sueldo
+-- =====================================================================================================
+
+SELECT
+    r.RepCod,
+    r.RepNom,
+    r.RepEdad,
+    c.CarSue AS Sueldo,
+    c.CarDesc AS NombreCargo,
+    o.OfiDir AS DireccionOficina
+FROM
+    repventa r
+JOIN
+    cargo c ON r.CarCod = c.CarCod
+JOIN
+    oficina o ON r.OfiCod = o.OfiCod
+ORDER BY
+    c.CarSue DESC, r.RepNom;
+
+-- ====================================================================
+-- Consulta 2: Monto total de las ventas para cada cliente.
+-- ====================================================================
+
+SELECT
+    c.CliCod,
+    c.CliNom,
+    c.CliApePat,
+	c.CliApeMat,
+    COALESCE(SUM(d.DetCan * d.DetPre), 0.00) AS TotalVentas
+FROM
+    cliente c
+LEFT JOIN
+    factura f ON c.CliCod = f.CliCod
+LEFT JOIN
+    detalles d ON f.FacCod = d.FacCod
+GROUP BY
+    c.CliCod, c.CliNom, c.CliApePat, c.CliApeMat
+ORDER BY
+    TotalVentas DESC;
